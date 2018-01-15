@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	2.1 1/2/18
+ * @(#)object.c	2.3 1/15/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2234,6 +2234,9 @@ fth_object_equal_p(FTH obj1, FTH obj2)
 {
 	if (obj1 == obj2)
 		return (1);
+
+	if (FICL_WORD_DEFINED_P(obj1))
+		return (obj1 == obj2);
 
 	if (INSTANCE_P(obj1) && INSTANCE_P(obj2))
 		if (FTH_INSTANCE_TYPE(obj1) == FTH_INSTANCE_TYPE(obj2))
