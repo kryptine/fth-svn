@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.185 12/31/17
+dnl @(#)configure.ac	1.186 1/16/18
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -127,7 +127,6 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_CHECK_TOOL([AR], [ar], [:])
-AC_CHECK_TOOL([STRIP], [strip], [:])
 AC_CHECK_TOOL([MANDOC], [mandoc], [:])
 AC_CHECK_TOOL([LLI], [lli], [:])
 AC_CHECK_TOOL([LLC], [llc], [:])
@@ -292,51 +291,6 @@ AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
     [SO_DBM_LIB="dbm.so"
      AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])
 
-dnl
-dnl From sndlib/autoconf.ac.
-dnl
-# If prefix isn't set in the environment eg. via prefix=/home/mike etc,
-# ${prefix} isn't set here!
-if test "X${prefix}" = "XNONE"; then
-	prefix="${ac_default_prefix}"
-fi
-SO_LD="${CC}"
-SO_LDFLAGS=""
-LDFLAGS="${LDFLAGS} -L${prefix}/lib"
-case "${host}" in
-	*-sgi* | *-apple-*)
-		SO_LD=":"
-		enable_shared="no"
-		;;
-	*-*-solaris*)
-		SO_LDFLAGS="-G"
-		;;
-	*-*-minix*)
-		# no -shared and -fPIC
-		enable_shared="no"
-		;;
-	*-*-netbsd*)
-		CFLAGS="-fPIC ${CFLAGS}"
-		SO_LDFLAGS="-shared"
-		;;
-	*-*-openbsd*)
-		CFLAGS="-fPIC ${CFLAGS}"
-		SO_LDFLAGS="-shared -fPIC"
-		LDFLAGS="${LDFLAGS} -Wl,-E"
-		;;
-	# Fri Mar  8 00:20:24 CET 2013 [ms]
-	# Advised by Hannu Vuolasaho <vuokkosetae@gmail.com>
-	*-mingw*)
-		# no -fPIC
-		;;
-	*)
-		CFLAGS="-fPIC ${CFLAGS}"
-		SO_LDFLAGS="-shared"
-		;;
-esac
-AC_SUBST(SO_LD)
-AC_SUBST(SO_LDFLAGS)
-
 CWARNFLAGS="-ansi -std=iso9899:1999"
 CWARNFLAGS="${CWARNFLAGS} -Wall -Wextra -Wunused"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-declarations"
@@ -395,6 +349,41 @@ else
 fi
 
 dnl
+dnl From sndlib/autoconf.ac.
+dnl
+# If prefix isn't set in the environment eg. via prefix=/home/mike etc,
+# ${prefix} isn't set here!
+if test "X${prefix}" = "XNONE"; then
+	prefix="${ac_default_prefix}"
+fi
+SO_LD="${CC}"
+SO_LDFLAGS=""
+LDFLAGS="${LDFLAGS} -L${prefix}/lib"
+case "${host}" in
+	*-sgi* | *-apple-* | *-*-minix*)
+		SO_LD=":"
+		enable_shared="no"
+		;;
+	*-*-solaris*)
+		SO_LDFLAGS="-G"
+		;;
+	# Fri Mar  8 00:20:24 CET 2013 [ms]
+	# Hannu Vuolasaho <vuokkosetae@gmail.com>
+	*-mingw*)
+		# no -fPIC
+		;;
+	# Tested on
+	#	freebsd (arbornet.org i386-mnet-freebsd11.14)
+	#	openbsd (grex.org i386-intel-openbsd6.1)
+	#	netbsd (localhost amd64-netbsd8)
+	#	linux (freeshell.de x86_64-debian-linux-gnu3.16.0)
+	*)
+		CFLAGS="-fPIC ${CFLAGS}"
+		SO_LDFLAGS="-shared -Wl,-soname,${FTH_LIB}"
+		;;
+esac
+
+dnl
 dnl Substitute variables and write config files.
 dnl
 AC_SUBST(FTH_PROG)
@@ -402,6 +391,8 @@ AC_SUBST(FTH_LIB)
 AC_DEFINE_UNQUOTED([FTH_LIBS], ["${LIBS}"], [Required libraries.])
 AC_SUBST(prog_name)
 AC_SUBST(SO_DBM_LIB)
+AC_SUBST(SO_LD)
+AC_SUBST(SO_LDFLAGS)
 
 AC_CONFIG_TESTDIR(tests)
 AC_CONFIG_FILES([

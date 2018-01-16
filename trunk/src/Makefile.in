@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	2.5 1/12/18
+# @(#)Makefile.in	2.6 1/16/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -49,7 +49,6 @@ ARFLAGS		= cr
 RANLIB		= @RANLIB@
 INSTALL		= @INSTALL@
 INSTALL_DATA	= ${INSTALL} -m 0644
-STRIP		= @STRIP@
 SO_LD		= @SO_LD@
 CFLAGS		= @CFLAGS@
 
@@ -66,7 +65,7 @@ LIB_OBJS	= \
 		echo ${top_builddir}/lib/*.o; \
 	fi`
 LDFLAGS		= @LDFLAGS@
-SO_LDFLAGS	= @SO_LDFLAGS@ -Wl,-soname,${FTH_SO_LIB}
+SO_LDFLAGS	= @SO_LDFLAGS@
 LIBS		= @LIBS@
 
 LLI		= @LLI@
