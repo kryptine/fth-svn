@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.1 1/2/18
+ * @(#)utils.c	2.3 1/16/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -563,6 +563,7 @@ parse_tib_with_restart(ficlVm *vm, char *delim, int skip,
 	else {
 		if (strlen(buffer_result) > 0)
 			buf = FTH_STRDUP(buffer_result);
+
 		buffer_result[0] = '\0';
 	}
 	return (buf);
@@ -1480,7 +1481,10 @@ repl_unique_history(GetLine * gl, char *line)
 	hf = FGL_HISTFILE_CSTR();
 	gl_save_history(gl, hf, FGL_COMMENT, -1);
 	hary = fth_array_reverse(fth_readlines(hf));
+	/*
 	cline = fth_make_string_format("%s\n", line);
+	*/
+	cline = fth_make_string(line);
 	nhary = fth_make_empty_array();
 	len = fth_array_length(hary) - 1;
 
@@ -1510,8 +1514,9 @@ repl_unique_history(GetLine * gl, char *line)
  * According to libtecla's source files, gl_append_history() adds only
  * unique history lines.  But this doesn't seem to work.
  *
- * Here we try a tcsh-like scheme where *histdup* can be set to gl-all,
- * gl-prev, gl-erase, or undef.
+ * Here we try a tcsh-like scheme where *histdup* can be set to
+ * gl-all (uniq events only), gl-prev (not again if previous is
+ * the same), gl-erase (erase old and add new), or undef (default).
  */
 static int
 repl_append_history(GetLine * gl, char *line)
@@ -1519,32 +1524,44 @@ repl_append_history(GetLine * gl, char *line)
 	unsigned long 	id;
 	GlHistoryRange 	range;
 	GlHistoryLine 	hline;
+	size_t		size;
+	char           *s;
 
 	/* replace '\n' */
-	line[strlen(line)] = '\0';
+	s = strchr(line, '\n');
+	if (s)
+		size = s - line;
+	else
+		size = fth_strlen(line);
 
 	if (FGL_HISTDUP_ALL_P()) {
 		gl_range_of_history(gl, &range);
+
 		for (id = range.newest; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
-				if (strcmp(hline.line, line) == 0)
+				if (strncmp(hline.line, line, size) == 0)
 					return (0);
 	} else if (FGL_HISTDUP_PREV_P()) {
 		gl_range_of_history(gl, &range);
+
 		if (gl_lookup_history(gl, range.newest, &hline))
-			if (strcmp(hline.line, line) == 0)
+			if (strncmp(hline.line, line, size) == 0)
 				return (0);
 	} else if (FGL_HISTDUP_ERASE_P()) {
 		gl_range_of_history(gl, &range);
+
 		for (id = range.newest; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
-				if (strcmp(hline.line, line) == 0) {
+				if (strncmp(hline.line, line, size) == 0) {
 					repl_unique_history(gl, line);
 					break;
 				}
 	}
-	return (gl_append_history(gl, line));
+	gl_append_history(gl, line);
+	return (0);
 }
+
+static char 	hist_buffer[FGL_BUFFER + 1];
 
 /*-
  * If command line starts with !, try to substitute with commands from
@@ -1563,24 +1580,25 @@ repl_expand_history(GetLine * gl, char *line)
 	GlHistoryRange 	range;
 	GlHistoryLine 	hline;
 	long 		ld;
+	int 		i;
 	size_t 		ln;
-	char 		s[FGL_BUFFER + 1], *res;
+	char 		s[FGL_BUFFER + 1], *r;
 
-	ln = strlen(line);
+	ln = fth_strlen(line);
 
 	if (ln < 2)
 		return (line);
 
 	/* skip '!' sign */
-	strcpy(s, line + 1);
+	fth_strcpy(s, sizeof(s), line + 1);
 	ln--;
-	/* adjust length to minus trailing '\n' */
+	/* adjust length minus trailing '\n' */
 	ln--;
 	/* remove trailing '\n' */
 	s[ln] = '\0';
-	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
+	r = hist_buffer;
 
 	if (isdigit((int) *s) || *s == '-') {
 		/* !123 or !-123 */
@@ -1592,50 +1610,46 @@ repl_expand_history(GetLine * gl, char *line)
 			id = ld;
 
 		if (gl_lookup_history(gl, id, &hline))
-			res = (char *) hline.line;
+			return (fth_strcpy(r, FGL_BUFFER, hline.line));
 	} else if (*s == '!') {
 		/* !! */
 		if (gl_lookup_history(gl, id, &hline))
-			res = (char *) hline.line;
+			return (fth_strcpy(r, FGL_BUFFER, hline.line));
 	} else if (*s == '?') {
 		/* !?sub_string(?) */
 		size_t 		sl;
-		char           *r;
+		char           *re;
 
-		r = s + 1;
-		sl = strlen(r);
+		re = s + 1;
+		sl = fth_strlen(re);
 
-		if (r[sl] == '?')
-			r[sl] = '\0';
+		if (re[sl] == '?')
+			re[sl] = '\0';
 
 		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
-				if (fth_regexp_find(r, hline.line) != -1) {
-					res = (char *) hline.line;
-					break;
+				if (fth_regexp_find(re, hline.line) != -1) {
+					fth_strcpy(r, FGL_BUFFER, hline.line);
+					return (r);
 				}
 	} else
 		/* !start_of_string */
 		for (; id > range.oldest; id--)
 			if (gl_lookup_history(gl, id, &hline))
 				if (strncmp(s, hline.line, ln) == 0) {
-					res = (char *) hline.line;
-					break;
+					fth_strcpy(r, FGL_BUFFER, hline.line);
+					return (r);
 				}
-	if (res == NULL) {
-		int 		i;
+	i = 0;
 
-		i = 0;
+	if (*s == '!')
+		i++;
 
-		if (*s == '!')
-			i++;
+	if (*s == '?')
+		i++;
 
-		if (*s == '?')
-			i++;
-
-		fth_printf("%s: event not found\n", s + i);
-	}
-	return (res);
+	fth_printf("%s: event not found\n", s + i);
+	return (NULL);
 }
 
 /*-
@@ -1651,7 +1665,7 @@ repl_replace_history(GetLine * gl, char *line)
 	GlHistoryRange 	range;
 	GlHistoryLine 	hline;
 	size_t 		i, j;
-	char 		src[FGL_BUFFER], dst[FGL_BUFFER], *res;
+	char 		src[FGL_BUFFER], dst[FGL_BUFFER];
 
 	if (strlen(line) < 4)
 		return (line);
@@ -1670,27 +1684,22 @@ repl_replace_history(GetLine * gl, char *line)
 		dst[i++] = line[j++];
 
 	dst[i] = '\0';
-	res = NULL;
 	gl_range_of_history(gl, &range);
 	id = range.newest;
 
 	for (; id > range.oldest; id--)
 		if (gl_lookup_history(gl, id, &hline))
 			if (fth_regexp_find(src, hline.line) != -1) {
-				FTH 		reg, str, rep, rpl;
+				FTH 		reg      , str, rep, rpl;
 
 				reg = fth_make_regexp(src);
 				str = fth_make_string(hline.line);
 				rep = fth_make_string(dst);
 				rpl = fth_regexp_replace(reg, str, rep);
-				res = fth_string_ref(rpl);
-				break;
+				return (fth_string_ref(rpl));
 			}
-
-	if (res == NULL)
-		fth_printf("%s: event not found\n", src);
-
-	return (res);
+	fth_printf("%s: event not found\n", src);
+	return (NULL);
 }
 
 #else				/* !HAVE_LIBTECLA */
@@ -1850,8 +1859,10 @@ fth_repl(int argc, char **argv)
 		line = NULL;
 		prompt = NULL;
 #if defined(HAVE_LIBTECLA)
-		gl_range_of_history(gl, &range);
-		lineno = (ficlInteger) range.newest + 1;
+		if (!FGL_HISTDUP_ERASE_P()) {
+			gl_range_of_history(gl, &range);
+			lineno = (ficlInteger) range.newest + 1;
+		}
 #endif
 		if (compile_p)
 			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
@@ -1922,25 +1933,27 @@ fth_repl(int argc, char **argv)
 
 			fth_printf("%s\n", line);
 		}
-#else
+#else				/* !HAVE_LIBTECLA */
 		line = get_line(prompt, err_line);
 
 		if (line == NULL)	/* Ctrl-D finishes repl */
 			break;
-#endif
+#endif				/* HAVE_LIBTECLA */
 		if (*line == '\n') {	/* empty line */
 			if (fth_true_repl_p)
 				fth_printf("%S\n", FTH_UNDEF);
 			continue;
 		}
+
 #if defined(HAVE_LIBTECLA)
 		repl_append_history(gl, line);
 #endif
+
 		status = fth_catch_eval(line);
 
 		if (status == FTH_ERROR) {
 			/*
-			 * If an error occures, show the wrong command again.
+			 * If an error occures, show wrong command again.
 			 */
 			err_line = line;
 			continue;
