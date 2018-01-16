@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	2.3 1/15/18
+ * @(#)object.c	2.4 1/16/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -471,11 +471,13 @@ static int 	last_instance = 0;
 	(FTH_OBJECT_REF(Obj) >= obj_minmem &&				\
 	 FTH_OBJECT_REF(Obj) <= obj_maxmem)
 
-#define INSTANCE_P(Obj)							\
+#define INSTANCE0_P(Obj)						\
 	(FTH_INSTANCE_REF(Obj) >= inst_minmem &&			\
 	 FTH_INSTANCE_REF(Obj) <= inst_maxmem &&			\
 	 OBJECT_TYPE_P(FTH_INSTANCE_REF_OBJ(Obj)) &&			\
 	 !GC_FREED_P(FTH_INSTANCE_REF(Obj)))
+
+#define INSTANCE_P(Obj)	(!FICL_WORD_DICT_P(Obj) && INSTANCE0_P(Obj))
 
 #define OBJECT_MARK(Inst)						\
 	if ((Inst)->obj->mark)						\
@@ -2235,9 +2237,6 @@ fth_object_equal_p(FTH obj1, FTH obj2)
 	if (obj1 == obj2)
 		return (1);
 
-	if (FICL_WORD_DEFINED_P(obj1))
-		return (obj1 == obj2);
-
 	if (INSTANCE_P(obj1) && INSTANCE_P(obj2))
 		if (FTH_INSTANCE_TYPE(obj1) == FTH_INSTANCE_TYPE(obj2))
 			if (FTH_EQUAL_P_P(obj1))
@@ -2900,7 +2899,7 @@ FTH
 ficl_to_fth(FTH obj)
 {
 	if (obj != 0 &&
-	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE_P(obj)))
+	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE0_P(obj)))
 		return (obj);
 	return (fth_make_int((ficlInteger) obj));
 }
@@ -2916,7 +2915,7 @@ fth_pop_ficl_cell(ficlVm *vm)
 	stack->top--;
 
 	if (obj != 0 &&
-	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE_P(obj)))
+	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE0_P(obj)))
 		return (obj);
 	return (fth_make_int((ficlInteger) obj));
 }
