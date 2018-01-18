@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	2.6 1/16/18
+# @(#)Makefile.in	2.7 1/18/18
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -67,17 +67,7 @@ LIB_OBJS	= \
 LDFLAGS		= @LDFLAGS@
 SO_LDFLAGS	= @SO_LDFLAGS@
 LIBS		= @LIBS@
-
-LLI		= @LLI@
-LLIFLAGS	= -O3
-LLILIBS		= -load ${FTH_SO_LIB}
-LLC		= @LLC@
-LLCFLAGS	= -O3 -filetype asm
-LLCLIBS		= -load ${FTH_SO_LIB}
-
 FTH_O		= fth.o
-FTH_BC		= fth.bc
-FTH_LLVM	= fth-llvm
 
 MISC_EXTRA	= \
 	-DFTH_PREFIX_PATH=\"${prefix}\" \
@@ -131,16 +121,6 @@ fth-shared: ${FTH_O} ${FTH_SO_LIB}
 
 fth-static: ${FTH_O} ${FTH_A_LIB}
 	${CC} -o $@ ${FTH_O} ${LDFLAGS} ${FTH_A_LIB} ${LIBS}
-
-${FTH_LLVM}: ${FTH_BC} ${FTH_SO_LIB}
-	${LLC} ${LLCFLAGS} ${LLCLIBS} -o $@.s ${FTH_BC}
-	${CC} -o $@ $@.s ${LDFLAGS} ${FTH_SO_LIB} ${LIBS}
-	cp $@ fth
-
-${FTH_LLVM}.sh:
-	echo "#! /bin/sh" > $@
-	echo "${LLI} ${LLIFLAGS} ${LLILIBS} ${FTH_BC} \"\$$@\"" >> $@
-	chmod 0755 $@
 
 ${FTH_A_LIB}: ${FTH_OBJECTS} ${FICL_OBJECTS}
 	${RM} $@
@@ -202,7 +182,6 @@ uninstall: Makefile
 	${RM} ${DESTDIR}${libdir}/${FTH_A_LIB}
 	${RM} ${DESTDIR}${libdir}/${FTH_SO_LIB}*
 
-fth.bc:		${srcdir}/fth.c		${src_common}
 fth.o:		${srcdir}/fth.c		${src_common}
 array.o:	${srcdir}/array.c	${src_common}
 file.o:		${srcdir}/file.c	${src_common}

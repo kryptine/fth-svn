@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.186 1/16/18
+dnl @(#)configure.ac	1.187 1/18/18
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -128,8 +128,6 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_CHECK_TOOL([AR], [ar], [:])
 AC_CHECK_TOOL([MANDOC], [mandoc], [:])
-AC_CHECK_TOOL([LLI], [lli], [:])
-AC_CHECK_TOOL([LLC], [llc], [:])
 
 dnl
 dnl Check for header files.
@@ -372,7 +370,7 @@ case "${host}" in
 	*-mingw*)
 		# no -fPIC
 		;;
-	# Tested on
+	# As of Thu Jan 18 13:53:33 CET 2018 tested on
 	#	freebsd (arbornet.org i386-mnet-freebsd11.14)
 	#	openbsd (grex.org i386-intel-openbsd6.1)
 	#	netbsd (localhost amd64-netbsd8)
