@@ -1,4 +1,4 @@
-.\" Copyright (c) 2012-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2012-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,11 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)libfth.3	1.45 2/17/16
+.\" @(#)libfth.3	1.47 1/20/18
 .\"
 .ds str-Lb-libfth Forth Library (libfth, \-lfth)
 .\"
-.Dd 2016/02/17
+.Dd 2018/01/20
 .Dt LIBFTH 3
 .Os
 .\"
@@ -49,12 +49,9 @@
 .\" DESCRIPTION
 .\"
 .Sh DESCRIPTION
-This is the Fth library manual page.  Fth is known to compile with
-.Xr clang 1
-and 
-.Xr gcc 1 .
-One can include Fth library functions in applications and in C
-extension libraries.  The following shows example for each:
+This is the Fth library manual page.  One can include Fth library
+functions in applications and in C extension libraries.  The
+following shows example for each:
 .Ss Hello-World application:
 .Bd -literal -offset indent -compact
 % cat hello.c
@@ -2914,34 +2911,17 @@ Overwrite default size of return stack (1024).
 Overwrite default size of parameter stack (8192).
 .El
 .\"
-.\" COMPATIBILITY
-.\"
-.Sh COMPATIBILITY
-.Nm
-conforms only partly to
-.Em ANS Forth .
-The double word set doesn't take two stack entries and is actually of
-type
-.Ft ficl2Integer .
-.Pp
-.Nm
-has no extra floating point stack; floats are of type
-.Ft ficlFloat .
-.\"
 .\" SEE ALSO
 .\"
 .Sh SEE ALSO
-.Xr clang 1 ,
 .Xr fth 1 ,
 .Xr printf 3 ,
 .Xr strcmp 3 .
-.\"
-.\" STANDARDS
-.\"
-.Sh STANDARDS
-.Nm
-conforms only partly to
-.Em ANS Forth .
+.Rs
+.%A The Clang Team
+.%B Clang Compiler User's Manual
+.%U http://clang.llvm.org/docs/UsersManual.html
+.Re
 .\"
 .\" HISTORY
 .\"

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.3 1/16/18
+ * @(#)utils.c	2.4 1/20/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -46,6 +46,7 @@ static void	ficl_cold(ficlVm *);
 #if defined(HAVE_LIBTECLA)
 static void	ficl_ps_cb(ficlVm *);
 #endif
+static void	ficl_fgl_erase(ficlVm *);
 static void	ficl_repl_cb(ficlVm *);
 static void    *fixup_null_alloc(size_t, const char *);
 static int	get_pos_from_buffer(ficlVm *, char *);
@@ -931,7 +932,6 @@ static int	fth_in_repl_p = 0;
 
 static FTH 	fgl_all;	/* gl-all to *histdup* */
 static FTH 	fgl_prev;	/* gl-prev to *histdup* */
-static FTH 	fgl_erase;	/* gl-erase to *histdup* */
 
 static FTH 	fgl_vi;		/* edit-mode vi */
 static FTH 	fgl_emacs;	/* edit-mode emacs */
@@ -942,7 +942,6 @@ static FTH 	fgl_nobeep;	/* nobeep */
 #define FGL_HISTDUP_REF()	fth_variable_ref("*histdup*")
 #define FGL_HISTDUP_ALL_P()	(FGL_HISTDUP_REF() == fgl_all)
 #define FGL_HISTDUP_PREV_P()	(FGL_HISTDUP_REF() == fgl_prev)
-#define FGL_HISTDUP_ERASE_P()	(FGL_HISTDUP_REF() == fgl_erase)
 #define FGL_HISTDUP_UNDEF_P()	FTH_UNDEF_P(FGL_HISTDUP_REF())
 
 /* string */
@@ -977,7 +976,6 @@ static void 	ficl_bindkey(ficlVm *);
 static int	repl_command_generator(WordCompletion *,
 		    void *, const char *, int);
 static int 	repl_init_history(void);
-static int 	repl_unique_history(GetLine *, char *);
 static int 	repl_append_history(GetLine *, char *);
 static char    *repl_expand_history(GetLine *, char *);
 static char    *repl_replace_history(GetLine *, char *);
@@ -1471,43 +1469,6 @@ repl_init_history(void)
 	return (hist_len);
 }
 
-static int
-repl_unique_history(GetLine * gl, char *line)
-{
-	char           *hf;
-	FTH 		hary, nhary, cline, hline;
-	ficlInteger 	i, len;
-
-	hf = FGL_HISTFILE_CSTR();
-	gl_save_history(gl, hf, FGL_COMMENT, -1);
-	hary = fth_array_reverse(fth_readlines(hf));
-	/*
-	cline = fth_make_string_format("%s\n", line);
-	*/
-	cline = fth_make_string(line);
-	nhary = fth_make_empty_array();
-	len = fth_array_length(hary) - 1;
-
-	for (i = 0; i < len; i += 2) {
-		hline = fth_array_ref(hary, i);
-
-		if (fth_string_equal_p(cline, hline))
-			continue;
-
-		if (fth_array_member_p(nhary, hline))
-			continue;
-
-		/* history line */
-		fth_array_unshift(nhary, hline);
-		/* time line */
-		fth_array_unshift(nhary, fth_array_ref(hary, i + 1));
-	}
-
-	fth_writelines(hf, nhary);
-	gl_clear_history(gl, 1);
-	return (gl_load_history(gl, hf, FGL_COMMENT));
-}
-
 /*-
  * XXX: gl_append_history() (Wed Jan 15 18:10:07 CET 2014)
  *
@@ -1516,7 +1477,7 @@ repl_unique_history(GetLine * gl, char *line)
  *
  * Here we try a tcsh-like scheme where *histdup* can be set to
  * gl-all (uniq events only), gl-prev (not again if previous is
- * the same), gl-erase (erase old and add new), or undef (default).
+ * the same), or undef (all is added, the default).
  */
 static int
 repl_append_history(GetLine * gl, char *line)
@@ -1547,15 +1508,6 @@ repl_append_history(GetLine * gl, char *line)
 		if (gl_lookup_history(gl, range.newest, &hline))
 			if (strncmp(hline.line, line, size) == 0)
 				return (0);
-	} else if (FGL_HISTDUP_ERASE_P()) {
-		gl_range_of_history(gl, &range);
-
-		for (id = range.newest; id > range.oldest; id--)
-			if (gl_lookup_history(gl, id, &hline))
-				if (strncmp(hline.line, line, size) == 0) {
-					repl_unique_history(gl, line);
-					break;
-				}
 	}
 	gl_append_history(gl, line);
 	return (0);
@@ -1859,10 +1811,8 @@ fth_repl(int argc, char **argv)
 		line = NULL;
 		prompt = NULL;
 #if defined(HAVE_LIBTECLA)
-		if (!FGL_HISTDUP_ERASE_P()) {
-			gl_range_of_history(gl, &range);
-			lineno = (ficlInteger) range.newest + 1;
-		}
+		gl_range_of_history(gl, &range);
+		lineno = (ficlInteger) range.newest + 1;
 #endif
 		if (compile_p)
 			prompt = FTH_REPL_PROMPT2;	/* continue prompt */
@@ -1944,11 +1894,6 @@ fth_repl(int argc, char **argv)
 				fth_printf("%S\n", FTH_UNDEF);
 			continue;
 		}
-
-#if defined(HAVE_LIBTECLA)
-		repl_append_history(gl, line);
-#endif
-
 		status = fth_catch_eval(line);
 
 		if (status == FTH_ERROR) {
@@ -1968,6 +1913,10 @@ fth_repl(int argc, char **argv)
 
 		if (compile_p)
 			continue;
+
+#if defined(HAVE_LIBTECLA)
+		repl_append_history(gl, line);
+#endif
 
 		status = FTH_OKAY;
 
@@ -2065,6 +2014,12 @@ ficl_ps_cb(ficlVm *vm)
 }
 #endif
 
+static void
+ficl_fgl_erase(ficlVm *vm)
+{
+	ficlStackPushFTH(vm->dataStack, fgl_all);
+}
+
 void
 init_utils(void)
 {
@@ -2101,16 +2056,16 @@ init_utils(void)
 	/* *histdup* constants */
 	FGL_SET_CONSTANT(all);
 	FGL_SET_CONSTANT(prev);
-	FGL_SET_CONSTANT(erase);
+	/*
+	 * XXX: for backwards compatibility, returns fgl_all.
+	 */
+	FTH_PRI1("gl-erase", ficl_fgl_erase, NULL);
 	fth_define_variable("*histdup*", FTH_UNDEF,
 	    "History variable (constant).\n\
 If set to GL-ALL, only unique history events are entered in the history list.  \
 If set to GL-PREV and the last history event is the same as the current, \
 the current command is not entered.  \
-If set to GL-ERASE and the same event is found in the history list, \
-that old event gets erased and the current one gets inserted.  \
-If not defined (undef, the default), all history events are entered.\n\
-Default is undef.");
+If not defined (undef, the default), all history events are entered.");
 	fth_define_variable("*histfile*", FTH_UNDEF,
 	    "History variable (string).\n\
 Can be set to the pathname where history is going to be saved and restored.  \
