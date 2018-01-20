@@ -2,6 +2,9 @@ See ChangeLog for more.
 
 * 1.3.8
 
+Remove history option gl-erase.  Constant gl-erase returns now
+gl-all.
+
 Replace bool with int.
 
 Add config and build tool scripts for scons.  It's a replacement
