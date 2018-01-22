@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.6 1/4/18
+# @(#)SConstruct	1.7 1/23/18
 
 #
 # scons -h
@@ -31,12 +31,11 @@
 help			= """
 scons -h	# help
 scons -c	# clean
-scons CC=clang prefix=/usr/opt
 scons
+scons CC=clang prefix=/usr/opt
 scons test
 scons install
 scons uninstall
-scons dist
 """
 
 sc_h			= {}

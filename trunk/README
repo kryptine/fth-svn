@@ -5,49 +5,53 @@ NAME
 
 INTRODUCTION
      Fth is a software package which includes the interpreter fth and the
-     extension library libfth.	You can write Forth scripts and interpret them
-     with the interpreter fth or you can link libfth into an application to
-     use it as extension language.
+     library libfth.  You can write Forth scripts and interpret them with the
+     interpreter fth or you can link libfth into an application to use Fth as
+     extension language.
 
-     Fth's core language is Ficl, a Forth dialect written by John Sadler.  The
-     Ficl source is included in the Fth source tree and is slightly changed to
-     fit with Fth.  Ficl is more or less ANS compatible.  The Fth library
-     contains object type extensions like arrays, hashs, strings, regexp etc.
-     A GC tries to handle memory management of object types.  Fth is known to
-     build with clang(1) as well as with gcc(1).
+     The core language of Fth is John Sadler's Forth-inspired command language
+     Ficl.  Fth has object type extensions, for example array, hash, string,
+     regexp etc.
 
 WHERE IS FTH LOCATED?
      You can get the latest archive from http://www.sf.net/projects/fth/.  If
      you prefer svn, you can get the source code from
      svn.code.sf.net/p/fth/code/.  Check out the source tree with
-	   % svn checkout svn://svn.code.sf.net/p/fth/code/trunk fth
-     and update it later with
-	   % svn update
+
+	   % svn co svn://svn.code.sf.net/p/fth/code/trunk fth
+
+     and update later with
+
+	   % svn up
+
      in the new fth directory.
 
 REQUIREMENTS
    Tecla
      The interactive Fth interpreter supports tcsh-like command-line editing
-     with the tecla(7) library.	 You can find a copy at
-     http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.3.tar.gz.  If you
+     and history manipulation with the tecla(7) library.  You can find a copy
+     at http://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.3.tar.gz.	If you
      won't use tecla(7), you can configure Fth without it, see CONFIGURE AND
      BUILD FTH WITH SCONS.
 
    Bn
-     Bignumbers are supported by bn(3) from openssl.
+     Big integer arithmetic uses OpenSSL's BN_* function set like BN_new(3).
 
    64-Bit-NetBSD and Tecla
      The libtecla package on NetBSD provides a static library libtecla.a.  On
      64-bit machines this package should be compiled with:
+
 	   % cd /usr/pkgsrc/devel/libtecla
 	   % env CFLAGS=-fPIC make install clean
 
 CONFIGURE AND BUILD FTH WITH SCONS
-     If you have the python(1) package scons(1), you can configure, build and
+     If you have the python(1) package scons(1), you can config, build and
      install Fth with scons:
 
 	   % scons install
+
      or
+
 	   % scons test install
 
      You can set additional variables on the command line, see below for the
@@ -55,29 +59,34 @@ CONFIGURE AND BUILD FTH WITH SCONS
 
 	   % scons CC=clang CFLAGS='-fno-strict-aliasing' install
 
-     Scons for Fth has the following command line options.  For more, try
+     Scons for Fth has the following command line options.  For the full list,
+     try
+
 	   % scons -h
+
      --prefix path
 	  Installation prefix.
      --build path
-	  Build path, default
+	  Build path, default ./build.
      --tecla-prefix path
 	  Search for tecla(7) in path/{include,lib}.
      --program-prefix string
      --program-suffix string
-	  Prepend or append string to installed program and library name.
+	  Prepend or append string to the installed program and library name.
 	  More than one version of fth may be installed at the same time.  You
-	  can manipulate the name to achieve this, for example:
+	  can have different names, for example:
 
 		% scons --prefix=/usr/local --program-suffix=-1.3 test install
 
 	  installs the interpreter as fth-1.3, the library as libfth-1.3.so,
 	  creates a library path /usr/local/lib/fth-1.3 for local dynamic libs
 	  and installs the header files in /usr/local/include/fth-1.3:
+
 		/usr/local/bin/fth-1.3
 		/usr/local/lib/libfth-1.3.so
 		/usr/local/lib/fth-1.3/
 		/usr/local/include/fth-1.3/
+
      --enable-warnings
 	  Enable extra C compiler warnings flags.
      --disable-shared
@@ -86,15 +95,15 @@ CONFIGURE AND BUILD FTH WITH SCONS
 	  Do not use the tecla(7) command-line editing library.
 
      Scons has the following targets:
-     dist
-	  Create a distribution tar file.
      install
 	  Install the Fth package.
      test
 	  Test the Fth package.
      uninstall
 	  Uninstall all installed files.
+
 	   % scons -c
+
      is similar to `make clean'.
 
      Scons handles command line variables.  They can be mixed with command
@@ -115,14 +124,16 @@ CONFIGURE AND BUILD FTH WITH SCONS
 	  C Compiler, default cc.
      CFLAGS cflags
 	  Additional CFLAGS, default empty.
+     LDFLAGS ldflags
+	  Additional LDFLAGS, default empty.
      build path
 	  Build path.
      prefix path
 	  Install prefix.
      program_prefix string
      program_suffix string
-	  Prepend or append string to fth program and library.	See above for
-	  an explanation.
+	  Prepend or append string to the fth program and library.  See above
+	  for an example.
      tecla_prefix path
 	  tecla(7) prefix.
      libtecla
@@ -133,7 +144,8 @@ CONFIGURE AND BUILD FTH WITH SCONS
 	  Set to yes or no, default no.
 
 CONFIGURE AND BUILD FTH THE OLD WAY
-     The usual way to configure and install Fth is:
+     You may also configure and install Fth this way:
+
 	   % ./configure
 	   % make
 	   % make test # optional
@@ -142,7 +154,9 @@ CONFIGURE AND BUILD FTH THE OLD WAY
      There are a few additional configure options which may be of interest.
      See CONFIGURE AND BUILD FTH WITH SCONS for explanations of them.  For
      more, try:
+
 	   % ./configure -h
+
      --prefix path
      --with-tecla-prefix path
      --program-prefix string
@@ -167,10 +181,14 @@ CONFIGURE AND BUILD FTH THE OLD WAY
      test
      uninstall
 
-     During testing with make test two environment variables are checked:
+     Testing with
+
+	   make test
+
+     checks two environment variables:
      FTH_TEST_IO
      FTH_TEST_FILE
-     If set, the IO and File test will be executed.  These two tests may bear
+     If set, the IO and File tests will be executed.  These two tests may bear
      problems so they are disabled by default.
 
 AUTOCONF MACRO FTH_CHECK_LIB
@@ -178,14 +196,17 @@ AUTOCONF MACRO FTH_CHECK_LIB
      program and library using the autoconf macro FTH_CHECK_LIB which is
      located in fth.m4.	 This macro tests if the interpreter fth can be found
      in $PATH.	If so, it tests if libfth contains complex and rational
-     numbers.  Eventually it substitutes six variables for
+     numbers.  Eventually it substitutes six variables for configure.ac.
 
-     After including FTH_CHECK_LIB in configure.ac call aclocal && autoconf to
-     update aclocal.m4.
+     After including FTH_CHECK_LIB in configure.ac call
+
+	   aclocal && autoconf
+
+     to update aclocal.m4.
      FTH  Set to full path of the interpreter or "no", e.g.
 	  "/usr/local/bin/fth".
      FTH_VERSION
-	  Set to version number of the Fth package or "no", e.g.  "1.3.1".
+	  Set to version number of the Fth package or "no", e.g.  "1.3.8".
      FTH_CFLAGS
 	  Set to include path or "no", e.g. "-I/usr/local/include/fth".
      FTH_LIBS
