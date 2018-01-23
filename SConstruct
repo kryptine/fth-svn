@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.7 1/23/18
+# @(#)SConstruct	1.8 1/23/18
 
 #
 # scons -h
@@ -165,7 +165,9 @@ missing			= []
 cflags			= env['CFLAGS']
 env['CFLAGS']		= []
 env.MergeFlags(cflags)
-env.Append(LINKFLAGS	= env['LDFLAGS'])
+ldflags			= env['LDFLAGS']
+env['LDFLAGS']		= []
+env.Append(LINKFLAGS	= ldflags)
 env['top_srcdir']	= Dir('.').path
 env['CPPPATH']		= ['.', 'ficl', 'lib', 'src']
 if prefix == tecla_prefix:
