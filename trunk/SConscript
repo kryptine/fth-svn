@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.2 3/25/16
+# @(#)SConscript	1.4 1/23/18
 
 import os
 
@@ -67,13 +67,15 @@ if shared:
 	ms = misc_env.SharedObject('src/misc.c')
 	so = env.SharedLibrary(so_lib, [sources, ms])
 	po = env.SharedObject('src/fth.c')
+	pg = env.Clone(LIBS = [prog_name, 'm']).Program(pg_fth, [po])
 else:
 	ms = misc_env.StaticObject('src/misc.c')
 	so = env.StaticLibrary(so_lib, [sources, ms])
 	po = env.StaticObject('src/fth.c')
+	pg = env.Program(pg_fth, [po, so])
 
 if dbm:
-	ext_env = env.Clone(LIBS = [dbm_lib, 'm', 'c'])
+	ext_env = env.Clone(LIBS = [dbm_lib, 'm'])
 	od = ext_env.SharedObject('examples/dbm/fth-dbm.c')
 	el = ext_env.SharedLibrary('fth-dbm', od)
 
@@ -117,16 +119,18 @@ man3dir		= mandir + '/man3'
 cat1dir		= mandir + '/cat1'
 cat3dir		= mandir + '/cat3'
 
-iso = env.InstallAs(libdir + '/lib' + prog_name + '.so', so)
+if shared:
+	iso = env.InstallAs(libdir + '/lib' + prog_name + '.so', so)
+	if dbm:
+		inst.extend(env.InstallAs(pkglibdir + '/dbm.so', el))
+else:
+	iso = env.InstallAs(libdir + '/lib' + prog_name + '.a', so)
+
+env.Depends(pg, iso)
 env.NoClean(iso)
 
-pg = env.Clone(LIBS = [prog_name, 'm', 'c']).Program(pg_fth, [po])
 inst.extend(env.InstallAs(bindir + '/' + prog_name, pg))
-env.Depends(pg, iso)
 inst.extend(iso)
-
-if dbm:
-	inst.extend(env.InstallAs(pkglibdir + '/dbm.so', el))
 
 inst.extend(env.Install(incdir, [
 	'ficl/ficl.h',
