@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.8 1/23/18
+# @(#)SConstruct	1.9 1/24/18
 
 #
 # scons -h
@@ -189,12 +189,17 @@ env['SOURCE_URL']	= 'http://fth.sourceforge.net'
 env['LICENSE']		= 'bsd-2-clause'
 env['SUMMARY']		= "FTH Forth Scripting"
 env['PACKAGETYPE']	= 'src_tarbz2'
-arch			= os.uname()[4]
+arch			= os.getenv('MACHTYPE')
 vendor			= os.getenv('VENDOR')
+machine			= os.uname()[0].lower()
+if not arch:
+	arch = os.uname()[4]
 if not vendor:
 	vendor = os.name
+if not machine:
+	machine = sys.platform
 env['VENDOR']		= vendor
-env['HOST_TRIPLE']	= arch + '-' + vendor + '-' + sys.platform
+env['HOST_TRIPLE']	= arch + '-' + vendor + '-' + machine
 # PACKAGEROOT is default:
 # PACKAGEROOT = "${NAME}-${VERSION}"
 
