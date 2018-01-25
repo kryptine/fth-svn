@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.187 1/18/18
+dnl @(#)configure.ac	1.188 1/25/18
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -356,6 +356,7 @@ if test "X${prefix}" = "XNONE"; then
 fi
 SO_LD="${CC}"
 SO_LDFLAGS=""
+SO_DLDFLAGS=""
 LDFLAGS="${LDFLAGS} -L${prefix}/lib"
 case "${host}" in
 	*-sgi* | *-apple-* | *-*-minix*)
@@ -373,11 +374,12 @@ case "${host}" in
 	# As of Thu Jan 18 13:53:33 CET 2018 tested on
 	#	freebsd (arbornet.org i386-mnet-freebsd11.14)
 	#	openbsd (grex.org i386-intel-openbsd6.1)
-	#	netbsd (localhost amd64-netbsd8)
+	#	netbsd (localhost x86_64-netbsd8)
 	#	linux (freeshell.de x86_64-debian-linux-gnu3.16.0)
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
-		SO_LDFLAGS="-shared -Wl,-soname,${FTH_LIB}"
+		SO_LDFLAGS="-shared"
+		SO_DLDFLAGS="${SO_LDFLAGS} -Wl,-soname,${FTH_LIB}"
 		;;
 esac
 
@@ -391,6 +393,7 @@ AC_SUBST(prog_name)
 AC_SUBST(SO_DBM_LIB)
 AC_SUBST(SO_LD)
 AC_SUBST(SO_LDFLAGS)
+AC_SUBST(SO_DLDFLAGS)
 
 AC_CONFIG_TESTDIR(tests)
 AC_CONFIG_FILES([
@@ -429,7 +432,7 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_LDFLAGS}
+Shared linker flags .... : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 ])
 fi

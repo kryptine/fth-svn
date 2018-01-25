@@ -648,6 +648,7 @@ ac_includes_default="\
 
 ac_config_libobj_dir=lib
 ac_subst_vars='LTLIBOBJS
+SO_DLDFLAGS
 SO_LDFLAGS
 SO_LD
 SO_DBM_LIB
@@ -6126,6 +6127,7 @@ if test "X${prefix}" = "XNONE"; then
 fi
 SO_LD="${CC}"
 SO_LDFLAGS=""
+SO_DLDFLAGS=""
 LDFLAGS="${LDFLAGS} -L${prefix}/lib"
 case "${host}" in
 	*-sgi* | *-apple-* | *-*-minix*)
@@ -6143,11 +6145,12 @@ case "${host}" in
 	# As of Thu Jan 18 13:53:33 CET 2018 tested on
 	#	freebsd (arbornet.org i386-mnet-freebsd11.14)
 	#	openbsd (grex.org i386-intel-openbsd6.1)
-	#	netbsd (localhost amd64-netbsd8)
+	#	netbsd (localhost x86_64-netbsd8)
 	#	linux (freeshell.de x86_64-debian-linux-gnu3.16.0)
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
-		SO_LDFLAGS="-shared -Wl,-soname,${FTH_LIB}"
+		SO_LDFLAGS="-shared"
+		SO_DLDFLAGS="${SO_LDFLAGS} -Wl,-soname,${FTH_LIB}"
 		;;
 esac
 
@@ -6157,6 +6160,7 @@ esac
 cat >>confdefs.h <<_ACEOF
 #define FTH_LIBS "${LIBS}"
 _ACEOF
+
 
 
 
@@ -7535,7 +7539,7 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_LDFLAGS}
+Shared linker flags .... : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 " >&5
 $as_echo "
@@ -7550,7 +7554,7 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_LDFLAGS}
+Shared linker flags .... : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 " >&6; }
 fi
