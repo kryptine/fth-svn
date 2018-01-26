@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2007-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# @(#)common.mk	1.26 3/22/16
+# @(#)common.mk	1.27 1/26/18
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib
@@ -44,17 +44,14 @@ fth_cflags	+= -I${fthdir}
 fth_cflags	+= -I${ficldir}
 fth_cflags	+= -I${comdir}
 FTH_CFLAGS	= ${fth_cflags} -I${prefix}/include ${CFLAGS}
-TRASH		= fth fth-s* *.so *.[ao] *core *.db *.bc *.s *-llvm*
+TRASH		= fth fth-s* *.{so,db} *.[aos] *core
 RM		= rm -f
 
 .SUFFIXES:
-.SUFFIXES: .o .c .a .so .bc
+.SUFFIXES: .o .c .a .so
 
 .c.o:
 	${CC} ${DEFS} ${FTH_CFLAGS} -c $<
-
-.c.bc:
-	${CC} -emit-llvm ${DEFS} ${FTH_CFLAGS} -o $@ -c $<
 
 clean:
 	${RM} ${TRASH}
@@ -74,7 +71,7 @@ ${top_builddir}/config.status: ${top_srcdir}/configure
 	(cd ${top_builddir} && ${SHELL} ./config.status --recheck)
 
 .PHONY: all install fth-shared fth-static install-shared install-static \
-	install-strip install-site-fth uninstall \
-	dist check test clean distclean maintainer-clean depend
+	install-strip install-site-fth maintainer-install uninstall \
+	dist test clean distclean maintainer-clean depend
 
 # common.mk ends here

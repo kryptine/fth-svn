@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.33 1/23/18
+.\" @(#)README.man	1.34 1/26/18
 .\"
-.Dd 2018/01/23
+.Dd 2018/01/26
 .Dt README
 .Os
 .\"
@@ -163,7 +163,7 @@ libs and installs the header files in /usr/local/include/fth-1.3:
 .Ed
 .Pp
 .It Fl Fl enable-warnings
-Enable extra C compiler warnings flags.
+Enable extra C compiler warning flags.
 .It Fl Fl disable-shared
 Disable shared library support.
 .It Fl Fl without-tecla
@@ -212,7 +212,8 @@ Additional CFLAGS, default empty.
 .It Cm LDFLAGS Ar ldflags
 Additional LDFLAGS, default empty.
 .It Cm build Ar path
-Build path.
+Build path, default
+.Pa ./build .
 .It Cm prefix Ar path
 Install prefix.
 .It Cm program_prefix Ar string
@@ -259,7 +260,7 @@ for explanations of them.  For more, try:
 .It Fl Fl without-tecla
 .El
 .Pp
-Makefile knows the following targets:
+The following make targets are provided:
 .Bl -diag
 .It all
 .It clean
