@@ -6150,7 +6150,7 @@ case "${host}" in
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
 		SO_LDFLAGS="-shared"
-		SO_DLDFLAGS="${SO_LDFLAGS} -Wl,-soname,${FTH_LIB}"
+		SO_DLDFLAGS="-Wl,-soname,${FTH_LIB}"
 		;;
 esac
 
@@ -7539,7 +7539,8 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_DLDFLAGS}
+Shared dlflags ......... : ${SO_LDFLAGS}
+Shared dldflags ........ : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 " >&5
 $as_echo "
@@ -7554,7 +7555,8 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_DLDFLAGS}
+Shared dlflags ......... : ${SO_LDFLAGS}
+Shared dldflags ........ : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 " >&6; }
 fi

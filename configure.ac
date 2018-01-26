@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.188 1/25/18
+dnl @(#)configure.ac	1.190 1/26/18
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -379,7 +379,7 @@ case "${host}" in
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
 		SO_LDFLAGS="-shared"
-		SO_DLDFLAGS="${SO_LDFLAGS} -Wl,-soname,${FTH_LIB}"
+		SO_DLDFLAGS="-Wl,-soname,${FTH_LIB}"
 		;;
 esac
 
@@ -432,7 +432,8 @@ Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
 Linker flags ........... : ${LDFLAGS}
-Shared linker flags .... : ${SO_DLDFLAGS}
+Shared dlflags ......... : ${SO_LDFLAGS}
+Shared dldflags ........ : ${SO_DLDFLAGS}
 Libraries .............. : ${LIBS}
 ])
 fi
