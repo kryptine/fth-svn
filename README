@@ -88,7 +88,7 @@ CONFIGURE AND BUILD FTH WITH SCONS
 		/usr/local/include/fth-1.3/
 
      --enable-warnings
-	  Enable extra C compiler warnings flags.
+	  Enable extra C compiler warning flags.
      --disable-shared
 	  Disable shared library support.
      --without-tecla
@@ -127,7 +127,7 @@ CONFIGURE AND BUILD FTH WITH SCONS
      LDFLAGS ldflags
 	  Additional LDFLAGS, default empty.
      build path
-	  Build path.
+	  Build path, default ./build.
      prefix path
 	  Install prefix.
      program_prefix string
@@ -166,7 +166,7 @@ CONFIGURE AND BUILD FTH THE OLD WAY
      --disable-shared
      --without-tecla
 
-     Makefile knows the following targets:
+     The following make targets are provided:
 
      all
      clean
