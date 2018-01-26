@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.190 1/26/18
+dnl @(#)configure.ac	1.191 1/26/18
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -61,7 +61,7 @@ dnl AC_INIT arg   4: PACKAGE_TARNAME
 dnl AC_INIT arg   5: PACKAGE_URL
 dnl
 AC_INIT([FTH],
-    [1.3.8],
+    [1.3.9],
     [mi-scholz@users.sourceforge.net],
     [fth],
     [fth.sourceforge.net])
