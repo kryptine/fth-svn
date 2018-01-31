@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * %W% %G%
+ * @(#)proc.c	2.6 2/1/18
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -3039,5 +3039,5 @@ init_proc(void)
 }
 
 /*
- * %M% ends here
+ * proc.c ends here
  */
