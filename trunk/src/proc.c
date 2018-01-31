@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.5 1/4/18
+ * %W% %G%
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2110,7 +2110,7 @@ See also <{}>, get-optkey, get-optart, get-optkeys, get-optargs."
 	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	req = opt = 0;
 	key_p = opt_p = 0;
-	dict = FTH_FICL_DICT();
+	dict = ficlVmGetDictionary(vm);
 	word = dict->smudge;
 	keys = fth_make_empty_array();
 	defs = fth_make_empty_array();
@@ -2464,6 +2464,7 @@ This word is compile only and can only be used in word definitions."
 	word = ficlDictionaryAppendWord(dict, name, code, flag);
 	word->primitive_p = 0;
 	fth_latest_xt = word;
+	FTH_STACK_CHECK(vm, 1, 1);
 	arity = (int) ficlStackPopInteger(vm->dataStack);
 	prc = fth_make_proc(word, arity, 0, 0);
 	ficlStackPushFTH(vm->dataStack, prc);
@@ -2541,7 +2542,7 @@ See also constant."
 	fth_define_variable(vm->pad, obj, NULL);
 }
 
-static ficlWord *local_variables_paren;
+static ficlWord *local_vars_paren;
 
 static FTH
 local_vars_cb(FTH key, FTH value, FTH data)
@@ -2565,7 +2566,6 @@ ficl_local_variables_paren_co(ficlVm *vm)
 	frm = (FTH) (vm->returnStack->frame);
 	res = fth_hash_map(vars, local_vars_cb, frm);
 	ficlStackPushFTH(vm->dataStack, res);
-
 }
 
 static void
@@ -2625,12 +2625,13 @@ be used in word definitions."
 		}
 		hash = hash->link;
 	}
+
 finish:
 	dict = ficlVmGetDictionary(vm);
 	u = (ficlUnsigned) ficlInstructionLiteralParen;
 	ficlDictionaryAppendUnsigned(dict, u);
 	ficlDictionaryAppendFTH(dict, vars);
-	ficlDictionaryAppendPointer(dict, local_variables_paren);
+	ficlDictionaryAppendPointer(dict, local_vars_paren);
 }
 
 FTH
@@ -3028,7 +3029,7 @@ init_proc(void)
 	FTH_PRIMITIVE_SET("constant", ficl_constant,
 	    FICL_WORD_DEFAULT, h_constant);
 	FTH_PRIMITIVE_SET("value", ficl_value, FICL_WORD_DEFAULT, h_value);
-	local_variables_paren = FTH_PRIM_CO("(local-variables)",
+	local_vars_paren = FTH_PRIM_CO("(local-variables)",
 	    ficl_local_variables_paren_co, NULL);
 	FTH_PRIM_CO_IM("local-variables", ficl_local_variables_co_im, h_lvars);
 	FTH_PRI1("defined?", ficl_defined_p, h_defined_p);
@@ -3038,5 +3039,5 @@ init_proc(void)
 }
 
 /*
- * proc.c ends here
+ * %M% ends here
  */
