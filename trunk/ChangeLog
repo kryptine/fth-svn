@@ -1,3 +1,8 @@
+2018-04-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* examples/site-lib/dsp.fs (make-bark-labels): Remove
+	make-cairo/free-cairo; no longer required.
+
 2018-01-26  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* SConstruct: New version number: 1.3.8
