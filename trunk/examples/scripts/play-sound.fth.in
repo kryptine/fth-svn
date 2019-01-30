@@ -1,8 +1,8 @@
-#! @prefix@/bin/@prog_name@ -Dvs
+#! @prefix@/bin/@prog_name@ -s
 \ @configure_input@
 \ play-sound.fth -- plays sound files
 
-\ Copyright (c) 2006-2014 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,14 @@
 \ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \
-\ @(#)play-sound.fth.in	1.16 11/12/14
+\ @(#)play-sound.fth.in	2.1 1/30/19
 \
 \ % play-sound oboe.snd dog.snd
 \ % play-sound -p sndplay cardinal.snd
 \ % play-sound -P /usr/opt/sound/SFiles -p play cage.snd
 
 *filename* nil file-basename constant *script-name*
-"This is %s v1.16, (c) 2006-2014 Michael Scholz"
+"This is %s v1.2.1, (c) 2006-2019 Michael Scholz"
     '( *script-name* string-upcase ) string-format constant *banner*
   
 SIGINT lambda: { sig -- }
@@ -43,7 +43,14 @@ SIGINT lambda: { sig -- }
 
 require clm
 
-: play-sound-player <{ output -- }>
+: ps-print ( fmt args -- )
+	string-format { msg }
+	*fth-verbose* if
+		"\\ %s\n" '( msg ) fth-print
+	then
+;
+
+: ps-player <{ output -- }>
 	"sox -qV1 %s -d" #( output ) string-format file-system unless
 		"exit %d\n" #( exit-status ) fth-warning
 	then
@@ -54,8 +61,8 @@ let: ( -- )
 	\ getopt prints error message
 	#t to opterr
 	"P:p:qV" { args }
-	<'> play-sound-player { player }
-	#t { verbose }
+	#t to *fth-verbose*
+	<'> ps-player { player }
 	begin
 		*argv* args getopt ( ch ) dup
 	while
@@ -67,7 +74,7 @@ let: ( -- )
 				optarg to player
 			endof
 			<char> q of
-				#f to verbose
+				#f to *fth-verbose*
 			endof
 			<char> V of
 				"%s\n" '( *banner* ) fth-print
@@ -75,8 +82,8 @@ let: ( -- )
 			endof
 			<char> ? of
 				"\
-usage: play-sound [-q] [-P search-path] [-p player] file...
-       play-sound [-V]\n" '() fth-print
+usage: %s [-q] [-P path] [-p player] file...
+       %s -V\n" '( *script-name* dup ) fth-print
 				1 (bye)
 			endof
 		endcase
@@ -85,24 +92,20 @@ usage: play-sound [-q] [-P search-path] [-p player] file...
 	*argc* optind - to *argc*
 	optind 0 ?do *argv* array-shift drop loop
 	\
-	verbose if
-		"\\ %s\n" '( *banner* ) fth-print
-	then
+	"%s" '( *banner* ) ps-print
 	*argc* 0> if
 		*argv* each { file }
 			file find-file file-exists? if
-				file :player player :verbose verbose play-sound
+				file *fth-verbose* player play-sound
 			else
 				"%s doesn't exist in %s"
 				    '( file *clm-search-list* ) fth-warning
 			then
 		end-each
 	else
-		verbose if
-			"\\ nothing to do\n" '() fth-print
-		then
+		"nothing to play" '() ps-print
 	then
 	0 (bye)
 ;let
 
-\ play-sound.fth ends here
+\ play-sound.fth.in ends here

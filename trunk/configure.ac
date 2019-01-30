@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.192 1/30/19
+dnl @(#)configure.ac	1.193 1/30/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -207,11 +207,9 @@ AC_SEARCH_LIBS([regcomp], [c regex gnuregex], [AC_DEFINE([HAVE_POSIX_REGEX],
     [1], [Define to 1 if you have POSIX regex.])])
 AC_CHECK_DECLS([isnan, isinf], [], [], [@%:@include <math.h>])
 
-`${PKGCONF} --max-version=1.0.2p libcrypto`
-if test $? = 0; then
-	AC_CHECK_HEADERS([openssl/bn.h openssl/err.h])
-	AC_CHECK_LIB([crypto], [BN_new])
-fi
+AS_IF([${PKGCONF} --max-version=1.0.2p libcrypto],
+    [AC_CHECK_HEADERS([openssl/bn.h openssl/err.h])
+     AC_CHECK_LIB([crypto], [BN_new])])
 
 dnl
 dnl Check for functions.	      

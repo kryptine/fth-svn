@@ -1,8 +1,8 @@
-#! @prefix@/bin/@prog_name@ -Ds
+#! @prefix@/bin/@prog_name@ -s
 \ @configure_input@
 \ fth-test.fth -- object-type tests
 
-\ Copyright (c) 2005-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)fth-test.fth.in	1.32 9/13/13
+\ @(#)fth-test.fth.in	1.34 1/30/19
 
 \ Commentary:
 \
@@ -70,7 +70,9 @@ require regexp-test.fs
 require symbol-test.fs
 
 : run-fth-test { xt cnt -- }
-	"\\ *** execute %s ...\n" #( xt xt->name ) fth-print
+	*fth-verbose* if
+		"\\ *** execute %s ...\n" #( xt xt->name ) fth-print
+	then
 	stack-reset
 	cnt 0 ?do
 		xt #t nil fth-catch if
@@ -82,9 +84,13 @@ require symbol-test.fs
 ;
 
 stack-reset
-make-timer value tm
-tm start-timer
-cr
+
+*fth-verbose* [if]
+	make-timer value tm
+	tm start-timer
+	cr
+[then]
+
 <'>  array-test test-count run-fth-test
 <'>   list-test test-count run-fth-test
 <'>   hash-test test-count run-fth-test
@@ -97,12 +103,15 @@ cr
 <'> string-test test-count run-fth-test
 <'> regexp-test test-count run-fth-test
 <'> symbol-test test-count run-fth-test
-cr
-tm stop-timer
-"summary: %s\n" #( tm ) fth-display
-gc-stats
-.memory cr cr
+
+*fth-verbose* [if]
+	cr
+	tm stop-timer
+	"summary: %s\n" #( tm ) fth-display
+	gc-stats
+	.memory cr cr
+[then]
 
 bye
 
-\ fth-test.fth ends here
+\ fth-test.fth.in ends here

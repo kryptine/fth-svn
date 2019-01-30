@@ -5458,9 +5458,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-`${PKGCONF} --max-version=1.0.2p libcrypto`
-if test $? = 0; then
-	for ac_header in openssl/bn.h openssl/err.h
+if ${PKGCONF} --max-version=1.0.2p libcrypto; then :
+  for ac_header in openssl/bn.h openssl/err.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -5473,7 +5472,7 @@ fi
 
 done
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for BN_new in -lcrypto" >&5
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for BN_new in -lcrypto" >&5
 $as_echo_n "checking for BN_new in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_BN_new+:} false; then :
   $as_echo_n "(cached) " >&6
