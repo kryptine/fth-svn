@@ -36,6 +36,7 @@ REQUIREMENTS
 
    Bn
      Big integer arithmetic uses OpenSSL's BN_* function set like BN_new(3).
+     OpenSSL library version up to v1.0.2p is supported.
 
    64-Bit-NetBSD and Tecla
      The libtecla package on NetBSD provides a static library libtecla.a.  On

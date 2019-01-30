@@ -1,4 +1,4 @@
-.\" Copyright (c) 2012-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2012-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.34 1/26/18
+.\" @(#)README.man	1.35 1/30/19
 .\"
-.Dd 2018/01/26
+.Dd 2019/01/30
 .Dt README
 .Os
 .\"
@@ -91,6 +91,7 @@ you can configure Fth without it, see
 .Ss Bn
 Big integer arithmetic uses OpenSSL's BN_* function set like
 .Xr BN_new 3 .
+OpenSSL library version up to v1.0.2p is supported.
 .\"
 .\" 64-Bit-NetBSD and Tecla
 .\"

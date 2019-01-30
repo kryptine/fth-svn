@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.13 1/29/19
+# @(#)SConstruct	1.15 1/30/19
 
 #
 # scons -h
@@ -69,6 +69,7 @@ sc_h['extensions']	= "Enable general extensions on Solaris."
 
 import os
 import sys
+import subprocess
 
 initfile		= os.getenv('HOME') + '/.scons/fth.py'
 build_dir		= 'build'
@@ -232,6 +233,10 @@ def conf_test(env):
 	if tmp:
 		env['RANLIB'] = tmp
 
+	pkgconf = conf.CheckProg('pkgconf')
+	if not pkgconf:
+		pkgconf = conf.CheckProg('pkg-config')
+
 	old_libs = ''
 	dbm_lib	= ''
 
@@ -281,8 +286,10 @@ def conf_test(env):
 	conf.CheckLib('socket', 'socket')
 	conf.CheckLib('nsl', 'gethostbyname')
 
-	if env.ParseConfig('pkg-config --max-version=1.0.2p libcrypto'):
-		env.ParseConfig('pkg-config --cflags --libs libcrypto')
+	env['have_crypto'] = False
+	if subprocess.call([pkgconf, "--max-version=1.0.2p", "libcrypto"]) == 0:
+		env.ParseConfig(pkgconf + ' --cflags --libs libcrypto')
+		env['have_crypto'] = True
 
 	env['posix_regex'] = conf.CheckFunc('regcomp')
 	if not env['posix_regex']:
@@ -440,7 +447,6 @@ def src_conf_test(env):
 		'ndbm.h',
 		'netdb.h',
 		'netinet/in.h',
-		'openssl/err.h',
 		'regex.h',
 		'signal.h',
 		'stdlib.h',
@@ -454,6 +460,9 @@ def src_conf_test(env):
 		'sys/wait.h',
 		'time.h']:
 		src_conf_h.CheckCHeader(h)
+
+	if env['have_crypto']:
+		src_conf_h.CheckCHeader('openssl/err.h')
 
 	# Minix seems to lack asinh(3), acosh(3), atanh(3)
 	for f in ['access',
@@ -575,13 +584,15 @@ def fth_conf_test(env):
 		'memory.h',
 		'missing/complex.h',
 		'missing/math.h',
-		'openssl/bn.h',
 		'setjmp.h',
 		'stdarg.h',
 		'strings.h',
 		'string.h',
 		'unistd.h']:
 		fth_conf_h.CheckHeader(fh)
+
+	if env['have_crypto']:
+		fth_conf_h.CheckCHeader('openssl/bn.h')
 
 	if env['complex_i']:
 		fth_conf_h.Define('HAVE_COMPLEX_I', 1)

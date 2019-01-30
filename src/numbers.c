@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	2.5 1/30/19
+ * @(#)numbers.c	2.6 1/30/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -4400,6 +4400,7 @@ See also numerator."
 	BN_CHECKP(BN_copy(res, FTH_RATIO_DEN(obj)));
 	return (fth_make_bignum(res));
 #else
+	(void) obj;
 	return (FTH_ONE);
 #endif
 }
