@@ -43,7 +43,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)tools.c	1.55 3/22/16
+ * @(#)tools.c	1.56 1/29/19
  */
 
 /*
@@ -238,7 +238,7 @@ If the CFA is not recognized, just indicate that it is a primitive."
   switch (kind)
   {
   case FICL_WORDKIND_COLON:
-    fth_printf(": %.*s", word->length, word->name);
+    fth_printf(": %.*s", (int)word->length, word->name);
     ficlDictionarySee(ficlVmGetDictionary(vm), word);
     break;
 

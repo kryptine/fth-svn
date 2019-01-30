@@ -1,4 +1,4 @@
-.\" Copyright (c) 2004-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.144 1/26/18
+.\" @(#)fth.1	1.147 1/30/19
 .\"
-.Dd 2018/01/26
+.Dd 2019/01/30
 .Dt FTH 1
 .Os
 .\"
@@ -282,6 +282,32 @@ to #t (default).
 .Ss Forth variables
 .Bl -tag -width MMM -compact
 .\"
+.\" *0*
+.\"
+.It Ev *0*
+Entire current input line, read-only.
+.\"
+.\" *1* ... *9*
+.\"
+.It Ev *1* ... *9*
+Corresponding single element of 
+.Ev *farray* ,
+read-only.
+.\"
+.\" .*0*
+.\"
+.It Ev .*0*
+Print entire current input line.
+.\"
+.\" .*1* ... .*9*
+.\"
+.It Ev .*1* ... .*9*
+Print corresponding single element of 
+.Ev *farray*
+with
+.Ev *ofs*
+attached, normally a single space.
+.\"
 .\" *argc*
 .\"
 .It Ev *argc*
@@ -385,6 +411,11 @@ Array of already loaded files.
 .It Ev *nr*
 Input record number over all files.
 .\"
+.\" *ofs*
+.\"
+.It Ev *ofs*
+Output field separator, default one space.
+.\"
 .\" *re*
 .\"
 .It Ev *re*
@@ -396,12 +427,15 @@ Array with last regexp match.
 Regexp syntax option, default
 .Dv REG_EXTENDED.
 .\"
-.\" *re0* ... *re9*
+.\" *re0*
 .\"
 .It Ev *re0*
-Regexp last entire match.
+Last entire match of regexp search, read-only.
+.\"
+.\" *re1* ... *re9*
+.\"
 .It Ev *re1* ... *re9*
-Regexp last subexpression matches.
+Last subexpression match of regexp search, read-only.
 .\"
 .\" optarg
 .\"
@@ -8434,6 +8468,12 @@ word during reading file line by line.
 		     *line* \e
 		   then\(aq config.h
 .Ed
+.Pp
+Print name and login time from the who command:
+.Dl who | fth -ane \(aq.*1* .*5* cr\(aq
+.Pp
+The same with output file separator set to \(dq == \(dq:
+.Dl who | fth -ane \(aq\(dq == \(dq to *ofs* .*1* .*5* cr\(aq
 .Pp
 Stand-alone executable Forth scripts have a first line of at least
 .Dl #! /usr/local/bin/fth -s

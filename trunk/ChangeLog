@@ -1,3 +1,7 @@
+2019-01-29  Michael Scholz  <mi-scholz@users.sourceforge.net>
+
+	* src/utils.c: *0*...*9* and *ofs* added.
+
 2018-04-14  Michael Scholz  <mi-scholz@users.sourceforge.net>
 
 	* examples/site-lib/dsp.fs (make-bark-labels): Remove

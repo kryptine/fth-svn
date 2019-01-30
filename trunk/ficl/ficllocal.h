@@ -42,7 +42,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2017 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficllocal.h	1.70 12/31/17
+ * @(#)ficllocal.h	1.71 1/29/19
  */
 
 #if !defined(_FICLLOCAL_H_)
@@ -101,8 +101,12 @@ typedef long long ficlSignedPointer;
 
 typedef long ficlInteger;
 typedef unsigned long ficlUnsigned;
-typedef ficlInteger64 ficl2Integer;
-typedef ficlUnsigned64 ficl2Unsigned;
+typedef long long ficl2Integer;
+typedef unsigned long long ficl2Unsigned;
+/*
+ * XXX: typedef ficlInteger64 ficl2Integer;
+ *	typedef ficlUnsigned64 ficl2Unsigned;
+ */
 typedef double ficlFloat;
 typedef ficlPointer FTH;
 typedef ficlSignedPointer SIGNED_FTH;

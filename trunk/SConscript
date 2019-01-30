@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.4 1/23/18
+# @(#)SConscript	1.5 1/29/19
 
 import os
 
@@ -50,7 +50,7 @@ env.MergeFlags(['-g', '-O3'])
 if warnings:
 	env.Append(CFLAGS = [
 		'-ansi',
-		'-std=iso9899:1999',	# otherwise va_copy() is hidden
+		'-std=c99',	# otherwise va_copy() is hidden
 		'-Wall',
 		'-Wextra',
 		'-Wmissing-declarations',

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.4 1/20/18
+ * @(#)utils.c	2.8 1/30/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2020,6 +2020,62 @@ ficl_fgl_erase(ficlVm *vm)
 	ficlStackPushFTH(vm->dataStack, fgl_all);
 }
 
+static void
+ficl_pos_xx(ficlVm *vm)
+{
+	ficlStackPushFTH(vm->dataStack, fth_variable_ref("*line*"));
+}
+
+static void
+ficl_print_pos_xx(ficlVm *vm)
+{
+	(void) vm;
+	fth_printf("%S", fth_variable_ref("*line*"));
+}
+
+#define MAKE_POSITION_WORDS(Numb)					\
+static void								\
+ficl_pos_0 ## Numb(ficlVm *vm)						\
+{									\
+	FTH		ary;						\
+	FTH		val;						\
+									\
+	ary = fth_variable_ref("*farray*");				\
+	val = FTH_FALSE;						\
+									\
+	if (fth_array_length(ary) > Numb)				\
+		val = fth_array_ref(ary, Numb);				\
+									\
+	ficlStackPushFTH(vm->dataStack, val);				\
+}									\
+									\
+static void								\
+ficl_print_pos_0 ## Numb(ficlVm *vm)					\
+{									\
+	FTH		ary;						\
+	FTH		val;						\
+									\
+	(void) vm;							\
+	ary = fth_variable_ref("*farray*");				\
+	val = FTH_FALSE;						\
+									\
+	if (fth_array_length(ary) > Numb)				\
+		val = fth_array_ref(ary, Numb);				\
+									\
+	fth_printf("%S", val);						\
+	fth_printf("%S", fth_variable_ref("*ofs*"));			\
+}
+
+MAKE_POSITION_WORDS(0);
+MAKE_POSITION_WORDS(1);
+MAKE_POSITION_WORDS(2);
+MAKE_POSITION_WORDS(3);
+MAKE_POSITION_WORDS(4);
+MAKE_POSITION_WORDS(5);
+MAKE_POSITION_WORDS(6);
+MAKE_POSITION_WORDS(7);
+MAKE_POSITION_WORDS(8);
+
 void
 init_utils(void)
 {
@@ -2094,10 +2150,32 @@ Default is #t.");
 	    "current in-place filename");
 	fth_define_variable("*fs*", fth_make_string(" "),
 	    "input field separator");
+	fth_define_variable("*ofs*", fth_make_string(" "),
+	    "output field separator");
 	fth_define_variable("*fnr*", FTH_ZERO,
 	    "input record number in current file");
 	fth_define_variable("*nr*", FTH_ZERO,
 	    "input record number since beginning");
+	FTH_PRI1("*0*", ficl_pos_xx, "entire current line");
+	FTH_PRI1("*1*", ficl_pos_00, "1st word of current line");
+	FTH_PRI1("*2*", ficl_pos_01, "2nd word of current line");
+	FTH_PRI1("*3*", ficl_pos_02, "3rd word of current line");
+	FTH_PRI1("*4*", ficl_pos_03, "4th word of current line");
+	FTH_PRI1("*5*", ficl_pos_04, "5th word of current line");
+	FTH_PRI1("*6*", ficl_pos_05, "6th word of current line");
+	FTH_PRI1("*7*", ficl_pos_06, "7th word of current line");
+	FTH_PRI1("*8*", ficl_pos_07, "8th word of current line");
+	FTH_PRI1("*9*", ficl_pos_08, "9th word of current line");
+	FTH_PRI1(".*0*", ficl_print_pos_xx, "print entire current line");
+	FTH_PRI1(".*1*", ficl_print_pos_00, "print 1st word of current line");
+	FTH_PRI1(".*2*", ficl_print_pos_01, "print 2nd word of current line");
+	FTH_PRI1(".*3*", ficl_print_pos_02, "print 3rd word of current line");
+	FTH_PRI1(".*4*", ficl_print_pos_03, "print 4th word of current line");
+	FTH_PRI1(".*5*", ficl_print_pos_04, "print 5th word of current line");
+	FTH_PRI1(".*6*", ficl_print_pos_05, "print 6th word of current line");
+	FTH_PRI1(".*7*", ficl_print_pos_06, "print 7th word of current line");
+	FTH_PRI1(".*8*", ficl_print_pos_07, "print 8th word of current line");
+	FTH_PRI1(".*9*", ficl_print_pos_08, "print 9th word of current line");
 	FTH_PRI1("cold", ficl_cold, h_cold);
 	before_repl_hook = fth_make_hook("before-repl-hook", 0,
 	    "before-repl-hook ( -- )  \

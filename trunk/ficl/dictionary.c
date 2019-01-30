@@ -54,7 +54,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)dictionary.c	1.71 10/17/13
+ * @(#)dictionary.c	1.72 1/29/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -730,7 +730,7 @@ void ficlDictionarySee(ficlDictionary *dict, ficlWord *wrd)
 	{
 	  ficlWord *w = (ficlWord *)CELL_VOIDP_REF(&c);
 
-	  fth_printf("%.*s (%p literal)", w->length, w->name, CELL_VOIDP_REF(&c));
+	  fth_printf("%.*s (%p literal)", (int)w->length, w->name, CELL_VOIDP_REF(&c));
 	}
 	else
 	  fth_printf("literal %ld (%p)", CELL_INT_REF(&c), CELL_VOIDP_REF(&c));
@@ -747,7 +747,7 @@ void ficlDictionarySee(ficlDictionary *dict, ficlWord *wrd)
 	ficlCountedString *counted = (ficlCountedString *)(void *)++cell;
 
 	cell = (ficlCell *)ficlAlignPointer(counted->text + counted->length + 1) - 1;
-	fth_printf("s\" %.*s\"", counted->length, counted->text);
+	fth_printf("s\" %.*s\"", (int)counted->length, counted->text);
       }
       break;
       case FICL_WORDKIND_CSTRING_LITERAL:
@@ -755,7 +755,7 @@ void ficlDictionarySee(ficlDictionary *dict, ficlWord *wrd)
 	ficlCountedString *counted = (ficlCountedString *)(void *)++cell;
 
 	cell = (ficlCell *)ficlAlignPointer(counted->text + counted->length + 1) - 1;
-	fth_printf("c\" %.*s\"", counted->length, counted->text);
+	fth_printf("c\" %.*s\"", (int)counted->length, counted->text);
       }
       break;
       case FICL_WORDKIND_BRANCH0:
@@ -788,7 +788,7 @@ void ficlDictionarySee(ficlDictionary *dict, ficlWord *wrd)
 	break;
       default:
 	if (FICL_WORD_P(word))
-	  fth_printf("%.*s", word->length, word->name);
+	  fth_printf("%.*s", (int)word->length, word->name);
 	else
 	  fth_printf("%S", ficl_to_fth(CELL_FTH_REF(cell)));
 	break;

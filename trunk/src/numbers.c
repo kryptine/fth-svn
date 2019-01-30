@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	2.3 1/4/18
+ * @(#)numbers.c	2.5 1/30/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -4179,9 +4179,9 @@ fth_number_equal_p(FTH m, FTH n)
 	if (NUMB_FIXNUM_P(m) && NUMB_FIXNUM_P(n))
 		return (FIX_TO_INT(m) == FIX_TO_INT(n));
 
-	/*
+#if !HAVE_BN
 	flag = 0;
-	*/
+#endif
 	N_CMP_TWO_OP(m, n, flag, ==, eq);
 	return (flag);
 }
@@ -4194,9 +4194,9 @@ fth_number_less_p(FTH m, FTH n)
 	if (NUMB_FIXNUM_P(m) && NUMB_FIXNUM_P(n))
 		return (FIX_TO_INT(m) < FIX_TO_INT(n));
 
-	/*
+#if !HAVE_BN
 	flag = 0;
-	*/
+#endif
 	N_CMP_TWO_OP(m, n, flag, <, less);
 	return (flag);
 }
@@ -4345,14 +4345,13 @@ See also denominator."
 #if HAVE_BN
 	unsigned long 	x;
 	ficlBignum 	res;
-#endif
 
 	if (FTH_INTEGER_P(obj))
 		return (obj);
 
 	if (!FTH_RATIO_P(obj))
 		return (FTH_ZERO);
-#if HAVE_BN
+
 	x = BN_get_word(FTH_RATIO_NUM(obj));
 
 	if (x < ULONG_MAX) {
@@ -4364,6 +4363,11 @@ See also denominator."
 	BN_CHECKP(res);
 	BN_CHECKP(BN_copy(res, FTH_RATIO_NUM(obj)));
 	return (fth_make_bignum(res));
+#else
+	if (FTH_INTEGER_P(obj))
+		return (obj);
+
+	return (FTH_ZERO);
 #endif
 }
 
@@ -4382,11 +4386,10 @@ See also numerator."
 #if HAVE_BN
 	unsigned long 	x;
 	ficlBignum 	res;
-#endif
 
 	if (!FTH_RATIO_P(obj))
 		return (FTH_ONE);
-#if HAVE_BN
+
 	x = BN_get_word(FTH_RATIO_DEN(obj));
 
 	if (x < ULONG_MAX)
@@ -4396,6 +4399,8 @@ See also numerator."
 	BN_CHECKP(res);
 	BN_CHECKP(BN_copy(res, FTH_RATIO_DEN(obj)));
 	return (fth_make_bignum(res));
+#else
+	return (FTH_ONE);
 #endif
 }
 

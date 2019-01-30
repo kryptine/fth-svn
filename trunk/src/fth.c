@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	2.1 1/2/18";
+const char fth_sccsid[] = "@(#)fth.c	2.2 1/29/19";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,7 +36,7 @@ const char fth_sccsid[] = "@(#)fth.c	2.1 1/2/18";
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2018 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2019 Michael Scholz"
 
 static FTH 	eval_with_error_exit(void *, int);
 static void 	repl_in_place(char *, FTH, ficlWord *, int, int, int);
@@ -51,9 +51,9 @@ enum {
 static ficlWord *
 source_to_word(const char *buffer)
 {
-	ficlWord       *word;
-	char           *bstr;
 	int 		status;
+	char           *bstr;
+	ficlWord       *word;
 
 	word = NULL;
 	bstr = fth_format("lambda: ( ?? -- ?? ) %s ;", buffer);
@@ -81,10 +81,12 @@ source_to_word(const char *buffer)
 static FTH
 eval_with_error_exit(void *p, int kind)
 {
+	int 		status;
+	ficlInteger 	depth;
+	ficlInteger 	new_depth;
+	ficlInteger 	i;
 	ficlVm         *vm;
 	FTH 		val;
-	ficlInteger 	depth, new_depth, i;
-	int 		status;
 
 	val = FTH_UNDEF;
 
@@ -140,7 +142,9 @@ eval_with_error_exit(void *p, int kind)
 static FTH
 string_split(char *str, char *delim)
 {
-	char           *p, *s, *t;
+	char           *p;
+	char           *s;
+	char           *t;
 	FTH 		result;
 
 	s = t = FTH_STRDUP(str);
@@ -159,11 +163,12 @@ static char 	fth_scratch[BUFSIZ];
 static void
 repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, int chomp_p)
 {
-	char           *delim, *buf;
 	size_t 		len;
 	ficlInteger 	line_no;
-	FTH 		line;
+	char           *delim;
+	char           *buf;
 	FILE           *ifp;
+	FTH 		line;
 
 	ifp = stdin;
 
@@ -226,22 +231,40 @@ extern int 	optopt;
 int
 main(int argc, char **argv)
 {
-	int 		die, no_init_file, auto_split, debug;
-	int 		in_place_p, ficl_repl;
-	int 		line_end, implicit_loop, loop_print;
-	int 		script_p, finish_getopt;
-	int 		i, c, exit_value, stay_in_repl, verbose;
-	int 		lp_len, llp_len, bufs_len, libs_len;
-	char           *field_separator, *init_file, *suffix, *script;
-	char           *buffers[LIBSLEN], *load_lib_paths[LIBSLEN];
-	char           *libraries[LIBSLEN], *load_paths[LIBSLEN];
+	int 		i;
+	int 		c;
+	int 		die;
+	int 		no_init_file;
+	int 		auto_split;
+	int 		debug;
+	int 		in_place_p;
+	int 		ficl_repl;
+	int 		line_end;
+	int 		implicit_loop;
+	int 		loop_print;
+	int 		script_p;
+	int 		finish_getopt;
+	int 		exit_value;
+	int 		stay_in_repl;
+	int 		verbose;
+	int 		lp_len;
+	int 		llp_len;
+	int 		bufs_len;
+	int 		libs_len;
+	char           *field_separator;
+	char           *init_file;
+	char           *suffix;
+	char           *script;
+	char           *buffers[LIBSLEN];
+	char           *load_lib_paths[LIBSLEN];
+	char           *libraries[LIBSLEN];
+	char           *load_paths[LIBSLEN];
 	FTH 		ret;
 
-	/*
+	/*-
 	 * environment variable POSIXLY_CORRECT: if set, disable permutation
-	 * optstring starting with `-': RETURN_IN_ORDER optstring starting
-	 * with `+': REQUIRE_ORDER (posix)
-	 *
+	 * optstring starting with `-': RETURN_IN_ORDER
+	 * optstring starting with `+': REQUIRE_ORDER (posix)
 	 * optional arguments: append two colons x:: (see i:: in char *args)
 	 */
 	char           *args = "C:DE:F:I:QS:Vade:f:i::lnpqrs:v";
@@ -262,10 +285,10 @@ main(int argc, char **argv)
 	die = 0;		/* -D */
 	/*
 	 * stay_in_repl:	-1 not set
-	 *			0 -e (eval)
-	 *			0 -s (script)
-	 *			1 -E (eval-and-stay)
-	 *			1 -r (ficl-repl)
+	 *			 0 -e (eval)
+	 *			 0 -s (script)
+	 *			 1 -E (eval-and-stay)
+	 *			 1 -r (ficl-repl)
 	 */
 	stay_in_repl = -1;	/* -Er 1 || -es 0 */
 	bufs_len = 0;		/* -Ee pattern */
@@ -288,8 +311,8 @@ main(int argc, char **argv)
 
 	/*-
 	 * verbose:		-1 not set --> true in interactive repl
-	 *			0 -q quiet
-	 *			1 -v verbose
+	 *			 0 -q quiet
+	 *			 1 -v verbose
 	 */
 	verbose = -1;		/* -v 1 || -q 0 */
 	opterr = 1;		/* show getopt's error message */
@@ -433,6 +456,7 @@ main(int argc, char **argv)
 	 * Reset getopt for further use in Forth scripts.
 	 */
 	optind = 1;
+
 	if (field_separator != NULL)	/* -F SEP */
 		fth_variable_set("*fs*", fth_make_string(field_separator));
 
@@ -446,6 +470,7 @@ main(int argc, char **argv)
 			fth_dl_load(name, fnc);
 		}
 	}
+
 	/*
 	 * Run script and exit.
 	 */
@@ -458,6 +483,7 @@ main(int argc, char **argv)
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
+
 	/*
 	 * In-place or implicit-loop action and exit.
 	 */
@@ -467,7 +493,7 @@ main(int argc, char **argv)
 		FTH 		out;
 
 		if (bufs_len < 1) {
-			fth_errorf("#<%s: in-place require -e PATTERN!>\n",
+			fth_errorf("#<%s: in-place requires -e PATTERN!>\n",
 			    fth_exception_ref(FTH_FORTH_ERROR));
 			fth_exit(EXIT_FAILURE);
 			/*
@@ -477,6 +503,7 @@ main(int argc, char **argv)
 			/* NOTREACHED */
 			return (EXIT_FAILURE);
 		}
+
 		/*
 		 * If multiple -e, eval all but last.
 		 */
@@ -496,6 +523,7 @@ main(int argc, char **argv)
 			    auto_split, loop_print, line_end);
 			fth_exit(EXIT_SUCCESS);
 		}
+
 		/*
 		 * ... or process all remaining files in order.
 		 */
@@ -522,6 +550,7 @@ main(int argc, char **argv)
 		}
 		fth_exit(EXIT_SUCCESS);
 	}
+
 	/*
 	 * Load remaining args as fth source files.
 	 */
@@ -566,6 +595,7 @@ main(int argc, char **argv)
 		if (die)
 			fth_exit(exit_value);
 	}
+
 	/*
 	 * Eval strings from command line.
 	 */
@@ -581,6 +611,7 @@ main(int argc, char **argv)
 		 */
 		eval_with_error_exit(source_to_word(buffers[i]), REPL_COMPILE);
 	}
+
 	/*
 	 * Adjust stay_in_repl if not set.
 	 */
@@ -604,6 +635,7 @@ main(int argc, char **argv)
 			fth_printf("\\ %s %s\n",
 			    FTH_PACKAGE_NAME, fth_version());
 		}
+
 		/*
 		 * Load init files if not -Q.
 		 */
