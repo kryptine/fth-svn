@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.10 1/26/18
+# @(#)SConstruct	1.13 1/29/19
 
 #
 # scons -h
@@ -47,6 +47,7 @@ sc_h['prg_suffix']	= "append SUFFIX to installed program name"
 sc_h['shared_l']	= "disable shared library support"
 sc_h['shared_v']	= "enable shared library support"
 sc_h['warnings']	= "enable extra C compiler warning flags"
+sc_h['verbose']		= "verbose mode"
 sc_h['cc']		= "C compiler"
 sc_h['cflags']		= "additional CFLAGS"
 sc_h['ldflags']		= "additional LDFLAGS"
@@ -79,6 +80,7 @@ prg_suffix		= ''
 libtecla		= True 
 shared			= True 
 warnings		= False
+verbose			= False
 
 AddOption('--prefix',
 	default = prefix,
@@ -124,6 +126,12 @@ AddOption('--enable-warnings',
 	default = warnings,
 	help = sc_h['warnings'])
 
+AddOption('--verbose',
+	action = 'store_true',
+	dest = 'verbose',
+	default = verbose,
+	help = sc_h['verbose'])
+
 prefix			= GetOption('prefix')
 tecla_prefix		= GetOption('tecla_prefix')
 prg_prefix		= GetOption('prg_prefix')
@@ -132,6 +140,7 @@ build_dir		= GetOption('build')
 libtecla		= GetOption('libtecla')
 shared			= GetOption('shared')
 warnings		= GetOption('warnings')
+verbose			= GetOption('verbose')
 
 vars.AddVariables(
 	('CC', sc_h['cc'], 'cc'),
@@ -146,7 +155,8 @@ vars.AddVariables(
 	    tecla_prefix, PathVariable.PathIsDir),
 	BoolVariable('libtecla', sc_h['tecla_v'], libtecla),
 	BoolVariable('shared', sc_h['shared_v'], shared),
-	BoolVariable('warnings', sc_h['warnings'], warnings))
+	BoolVariable('warnings', sc_h['warnings'], warnings),
+	BoolVariable('verbose', sc_h['verbose'], verbose))
 
 env = Environment(ENV = os.environ, variables = vars)
 
@@ -161,6 +171,7 @@ build_dir		= env['build']
 libtecla		= env['libtecla']
 shared			= env['shared']
 warnings		= env['warnings']
+verbose			= env['verbose']
 missing			= []
 cflags			= env['CFLAGS']
 env['CFLAGS']		= []
@@ -170,6 +181,7 @@ env['LDFLAGS']		= []
 env.Append(LINKFLAGS	= ldflags)
 env['top_srcdir']	= Dir('.').path
 env['CPPPATH']		= ['.', 'ficl', 'lib', 'src']
+
 if prefix == tecla_prefix:
 	env.Append(CPPPATH = [prefix + '/include'])
 	env.Append(LIBPATH = [prefix + '/lib'])
@@ -189,15 +201,18 @@ env['SOURCE_URL']	= 'http://fth.sourceforge.net'
 env['LICENSE']		= 'bsd-2-clause'
 env['SUMMARY']		= "FTH Forth Scripting"
 env['PACKAGETYPE']	= 'src_tarbz2'
+
 arch			= os.getenv('MACHTYPE')
 vendor			= os.getenv('VENDOR')
 machine			= os.uname()[0].lower()
+
 if not arch:
 	arch = os.uname()[4]
 if not vendor:
 	vendor = os.name
 if not machine:
 	machine = sys.platform
+
 env['VENDOR']		= vendor
 env['HOST_TRIPLE']	= arch + '-' + vendor + '-' + machine
 # PACKAGEROOT is default:
@@ -208,10 +223,21 @@ env['HOST_TRIPLE']	= arch + '-' + vendor + '-' + machine
 #
 def conf_test(env):
 	conf	= env.Configure(clean = False, help = False)
+
+	tmp = conf.CheckProg('llvm-ar')
+	if tmp:
+		env['AR'] = tmp
+
+	tmp = conf.CheckProg('llvm-ranlib')
+	if tmp:
+		env['RANLIB'] = tmp
+
 	old_libs = ''
 	dbm_lib	= ''
+
 	if 'LIBS' in env:
 		old_libs = env['LIBS']
+
 	dbm = conf.CheckFunc('dbm_open')
 	if not dbm:
 		for l in ['dbm', 'ndbm']:
@@ -219,9 +245,11 @@ def conf_test(env):
 				dbm_lib = l
 				dbm = True
 				break
+
 	env['LIBS']	= old_libs
 	env['dbm']	= dbm
 	env['dbm_lib']	= dbm_lib
+
 	if not conf.CheckFunc('getopt'):
 		missing.append('lib/getopt.c')
 	if not conf.CheckFunc('getopt_long'):
@@ -234,6 +262,7 @@ def conf_test(env):
 		missing.append('lib/strsep.c')
 	if not conf.CheckFunc('strsignal'):
 		missing.append('lib/strsignal.c')
+
 	env['missing']	= missing
 	env['sizeof_void_p'] = conf.CheckTypeSize('void *')
 	env['sizeof_long'] = conf.CheckTypeSize('long')
@@ -245,18 +274,24 @@ def conf_test(env):
 	env['uid_t'] = conf.CheckType('uid_t', '#include <sys/types.h>')
 	env['complex_i'] = conf.CheckDeclaration('_Complex_I',
 		'#include <complex.h>')
+
 	# Special FreeBSD library 'libmissing'
 	# added to ports/math/libmissing (2012/12/20).
 	conf.CheckLib('missing', 'acoshl')
-	conf.CheckLib('crypto', 'BN_new')
 	conf.CheckLib('socket', 'socket')
 	conf.CheckLib('nsl', 'gethostbyname')
+
+	if env.ParseConfig('pkg-config --max-version=1.0.2p libcrypto'):
+		env.ParseConfig('pkg-config --cflags --libs libcrypto')
+
 	env['posix_regex'] = conf.CheckFunc('regcomp')
 	if not env['posix_regex']:
 		env['posix_regex'] = conf.CheckLib(['regex', 'gnuregex'],
 			'regcomp')
+
 	if not conf.CheckFunc('dlopen'):
 		conf.CheckLib('dl', 'dlopen')
+
 	if libtecla:
 		env['tecla'] = conf.CheckLib('tecla', None)
 		if not env['tecla']:
@@ -266,6 +301,7 @@ def conf_test(env):
 			env['tecla'] = conf.CheckLib('tecla', None) 
 	else:
 		env['tecla'] = False
+
 	conf.CheckLib('m', 'main')
 	conf.CheckLib('c', 'main')
 	conf.Finish()
@@ -300,25 +336,34 @@ def src_conf_test(env):
 		custom_tests = { 'CheckMember' : CheckMember },
 		config_h = build_dir + '/src-config.h',
 		clean = False, help = False)
+
 	env.AddMethod(CheckMember)
+
 	if env['posix_regex']:
 		src_conf_h.Define('HAVE_POSIX_REGEX', 1)
+
 	if env['tecla']:
 		src_conf_h.Define('HAVE_LIBTECLA', 1)
+
 	src_conf_h.Define('SIZEOF_VOID_P', env['sizeof_void_p'])
+
 	for m in ['tm_gmtoff', 'tm_zone']:
 		src_conf_h.CheckMember(src_conf_h, 'struct tm', m,
 			'#include <time.h>')
+
 	for m in ['d_ino', 'd_fileno', 'd_namlen']:
 		src_conf_h.CheckMember(src_conf_h, 'struct dirent', m,
 			'#include <dirent.h>')
+
 	src_conf_h.CheckMember(src_conf_h, 'struct sockaddr_un', 'sun_len',
 		'#include <sys/un.h>')
 	src_conf_h.CheckType('struct sockaddr_un', '#include <sys/un.h>')
 	src_conf_h.CheckType('struct tms', '#include <sys/times.h>')
 	src_conf_h.CheckType('sig_t', '#include <signal.h>')
+
 	for d in ['isinf', 'isnan']:
 		src_conf_h.CheckDeclaration(d, '#include <math.h>')
+
 	if not src_conf_h.TryCompile("""
 	#include <sys/types.h>
 	#include <time.h>
@@ -333,6 +378,7 @@ def src_conf_test(env):
 	}
 	""", '.c'):
 		src_conf_h.Define('TM_IN_SYS_TIME', 1)
+
 	if src_conf_h.TryCompile("""
 	#include <sys/types.h>
 	#include <signal.h>
@@ -385,6 +431,7 @@ def src_conf_test(env):
 		src_conf_h.Define('_POSIX_PTHREAD_SEMANTICS', 1,
 			sc_h['posix_pthread'])
 		src_conf_h.Define('_TANDEM_SOURCE', 1, sc_h['tandem_source'])
+
 	for h in ['arpa/inet.h',
 		'dirent.h',
 		'dlfcn.h',
@@ -407,6 +454,7 @@ def src_conf_test(env):
 		'sys/wait.h',
 		'time.h']:
 		src_conf_h.CheckCHeader(h)
+
 	# Minix seems to lack asinh(3), acosh(3), atanh(3)
 	for f in ['access',
 		'acosh',
@@ -471,8 +519,10 @@ def src_conf_test(env):
 		'wait',
 		'waitpid']:
 		src_conf_h.CheckFunc(f)
+
 	if env['dbm']:
 		src_conf_h.Define('HAVE_DBM', 1)
+
 	src_conf_h.Define('fth', 1)
 	e = src_conf_h.Finish()
 	if e:
@@ -490,18 +540,23 @@ def fth_conf_test(env):
 	fth_conf_h.Define('FTH_PACKAGE_TARNAME', '"' + env['NAME'] + '"')
 	fth_conf_h.Define('FTH_PACKAGE_VERSION', '"' + env['VERSION'] + '"')
 	fth_conf_h.Define('FTH_SIZEOF_LONG', env['sizeof_long'])
+
 	if env['sizeof_long_long']:
 		fth_conf_h.Define('FTH_SIZEOF_LONG_LONG',
 			env['sizeof_long_long'])
 		fth_conf_h.Define('HAVE_LONG_LONG', 1)
+
 	fth_conf_h.Define('FTH_ALIGNOF_VOID_P', env['sizeof_void_p'])
 	fth_conf_h.Define('FTH_SIZEOF_VOID_P', env['sizeof_void_p'])
+
 	if not shared:
 		fth_conf_h.Define('FTH_STATIC', 1)
+
 	fth_conf_h.Define('FTH_TARGET', '"' + env['HOST_TRIPLE'] + '"')
 	fth_conf_h.Define('FTH_TARGET_CPU', '"' + arch + '"')
 	fth_conf_h.Define('FTH_TARGET_OS', '"' + sys.platform + '"')
 	fth_conf_h.Define('FTH_TARGET_VENDOR', '"' + vendor + '"')
+
 	if not env['mode_t']:
 		fth_conf_h.Define('mode_t', 'int', sc_h['mode_t'])
 	if not env['size_t']:
@@ -512,6 +567,7 @@ def fth_conf_test(env):
 		fth_conf_h.Define('pid_t', 'int', sc_h['pid_t'])
 	if not env['uid_t']:
 		fth_conf_h.Define('uid_t', 'int', sc_h['uid_t'])
+
 	for fh in ['complex.h',
 		'errno.h',
 		'float.h',
@@ -526,9 +582,11 @@ def fth_conf_test(env):
 		'string.h',
 		'unistd.h']:
 		fth_conf_h.CheckHeader(fh)
+
 	if env['complex_i']:
 		fth_conf_h.Define('HAVE_COMPLEX_I', 1)
 		fth_conf_h.Define('HAVE_1_0_FI', 1)
+
 	for cf in ['cabs',
 		'cabs2',
 		'cacos',
@@ -553,6 +611,7 @@ def fth_conf_test(env):
 		'ctanh',
 		'strncasecmp']:
 		fth_conf_h.CheckFunc(cf)
+
 	e = fth_conf_h.Finish()
 	if e:
 		env = e
@@ -564,22 +623,23 @@ fth_conf_test(env)
 Export('env')
 SConscript('SConscript', variant_dir = build_dir)
 
-print("%20s: %s" % ("host", env.subst("${HOST_TRIPLE}")))
-print("%20s: %s v%s" % ("compiler",
-	env.subst("${CC}"), env.subst("${CCVERSION}")))
-if shared:
-	print("%20s: %s" % ("cc command line", env.subst("${SHCCCOM}")))
-	print("%20s: %s" % ("ld command line", env.subst("${SHLINKCOM}")))
-else:
-	print("%20s: %s" % ("cc command line", env.subst("${CCCOM}")))
-	print("%20s: %s" % ("ld command line", env.subst("${LINKCOM}")))
+if verbose:
+	print("%20s: %s" % ("host", env.subst("${HOST_TRIPLE}")))
+	print("%20s: %s v%s" % ("compiler",
+		env.subst("${CC}"), env.subst("${CCVERSION}")))
+	if shared:
+		print("%20s: %s" % ("cc command", env.subst("${SHCCCOM}")))
+		print("%20s: %s" % ("ld command", env.subst("${SHLINKCOM}")))
+	else:
+		print("%20s: %s" % ("cc command", env.subst("${CCCOM}")))
+		print("%20s: %s" % ("ld command", env.subst("${LINKCOM}")))
 
-print("%20s: %s" % ("prefix", prefix))
-print("%20s: %s" % ("tecla-prefix", tecla_prefix))
-print("%20s: %s" % ("program-prefix", prg_prefix))
-print("%20s: %s" % ("program-suffix", prg_suffix))
-print("%20s: %s" % ("libtecla", libtecla))
-print("%20s: %s" % ("shared", shared))
-print("%20s: %s" % ("warnings", warnings))
+	print("%20s: %s" % ("prefix", prefix))
+	print("%20s: %s" % ("tecla-prefix", tecla_prefix))
+	print("%20s: %s" % ("program-prefix", prg_prefix))
+	print("%20s: %s" % ("program-suffix", prg_suffix))
+	print("%20s: %s" % ("libtecla", libtecla))
+	print("%20s: %s" % ("shared", shared))
+	print("%20s: %s" % ("warnings", warnings))
 
 # SConstruct ends here

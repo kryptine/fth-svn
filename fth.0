@@ -76,6 +76,14 @@ DDEESSCCRRIIPPTTIIOONN
      --vv   Set global variable *fth-verbose* to #t (default).
 
    FFoorrtthh vvaarriiaabblleess
+     *0*  Entire current input line, read-only.
+     *1* ... *9*
+          Corresponding single element of *farray*, read-only.
+     .*0*
+          Print entire current input line.
+     .*1* ... .*9*
+          Print corresponding single element of *farray* with *ofs* attached,
+          normally a single space.
      *argc*
           Number of arguments in *argv*.
      *argv*
@@ -112,14 +120,16 @@ DDEESSCCRRIIPPTTIIOONN
           Array of already loaded files.
      *nr*
           Input record number over all files.
+     *ofs*
+          Output field separator, default one space.
      *re*
           Array with last regexp match.
      *re-syntax-options*
           Regexp syntax option, default REG_EXTENDED.
      *re0*
-          Regexp last entire match.
+          Last entire match of regexp search, read-only.
      *re1* ... *re9*
-          Regexp last subexpression matches.
+          Last subexpression match of regexp search, read-only.
      optarg
           Getopt variable with current option argument string, default #f.
      opterr
@@ -3291,6 +3301,12 @@ EEXXAAMMPPLLEESS
                           *line* \
                         then' config.h
 
+     Print name and login time from the who command:
+           who | fth -ane '.*1* .*5* cr'
+
+     The same with output file separator set to " == ":
+           who | fth -ane '" == " to *ofs* .*1* .*5* cr'
+
      Stand-alone executable Forth scripts have a first line of at least
            #! /usr/local/bin/fth -s
      but may have more options; adjust the path to the interpreter.  Note the
@@ -3409,4 +3425,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 8.99.12                    2018/01/26                    NetBSD 8.99.12
+NetBSD 8.99.32                    2019/01/30                    NetBSD 8.99.32

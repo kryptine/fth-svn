@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	2.1 1/2/18
+ * @(#)io.c	2.2 1/29/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1723,7 +1723,7 @@ socket_unlink(const char *host)
 	char           *host_del;
 	int 		old_errno;
 
-	host_del = fth_format("%.*s", fth_strlen(host) - 1, host);
+	host_del = fth_format("%.*s", (int) fth_strlen(host) - 1, host);
 	old_errno = errno;
 	unlink(host_del);
 	errno = old_errno;

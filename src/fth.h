@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	2.1 1/2/18
+ * @(#)fth.h	2.2 1/29/19
  */
 
 #if !defined(_FTH_H_)
@@ -864,19 +864,20 @@ in_cb		fth_set_read_cb(in_cb);
 FTH		fth_port_to_string(FTH);
 
 /* === printf.c === */
-int		fth_asprintf(char **, const char *,...);
-int		fth_debug(const char *,...);
-int		fth_error(const char *);
-int		fth_errorf(const char *,...);
+int 		fth_asprintf(char **, const char *,...);
+int 		fth_debug (const char *,...);
+int 		fth_errorf(const char *,...);
 char           *fth_format(const char *,...);
-int		fth_fprintf(FILE *, const char *,...);
-int		fth_ioprintf(FTH, const char *,...);
-int		fth_port_printf(FTH, const char *,...);
+int 		fth_fprintf(FILE *, const char *,...);
+int 		fth_ioprintf(FTH, const char *,...);
+int 		fth_port_printf(FTH, const char *,...);
+int 		fth_printf(const char *,...);
+int 		fth_snprintf(char *, size_t, const char *,...);
+int 		fth_sprintf(char *, const char *,...);
+int 		fth_warning(const char *,...);
 int		fth_port_vprintf(FTH, const char *, va_list);
 int		fth_print(const char *);
-int		fth_printf(const char *,...);
-int		fth_snprintf(char *, size_t, const char *,...);
-int		fth_sprintf(char *, const char *,...);
+int		fth_error(const char *);
 FTH		fth_string_vformat(const char *, FTH);
 int		fth_vasprintf(char **, const char *, va_list);
 int		fth_verrorf(const char *, va_list);
@@ -886,7 +887,6 @@ int		fth_vioprintf(FTH, const char *, va_list);
 int		fth_vprintf(const char *, va_list);
 int		fth_vsnprintf(char *, size_t, const char *, va_list);
 int		fth_vsprintf(char *, const char *, va_list);
-int		fth_warning(const char *,...);
 
 /* === proc.c === */
 int		fth_word_defined_p(FTH);

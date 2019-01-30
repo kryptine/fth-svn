@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.191 1/26/18
+dnl @(#)configure.ac	1.192 1/30/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -125,16 +125,17 @@ AC_GNU_SOURCE
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
-AC_CHECK_TOOL([AR], [ar], [:])
 AC_CHECK_TOOL([MANDOC], [mandoc], [:])
+AC_PATH_PROGS([AR], [llvm-ar ar], [:])
+AC_PATH_PROGS([RANLIB], [llvm-ranlib ranlib], [:])
+AC_PATH_PROGS([PKGCONF], [pkgconf pkg-config], [:])
 
 dnl
 dnl Check for header files.
 dnl
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h float.h])
-AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h openssl/bn.h openssl/err.h])
+AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h])
 AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
 # Special FreeBSD library 'libmissing'
@@ -195,7 +196,6 @@ dnl Check for libraries.
 dnl
 AC_CHECK_LIB([c], [main])
 AC_CHECK_LIB([m], [main])
-AC_CHECK_LIB([crypto], [BN_new])
 # Special FreeBSD library 'libmissing'
 # added to ports/math/libmissing (2012/12/20).
 AC_CHECK_LIB([missing], [acoshl])
@@ -206,6 +206,12 @@ AC_SEARCH_LIBS([dlopen], [c dl], [AC_DEFINE([HAVE_DLOPEN], [1],
 AC_SEARCH_LIBS([regcomp], [c regex gnuregex], [AC_DEFINE([HAVE_POSIX_REGEX],
     [1], [Define to 1 if you have POSIX regex.])])
 AC_CHECK_DECLS([isnan, isinf], [], [], [@%:@include <math.h>])
+
+`${PKGCONF} --max-version=1.0.2p libcrypto`
+if test $? = 0; then
+	AC_CHECK_HEADERS([openssl/bn.h openssl/err.h])
+	AC_CHECK_LIB([crypto], [BN_new])
+fi
 
 dnl
 dnl Check for functions.	      
@@ -289,15 +295,11 @@ AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
     [SO_DBM_LIB="dbm.so"
      AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])
 
-CWARNFLAGS="-ansi -std=iso9899:1999"
+CWARNFLAGS="-ansi -std=c99"
 CWARNFLAGS="${CWARNFLAGS} -Wall -Wextra -Wunused"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-declarations"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-prototypes"
 CWARNFLAGS="${CWARNFLAGS} -Wundef"
-#
-# CWARNFLAGS="${CWARNFLAGS} -Wconversion"
-# clang: okay
-# gcc42: doesn't know char and bool
 #
 # CWARNFLAGS="${CWARNFLAGS} -pedantic"
 # Pedantic is problematic because of
