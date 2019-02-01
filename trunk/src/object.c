@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)object.c	2.4 1/16/18
+ * @(#)object.c	2.6 2/1/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1624,14 +1624,16 @@ xmobj_p(FTH obj)
 
 	len = fth_list_length(obj);
 
-	/*
-	 * Xen Object (2|5) '( 'Name pointer ) or '( 'Name pointer bool zero
-	 * zero )
+	/*-
+	 * Xen Object (2|5)
+	 *	'( 'Name pointer )
+	 * or
+	 *	'( 'Name pointer bool zero zero )
 	 */
 	if ((len == 2 || len == 5) && fth_unsigned_p(fth_array_ref(obj, 1L)))
 		return (X_SYMBOL_P(fth_array_ref(obj, 0L)));
 
-	/*
+	/*-
 	 * Xen Object (3) '( 'Name pointer object )
 	 */
 	if (len == 3 &&
@@ -1639,7 +1641,7 @@ xmobj_p(FTH obj)
 		fth_instance_p(fth_array_ref(obj, 2L))))
 		return (X_SYMBOL_P(fth_array_ref(obj, 0L)));
 
-	/*
+	/*-
 	 * XEvent '( 'XXxxEvent pointer object 'XEvent )
 	 */
 	if (len == 4 && X_SYMBOL_P(fth_array_ref(obj, 3L)))
@@ -1668,41 +1670,60 @@ See snd(1) for more information."
 static FTH
 xmobj_to_string(FTH obj)
 {
-	if (xmobj_p(obj)) {
-		ficlInteger 	len;
-		char           *symbol;
+	ficlInteger 	len;
+	char           *sym;
+	void           *p;
+	FTH 		fs;
 
-		len = fth_array_length(obj);
-		symbol = ((len > 0) ?
-		    fth_symbol_ref(fth_array_ref(obj, 0L)) : NULL);
+	if (!xmobj_p(obj))
+		return (FTH_FALSE);
 
-		switch (len) {
-		case 2:
-			/* #( symbol addr ) */
-			return (fth_make_string_format("#( %s %p )",
-				symbol, (void *) fth_array_ref(obj, 1L)));
-			break;
-		case 3:
-			/* #( symbol addr xm-obj-from-addr ) */
-			if (fth_instance_p(fth_array_ref(obj, 2L)))
-				return (fth_make_string_format("#( XmObj %s )",
-					symbol));
-			break;
-		case 4:
-			/* #( type addr xm-obj-from-addr symbol ) */
-			if (fth_instance_p(fth_array_ref(obj, 2L)))
-				return (fth_make_string_format("#( XEvent %S )",
-					fth_array_ref(obj, 0L)));
-			break;
-		case 5:
-		default:
-			/* #( symbol code context prop-atom prot-atom ) */
-			return (fth_make_string_format("#( Callback %s )",
-				fth_symbol_ref(fth_array_ref(obj, 3L))));
-			break;
+	len = fth_array_length(obj);
+
+	if (len < 2)
+		return (FTH_FALSE);
+
+	sym = fth_symbol_ref(fth_array_ref(obj, 0L));
+	p = (void *) fth_array_ref(obj, 1L);
+	fs = fth_make_string("#( ");
+
+	switch (len) {
+	case 2:
+		/* #( symbol addr ) */
+		fth_string_scat(fs, sym);
+		fth_string_sformat(fs, " %p", p);
+		break;
+	case 3:
+		/* #( symbol addr xm-obj-from-addr ) */
+		if (fth_instance_p(fth_array_ref(obj, 2L))) {
+			fth_string_scat(fs, "XmObj ");
+			fth_string_scat(fs, sym);
+		} else {
+			fth_string_scat(fs, sym);
+			fth_string_sformat(fs, " %p", p);
 		}
+		break;
+	case 4:
+		/* #( type addr xm-obj-from-addr symbol ) */
+		if (fth_instance_p(fth_array_ref(obj, 2L))) {
+			fth_string_scat(fs, "XEvent ");
+			fth_string_sformat(fs, "%S", fth_array_ref(obj, 0L));
+
+		} else {
+			fth_string_scat(fs, sym);
+			fth_string_sformat(fs, " %p", p);
+		}
+		break;
+	case 5:
+	default:
+		/* #( symbol code context prop-atom prot-atom ) */
+		fth_string_scat(fs, "Callback ");
+		fth_string_scat(fs, fth_symbol_ref(fth_array_ref(obj, 3L)));
+		break;
 	}
-	return (FTH_FALSE);
+
+	fth_string_scat(fs, " )");
+	return (fs);
 }
 
 /* === Object Functions === */
@@ -1743,6 +1764,7 @@ Return object id of OBJ, a uniq number.\n\
 See also hash-id."
 	if (IMMEDIATE_P(obj))
 		return (INT_TO_FIX(obj));
+
 	return ((FTH) ((ficlInteger) obj | FIXNUM_FLAG));
 }
 
@@ -1791,6 +1813,7 @@ fth_object_name(FTH obj)
 	}
 	if (OBJECT_TYPE_P(obj))
 		return ("object-type");
+
 	return ("addr");
 }
 
@@ -1834,18 +1857,16 @@ print_object(FTH obj, fth_inspect_type_t type)
 	fs = FTH_FALSE;
 
 	if (obj == 0 || (IMMEDIATE_P(obj) && FIXNUM_P(obj))) {
-		if (type == OBJ_INSPECT)
-			fs = fth_make_string_format("%s: %ld",
-			    fth_object_name(obj),
-			    FIX_TO_INT(obj));
-		else
-			fs = fth_make_string_format("%ld",
-			    FIX_TO_INT(obj));
+		if (type == OBJ_INSPECT) {
+			fs = fth_make_string(fth_object_name(obj));
+			fth_string_sformat(fs, ": %ld", FIX_TO_INT(obj));
+		} else
+			fs = fth_make_string_format("%ld", FIX_TO_INT(obj));
 	} else if (INSTANCE_P(obj)) {
 		/* xm.c */
 		if (xmobj_p(obj))
 			fs = xmobj_to_string(obj);
-		else
+		else {
 			switch (type) {
 			case OBJ_INSPECT:
 				if (FTH_INSPECT_P(obj))
@@ -1854,10 +1875,6 @@ print_object(FTH obj, fth_inspect_type_t type)
 					fs = FTH_TO_STRING(obj);
 				else if (FTH_DUMP_P(obj))
 					fs = FTH_DUMP(obj);
-				else
-					fs = fth_make_string_format("%s: %p",
-					    FTH_INSTANCE_NAME(obj),
-					    (void *) obj);
 
 				if (!fth_hook_empty_p(
 					FTH_INSTANCE_DEBUG_HOOK(obj)))
@@ -1872,10 +1889,6 @@ print_object(FTH obj, fth_inspect_type_t type)
 					fs = FTH_INSPECT(obj);
 				else if (FTH_DUMP_P(obj))
 					fs = FTH_DUMP(obj);
-				else
-					fs = fth_make_string_format("#<%s:%p>",
-					    FTH_INSTANCE_NAME(obj),
-					    (void *) obj);
 				break;
 			case OBJ_DUMP:
 			default:
@@ -1885,17 +1898,23 @@ print_object(FTH obj, fth_inspect_type_t type)
 					fs = FTH_TO_STRING(obj);
 				else if (FTH_INSPECT_P(obj))
 					fs = FTH_INSPECT(obj);
-				else
-					fs = fth_make_string_format("%s:%p",
-					    FTH_INSTANCE_NAME(obj),
-					    (void *) obj);
 				break;
 			}
+
+			if (FTH_FALSE_P(fs)) {
+				char           *s;
+				void           *p;
+
+				s = FTH_INSTANCE_NAME(obj);
+				p = (void *) obj;
+				fs = fth_make_string_format("%s:%p", s, p);
+			}
+		}
 	} else if (FICL_WORD_DEFINED_P(obj))
 		switch (type) {
 		case OBJ_INSPECT:
-			fs = fth_make_string_format("%s: %S",
-			    fth_object_name(obj), fth_word_inspect(obj));
+			fs = fth_make_string(fth_object_name(obj));
+			fth_string_sformat(fs, ": %S", fth_word_inspect(obj));
 			break;
 		case OBJ_TO_STRING:
 			fs = fth_word_to_string(obj);
@@ -1908,12 +1927,12 @@ print_object(FTH obj, fth_inspect_type_t type)
 	else if (OBJECT_TYPE_P(obj))
 		switch (type) {
 		case OBJ_INSPECT:
-			fs = fth_make_string_format("%s: %s",
-			    fth_object_name(obj), FTH_OBJECT_NAME(obj));
+			fs = fth_make_string(fth_object_name(obj));
+			fth_string_scat(fs, ": ");
+			fth_string_scat(fs, FTH_OBJECT_NAME(obj));
 			break;
 		default:
-			fs = fth_make_string_format("%s",
-			    FTH_OBJECT_NAME(obj));
+			fs = fth_make_string(FTH_OBJECT_NAME(obj));
 			break;
 		}
 
@@ -1922,9 +1941,8 @@ print_object(FTH obj, fth_inspect_type_t type)
 
 	if (type == OBJ_INSPECT) {
 		if (fth_string_length(fs) < 3 ||
-		    (FTH_TO_CHAR(fth_string_char_ref(fs, 0L)) !=
-			(int) '#' && FTH_TO_CHAR(fth_string_char_ref(fs, 1L)) !=
-			(int) '<'))
+		    (FTH_TO_CHAR(fth_string_char_ref(fs, 0L)) != (int) '#' &&
+			FTH_TO_CHAR(fth_string_char_ref(fs, 1L)) != (int) '<'))
 			fs = fth_make_string_format("#<%S>", fs);
 	}
 	return (fs);
@@ -1973,6 +1991,7 @@ fth_object_to_string_2(FTH obj)
 {
 	if (FTH_STRING_P(obj))
 		return (fth_make_string_format("\"%S\"", obj));
+
 	return (print_object(obj, OBJ_TO_STRING));
 }
 
@@ -2091,8 +2110,8 @@ an array for example, return value at INDEX.  \
 If OBJ is of a type which consists of only one element, \
 a fixnum for example, ignore INDEX and return OBJ itself.\n\
 See also object-set!."
-	FTH 		obj;
 	ficlInteger 	idx;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2130,8 +2149,9 @@ an array for example, set VALUE at position INDEX.  \
 If OBJ is of a type which consists of only one element, \
 a fixnum for example, do nothing.\n\
 See also object-ref."
-	FTH 		obj, val;
 	ficlInteger 	idx;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2151,8 +2171,10 @@ Add VALUE to value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set-!, object-set*! and object-set/!."
-	FTH 		obj, value, res;
 	ficlInteger 	idx;
+	FTH 		obj;
+	FTH 		value;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2173,8 +2195,10 @@ Subtract VALUE from value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set+!, object-set*! and object-set/!."
-	FTH 		obj, value, res;
 	ficlInteger 	idx;
+	FTH 		obj;
+	FTH 		value;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2195,8 +2219,10 @@ Multiply VALUE with value at INDEX of OBJ.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatioi, \
 or ficlComplex).\n\
 See also object-set+!, object-set-! and object-set/!."
-	FTH 		obj, value, res;
 	ficlInteger 	idx;
+	FTH 		obj;
+	FTH 		value;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2217,8 +2243,10 @@ Divide value at INDEX of OBJ by VALUE.  \
 Value may be any number (ficlInteger, ficlFloat, ficlRatio, \
 or ficlComplex).\n\
 See also object-set+!, object-set-! and object-set*!."
-	FTH 		obj, value, res;
 	ficlInteger 	idx;
+	FTH 		obj;
+	FTH 		value;
+	FTH 		res;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	value = fth_pop_ficl_cell(vm);
@@ -2255,8 +2283,9 @@ ficl_object_equal_p(ficlVm *vm)
 a1 a2 object-equal? => #t\n\
 a1 h1 object-equal? => #f\n\
 Return #t if OBJ1 and OBJ2 have equal content, otherwise #f."
-	FTH 		obj1, obj2;
 	int		flag;
+	FTH 		obj1;
+	FTH 		obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -2307,7 +2336,8 @@ The next two examples require each 1 argument:\n\
 Forth: <'> enved-ref fth-enved 1 set-object-apply\n\
 See examples/site-lib/enved.fs for Forth examples \
 and eg. src/array.c for C examples."
-	FTH 		prc, r;
+	FTH 		prc;
+	FTH 		r;
 
 	if (!INSTANCE_P(obj))
 		return (FTH_FALSE);
@@ -2377,9 +2407,10 @@ int
 fth_object_member_p(FTH obj, FTH key)
 {
 	ficlInteger 	i;
-	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
+		FTH 		val;
+
 		val = fth_object_value_ref(obj, i);
 
 		if (val == key || fth_object_equal_p(val, key))
@@ -2399,7 +2430,8 @@ ficl_object_member_p(ficlVm *vm)
 \"foo\" <char> f object-member? => #t\n\
 Return #t if KEY is present in OBJ, otherwise #f.\n\
 See also object-find and object-index."
-	FTH 		key, obj;
+	FTH 		key;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	key = fth_pop_ficl_cell(vm);
@@ -2418,9 +2450,10 @@ fth_object_find(FTH obj, FTH key)
 Search for KEY in OBJ and return corresponding value or #f if not found.\n\
 See also object-member? and object-index."
 	ficlInteger 	i;
-	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
+		FTH 		val;
+
 		val = fth_object_value_ref(obj, i);
 
 		if (val == key || fth_object_equal_p(val, key))
@@ -2441,9 +2474,10 @@ fth_object_index(FTH obj, FTH key)
 Search for KEY in OBJ and return index or -1 if not found.\n\
 See also object-member? and object-find."
 	ficlInteger 	i;
-	FTH 		val;
 
 	for (i = 0; i < fth_object_length(obj); i++) {
+		FTH 		val;
+
 		val = fth_object_value_ref(obj, i);
 
 		if (val == key || fth_object_equal_p(val, key))
@@ -2489,6 +2523,7 @@ fth_cycle_pos_ref(FTH obj)
 {
 	if (INSTANCE_P(obj))
 		return (FTH_INSTANCE_REF(obj)->cycle);
+
 	return (0);
 }
 
@@ -2513,6 +2548,7 @@ fth_cycle_pos_0(FTH obj)
 {
 	if (INSTANCE_P(obj))
 		return (FTH_INSTANCE_REF(obj)->cycle = 0);
+
 	return (0);
 }
 
@@ -2578,7 +2614,8 @@ Store VALUE at current cycle-index of OBJ and increment cycle-index.  \
 Cycle through content of OBJ from first to last entry \
 and start again at the beginning etc.\n\
 See also cycle-ref."
-	FTH 		obj, val;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2618,8 +2655,8 @@ a cycle-ref => 3\n\
 a cycle-start@ => 0\n\
 Set cycle-index of OBJ to INDEX.\n\
 See also cycle-start@ and cycle-start0."
-	FTH 		obj;
 	ficlInteger 	idx;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	idx = ficlStackPopInteger(vm->dataStack);
@@ -2669,7 +2706,8 @@ a1 .$ => #( 20 1 2 )\n\
 Store VALUE to first element of OBJ.  \
 Raise an OUT-OF-RANGE exception if length of OBJ is less than 1.\n\
 See also second-set!, third-set! and last-set!."
-	FTH 		obj, val;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2702,7 +2740,8 @@ a1 .$ => #( 0 20 2 )\n\
 Store VALUE to second entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 2.\n\
 See also first-set!, third-set! and last-set!."
-	FTH 		obj, val;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2735,7 +2774,8 @@ a1 .$ => #( 0 1 20 )\n\
 Store VALUE to third entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 3.\n\
 See also first-set!, second-set! and last-set!."
-	FTH 		obj, val;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2768,7 +2808,8 @@ a1 .$ => #( 0 1 20 )\n\
 Store VALUE to last entry of OBJ.  \
 Raise OUT-OF-RANGE exception if length of OBJ is less than 1.\n\
 See also first-set!, second-set! and third-set!."
-	FTH 		obj, val;
+	FTH 		obj;
+	FTH 		val;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	val = fth_pop_ficl_cell(vm);
@@ -2800,13 +2841,14 @@ all of them will be called feeded with the new string previously returned."
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
 
-	if (INSTANCE_P(obj)) {
-		if (!FTH_HOOK_P(FTH_INSTANCE_DEBUG_HOOK(obj)))
-			FTH_INSTANCE_DEBUG_HOOK(obj) = fth_make_simple_hook(2);
-
-		ficlStackPushFTH(vm->dataStack, FTH_INSTANCE_DEBUG_HOOK(obj));
-	} else
+	if (!INSTANCE_P(obj)) {
 		ficlStackPushBoolean(vm->dataStack, 0);
+		return;
+	}
+	if (!FTH_HOOK_P(FTH_INSTANCE_DEBUG_HOOK(obj)))
+		FTH_INSTANCE_DEBUG_HOOK(obj) = fth_make_simple_hook(2);
+
+	ficlStackPushFTH(vm->dataStack, FTH_INSTANCE_DEBUG_HOOK(obj));
 }
 
 /* === Predicates === */
@@ -2901,6 +2943,7 @@ ficl_to_fth(FTH obj)
 	if (obj != 0 &&
 	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE0_P(obj)))
 		return (obj);
+
 	return (fth_make_int((ficlInteger) obj));
 }
 
@@ -2913,11 +2956,7 @@ fth_pop_ficl_cell(ficlVm *vm)
 	stack = vm->dataStack;
 	obj = STACK_FTH_REF(stack);
 	stack->top--;
-
-	if (obj != 0 &&
-	    (FICL_WORD_DICT_P(obj) || OBJECT_TYPE_P(obj) || INSTANCE0_P(obj)))
-		return (obj);
-	return (fth_make_int((ficlInteger) obj));
+	return (ficl_to_fth(obj));
 }
 
 FTH
@@ -2925,6 +2964,7 @@ fth_to_ficl(FTH obj)
 {
 	if (FTH_FIXNUM_P(obj))
 		return ((FTH) FIX_TO_INT(obj));
+
 	return (obj);
 }
 
