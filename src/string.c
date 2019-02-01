@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)string.c	2.1 1/2/18
+ * @(#)string.c	2.2 1/31/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1330,7 +1330,7 @@ fth_string_unshift(FTH fs, FTH add)
 s1 $space string-unshift drop\n\
 s1 10     string-unshift drop\n\
 s1 => \"10 foo\"\n\
-Prepends string representation of VALUE to STRING \
+Prepend string representation of VALUE to STRING \
 and return changed string object.\n\
 See also string-push, string-pop, string-shift."
 	ficlInteger 	l , new_top, new_len, new_buf_len, al;
@@ -2535,9 +2535,7 @@ ficl_make_string_im(ficlVm *vm)
 #define h_make_string_im "( space<ccc>\" -- str )  string (parse word)\n\
 $\" foo\" => \"foo\"\n\
 Parse string CCC delimited by '\"' at compile time and \
-at interpret time return parsed string.  \
-Note the space after the initial $\".  \
-It exist to satisfy fontifying in Emacs forth-mode."
+at interpret time return parsed string."
 	char           *buf;
 	FTH 		fs;
 

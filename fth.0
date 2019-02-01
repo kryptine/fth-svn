@@ -251,9 +251,7 @@ DDEESSCCRRIIPPTTIIOONN
           list.  If not set, use $FTH_HISTORY_LENGTH or 100.  Default is
           undef.
      *savehist*
-          If true, save at most *history*, $FTH_HISTORY_LENGTH, or 100 history
-          events to *history*, $FTH_HISTORY, or _~_/_._f_t_h_-_h_i_s_t_o_r_y, if false,
-          don't save history events.  Default is #t.
+          If true, save history events, otherwise not.  Default is #t.
      *promptstyle*
           If true, enable special formatting directives within the prompt, see
           gl_prompt_style(3).  Default is #f.
@@ -2712,7 +2710,7 @@ DDEESSCCRRIIPPTTIIOONN
      llaatteessttxxtt ( -- xt )
           Return latest defined xt.
      llooccaall--vvaarriiaabblleess ( -- vars )
-          Returns a hash of local variable name-value pairs up to the location
+          Return a hash of local variable name-value pairs up to the location
           in definition.  This word is immediate and compile only and can only
           be used in word definitions.
                 : word-with-locals { foo -- }
@@ -2875,9 +2873,7 @@ DDEESSCCRRIIPPTTIIOONN
                 /a*/ "aaaaab" 2 4 re-search => 2
      rree// ( space<ccc>/ -- reg )
           Parse regexp _c_c_c delimited by `/' at compile time and at interpret
-          time return parsed regexp.  Note the space after the initial rree//.
-          It exist to satisfy fontifying in Emacs forth-mode.  See _/ for an
-          alternative.
+          time return parsed regexp.  See _/ for an alternative.
                 re/ (B|b)+/ => /(B|b)+/
      rree== ( reg str -- len|#f ) alias for _r_e_g_e_x_p_-_m_a_t_c_h
      rreeggeexxpp--mmaattcchh ( reg str -- len|#f )
@@ -2924,9 +2920,7 @@ DDEESSCCRRIIPPTTIIOONN
           Return empty string object ("").
      $$"" ( space<ccc>" -- str )
           Parse string _c_c_c delimited by `"' at compile time and at interpret
-          time return parsed string.  Note the space after the initial $$"".  It
-          exist to satisfy fontifying in Emacs forth-mode.  See _" for an
-          alternative.
+          time return parsed string.  See _" for an alternative.
                 $" pumpkin" => "pumpkin"
      $$++ ( str1 str2 -- str3 ) alias for _s_t_r_i_n_g_-_a_p_p_e_n_d
      $$>>ssttrriinngg ( addr len -- str )
@@ -3425,4 +3419,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 8.99.32                    2019/01/30                    NetBSD 8.99.32
+NetBSD 8.99.32                    2019/02/01                    NetBSD 8.99.32

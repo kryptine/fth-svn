@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.1 1/2/18
+ * @(#)regexp.c	2.2 1/31/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -730,9 +730,7 @@ ficl_make_regexp_im(ficlVm *vm)
 #define h_make_regexp_im "( space<ccc>/ -- reg )  regexp (parse word)\n\
 re/ ^foo$/ => /^foo$/\n\
 Parse regexp CCC delimited by '/' at compile time \
-and at interpret time return parsed regexp.  \
-Note the space after the initial RE/.  \
-It exist to satisfy fontifying in Emacs forth-mode."
+and at interpret time return parsed regexp."
 	char           *buf;
 	FTH 		rs;
 
@@ -767,7 +765,6 @@ See regex(3) for more information."
  * functions.
  * On the C side we have fth_regexp_var_ref().
  */
-
 static void
 ficl_re(ficlVm *vm)
 {

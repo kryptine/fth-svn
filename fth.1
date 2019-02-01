@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.147 1/30/19
+.\" @(#)fth.1	1.148 2/1/19
 .\"
-.Dd 2019/01/30
+.Dd 2019/02/01
 .Dt FTH 1
 .Os
 .\"
@@ -681,14 +681,8 @@ or 100.  Default is undef.
 .\" *savehist*
 .\"
 .It Ev *savehist*
-If true, save at most *history*,
-.Ev $FTH_HISTORY_LENGTH ,
-or 100 history events to
-.Ev *history* ,
-.Ev $FTH_HISTORY ,
-or
-.Pa ~/.fth-history ,
-if false, don't save history events.  Default is #t.
+If true, save history events, otherwise not.
+Default is #t.
 .\"
 .\" *promptstyle*
 .\"
@@ -6907,9 +6901,9 @@ Return latest defined xt.
 .\" local-variables
 .\"
 .It Cm local-variables No (\ -- vars\ )
-Returns a hash of local variable name-value pairs up to the location in
-definition.  This word is immediate and compile only and can only be
-used in word definitions.
+Return a hash of local variable name-value pairs up to the location
+in definition.  This word is immediate and compile only and can
+only be used in word definitions.
 .Bd -literal -offset indent -compact
 : word-with-locals { foo -- }
 	10 { bar }
@@ -7284,9 +7278,7 @@ Return index of match or -1 for no match.
 Parse regexp
 .Ar ccc
 delimited by \(oq/\(cq at compile time and at interpret time return
-parsed regexp.  Note the space after the initial
-.Cm re/ .
-It exist to satisfy fontifying in Emacs forth-mode.  See
+parsed regexp.  See
 .Sx /
 for an alternative.
 .Bd -literal -offset indent -compact
@@ -7399,9 +7391,7 @@ Return empty string object (\(dq\(dq).
 Parse string
 .Ar ccc
 delimited by \(oq\(dq\(cq at compile time and at interpret time return
-parsed string.  Note the space after the initial
-.Cm $\(dq .
-It exist to satisfy fontifying in Emacs forth-mode.  See
+parsed string.  See
 .Sx \(dq
 for an alternative.
 .Bd -literal -offset indent -compact
