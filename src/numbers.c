@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	2.6 1/30/19
+ * @(#)numbers.c	2.7 2/1/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -967,12 +967,12 @@ ficlComplex, ficlBignum, ficlRatio), otherwise #f."
 static void
 ficl_fixnum_p(ficlVm *vm)
 {
-#define h_fixnum_p "( obj -- f )  test if OBJ is a fixnum\n\
+#define h_fixnum_p "( obj -- f )  test if OBJ is fixnum\n\
 nil fixnum? => #f\n\
 0   fixnum? => #t\n\
 0x3fffffff    fixnum? => #t\n\
 0x3fffffff 1+ fixnum? => #f\n\
-Return #t if OBJ is a fixnum (ficlInteger/ficlUnsigned), otherwise #f."
+Return #t if OBJ is fixnum (ficlInteger/ficlUnsigned), otherwise #f."
 	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -983,12 +983,12 @@ Return #t if OBJ is a fixnum (ficlInteger/ficlUnsigned), otherwise #f."
 static void
 ficl_unsigned_p(ficlVm *vm)
 {
-#define h_unsigned_p "( obj -- f )  test if OBJ is a unsigned integer\n\
+#define h_unsigned_p "( obj -- f )  test if OBJ is unsigned integer\n\
 nil unsigned? => #f\n\
 -1  unsigned? => #f\n\
 0   unsigned? => #t\n\
 0xffffffffffff unsigned? => #t\n\
-Return #t if OBJ is a unsigned integer (ficlUnsigned, \
+Return #t if OBJ is unsigned integer (ficlUnsigned, \
 ficl2Unsigned, ficlBignum), otherwise #f."
 	FTH 		obj;
 	int 		flag;
@@ -1011,11 +1011,11 @@ ficl2Unsigned, ficlBignum), otherwise #f."
 static void
 ficl_llong_p(ficlVm *vm)
 {
-#define h_llong_p "( obj -- f )  test if OBJ is an long-long integer\n\
+#define h_llong_p "( obj -- f )  test if OBJ is long-long integer\n\
 nil long-long? => #f\n\
 -1  long-long? => #f\n\
 -1 make-long-long long-long? => #t\n\
-Return #t if OBJ is an long-long object (ficl2Integer/ficl2Unsigned), \
+Return #t if OBJ is long-long object (ficl2Integer/ficl2Unsigned), \
 otherwise #f."
 	FTH 		obj;
 
@@ -1027,11 +1027,11 @@ otherwise #f."
 static void
 ficl_ullong_p(ficlVm *vm)
 {
-#define h_ullong_p "( obj -- f )  test if OBJ is a unsigned long-long integer\n\
+#define h_ullong_p "( obj -- f )  test if OBJ is unsigned long-long integer\n\
 nil ulong-long? => #f\n\
 1   ulong-long? => #f\n\
 1 make-ulong-long ulong-long? => #t\n\
-Return #t if OBJ is a ulong-long object (ficl2Unsigned), otherwise #f."
+Return #t if OBJ is ulong-long object (ficl2Unsigned), otherwise #f."
 	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -2163,31 +2163,38 @@ static char 	numbers_scratch_02[BUFSIZ];
 static FTH
 cp_inspect(FTH self)
 {
-	char           *re, *im;
+	char           *re;
+	char           *im;
 	size_t 		size;
+	FTH		fs;
 
 	re = numbers_scratch;
 	im = numbers_scratch_02;
 	size = sizeof(numbers_scratch);
-	return (fth_make_string_format("%s: real %s, image %s",
-		FTH_INSTANCE_NAME(self),
-		format_double(re, size, FTH_COMPLEX_REAL(self)),
-		format_double(im, size, FTH_COMPLEX_IMAG(self))));
+	fs = fth_make_string_format("%s: ", FTH_INSTANCE_NAME(self));
+	fth_string_scat(fs, "real ");
+	fth_string_scat(fs, format_double(re, size, FTH_COMPLEX_REAL(self)));
+	fth_string_scat(fs, ", image ");
+	fth_string_scat(fs, format_double(im, size, FTH_COMPLEX_IMAG(self)));
+	return (fs);
 }
 
 static FTH
 cp_to_string(FTH self)
 {
-	char           *re, *im;
+	char           *re;
+	char           *im;
 	size_t 		size;
+	FTH		fs;
 
 	re = numbers_scratch;
 	im = numbers_scratch_02;
 	size = sizeof(numbers_scratch);
-	return (fth_make_string_format("%s%s%si",
-		format_double(re, size, FTH_COMPLEX_REAL(self)),
-		FTH_COMPLEX_IMAG(self) >= 0.0 ? "+" : "",
-		format_double(im, size, FTH_COMPLEX_IMAG(self))));
+	fs = fth_make_string(format_double(re, size, FTH_COMPLEX_REAL(self)));
+	fth_string_scat(fs, FTH_COMPLEX_IMAG(self) >= 0.0 ? "+" : "");
+	fth_string_scat(fs, format_double(im, size, FTH_COMPLEX_IMAG(self)));
+	fth_string_scat(fs, "i");
+	return (fs);
 }
 
 static FTH
@@ -2229,8 +2236,8 @@ ficl_creal(ficlVm *vm)
 1+i real-ref => 1.0\n\
 Return the real part of NUMB.\n\
 See also imag-ref."
-	FTH 		obj;
 	ficlFloat 	f;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -3430,59 +3437,60 @@ fth_make_ratio(FTH num, FTH den)
 123 456 make-ratio => 41/152\n\
 355 113 make-ratio => 355/113\n\
 Return a new ratio object with numerator NUM and denumerator DEN."
+	ficlBignum 	m;
+	ficlBignum 	n;
 
 	if (den == FTH_ZERO) {
 		FTH_MATH_ERROR_THROW("denominator 0");
 		/* NOTREACHED */
 		return (FTH_FALSE);
-	} else {
-		ficlBignum 	m, n;
-
-		m = BN_new();
-		BN_CHECKP(m);
-		n = BN_new();
-		BN_CHECKP(n);
-
-		if (FTH_BIGNUM_P(num))
-			BN_CHECKP(BN_copy(m, FTH_BIGNUM_OBJECT(num)));
-		else
-			fth_to_bn(m, num);
-
-		if (FTH_BIGNUM_P(den))
-			BN_CHECKP(BN_copy(n, FTH_BIGNUM_OBJECT(den)));
-		else
-			fth_to_bn(n, den);
-
-		return (make_rational(m, n));
 	}
+	m = BN_new();
+	BN_CHECKP(m);
+	n = BN_new();
+	BN_CHECKP(n);
+
+	if (FTH_BIGNUM_P(num))
+		BN_CHECKP(BN_copy(m, FTH_BIGNUM_OBJECT(num)));
+	else
+		fth_to_bn(m, num);
+
+	if (FTH_BIGNUM_P(den))
+		BN_CHECKP(BN_copy(n, FTH_BIGNUM_OBJECT(den)));
+	else
+		fth_to_bn(n, den);
+
+	return (make_rational(m, n));
 }
 
 FTH
 fth_make_ratio_from_int(ficlInteger num, ficlInteger den)
 {
+	ficlBignum 	m;
+	ficlBignum 	n;
+
 	if (den == 0) {
 		FTH_MATH_ERROR_THROW("denominator 0");
 		/* NOTREACHED */
 		return (FTH_FALSE);
-	} else {
-		ficlBignum 	m, n;
-
-		m = BN_new();
-		BN_CHECKP(m);
-		n = BN_new();
-		BN_CHECKP(n);
-		int_to_bn(m, num);
-		int_to_bn(n, den);
-		return (make_rational(m, n));
 	}
+	m = BN_new();
+	BN_CHECKP(m);
+	n = BN_new();
+	BN_CHECKP(n);
+	int_to_bn(m, num);
+	int_to_bn(n, den);
+	return (make_rational(m, n));
 }
 
 FTH
 fth_make_ratio_from_float(ficlFloat f)
 {
 #if defined(HAVE_FREXP) && defined(HAVE_LDEXP)
-	ficlBignum 	m, n;
 	int 		exp;
+	BIGNUM 		tmp;
+	ficlBignum 	m;
+	ficlBignum 	n;
 
 	m = BN_new();
 	BN_CHECKP(m);
@@ -3495,15 +3503,11 @@ fth_make_ratio_from_float(ficlFloat f)
 	BN_CHECK(BN_one(n));
 
 	if (exp < 0) {
-		BIGNUM 		tmp;
-
 		BN_init(&tmp);
 		BN_CHECK(BN_one(&tmp));
 		BN_CHECK(BN_lshift(n, &tmp, -exp));
 		BN_free(&tmp);
 	} else if (exp > 0) {
-		BIGNUM 		tmp;
-
 		BN_init(&tmp);
 		BN_swap(&tmp, m);
 		BN_CHECK(BN_lshift(m, &tmp, exp));
@@ -3544,6 +3548,7 @@ Print rational number NUMB."
 
 	FTH_STACK_CHECK(vm, 1, 0);
 	obj = fth_pop_ficl_cell(vm);
+
 	if (FTH_RATIO_P(obj))
 		fth_printf("%S ", obj);
 	else if (FTH_BIGNUM_P(obj))
@@ -3632,7 +3637,7 @@ ficl_qinvert(ficlVm *vm)
 	ficlStackPushFTH(vm->dataStack, fth_make_ratio_from_float(1.0 / f));
 }
 
-/*
+/*-
  * rt_cmp(m, n)
  *
  * m < n => -1
@@ -3643,34 +3648,40 @@ static int
 rt_cmp(ficlRatio m, ficlRatio n)
 {
 	int 		flag;
+	BIGNUM 		num1;
+	BIGNUM 		num2;
+	BIGNUM 		res;
+	BN_CTX         *ctx;
 
 	if (BN_cmp(m->den, n->den) == 0)
-		flag = BN_cmp(m->num, n->num);
-	else {
-		BIGNUM 		num1, num2, res;
-		BN_CTX         *ctx;
+		return (BN_cmp(m->num, n->num));
 
-		ctx = bn_ctx_init();
-		BN_init(&num1);
-		BN_init(&num2);
-		BN_init(&res);
-		BN_CHECK(BN_mul(&num1, m->num, n->den, ctx));
-		BN_CHECK(BN_mul(&num2, m->den, n->num, ctx));
-		BN_CHECK(BN_sub(&res, &num1, &num2));
-		flag = BN_cmp(&res, &fth_bn_zero);
-		BN_CTX_free(ctx);
-		BN_free(&num1);
-		BN_free(&num2);
-		BN_free(&res);
-	}
+	ctx = bn_ctx_init();
+	BN_init(&num1);
+	BN_init(&num2);
+	BN_init(&res);
+	BN_CHECK(BN_mul(&num1, m->num, n->den, ctx));
+	BN_CHECK(BN_mul(&num2, m->den, n->num, ctx));
+	BN_CHECK(BN_sub(&res, &num1, &num2));
+	flag = BN_cmp(&res, &fth_bn_zero);
+	BN_CTX_free(ctx);
+	BN_free(&num1);
+	BN_free(&num2);
+	BN_free(&res);
 	return (flag);
 }
 
 static ficlRatio
 rt_addsub(FTH m, FTH n, int type)
 {
-	ficlRatio 	x, y, res;
-	BIGNUM 		gcd, tmpx, tmpy, tmpz, tmp;
+	ficlRatio 	x;
+	ficlRatio 	y;
+	ficlRatio 	res;
+	BIGNUM 		gcd;
+	BIGNUM 		tmpx;
+	BIGNUM 		tmpy;
+	BIGNUM 		tmpz;
+	BIGNUM 		tmp;
 	BN_CTX         *ctx;
 
 	ctx = bn_ctx_init();
@@ -3715,8 +3726,13 @@ rt_addsub(FTH m, FTH n, int type)
 static ficlRatio
 rt_muldiv(FTH m, FTH n, int type)
 {
-	ficlRatio 	x, y, res;
-	BIGNUM 		gcd1, gcd2, tmp1, tmp2;
+	ficlRatio 	x;
+	ficlRatio 	y;
+	ficlRatio 	res;
+	BIGNUM 		gcd1;
+	BIGNUM 		gcd2;
+	BIGNUM 		tmp1;
+	BIGNUM 		tmp2;
 	BN_CTX         *ctx;
 
 	ctx = bn_ctx_init();
@@ -4091,7 +4107,8 @@ ficl_rationalize(ficlVm *vm)
 5.4  0.1  rationalize => 5.5\n\
 5.23 0.02 rationalize => 5.25\n\
 Return inexact number within ERR of X."
-	FTH 		x, err;
+	FTH 		x;
+	FTH 		err;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	err = fth_pop_ficl_cell(vm);

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)port.c	2.1 1/2/18
+ * @(#)port.c	2.2 2/1/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -238,8 +238,8 @@ fth_init_soft_port_procs(void)
 static FTH
 fth_set_soft_port_from_optkey(FTH prcs, int kind)
 {
-	FTH 		proc;
 	ficlInteger 	type;
+	FTH 		proc;
 
 	type = (ficlInteger) kind;
 	FTH_ASSERT_ARGS(fth_array_length(prcs) >= PORT_TYPE_LAST,
@@ -276,8 +276,8 @@ fth_set_soft_port_from_optkey(FTH prcs, int kind)
 static FTH
 fth_make_soft_port(FTH prcs, char *name, int fam)
 {
-	FTH 		io;
 	FIO_Softport   *prt;
+	FTH 		io;
 
 	io = make_io_base(fam);
 	prt = FTH_MALLOC(sizeof(FIO_Softport));
@@ -309,8 +309,8 @@ nil port? => #f\n\
 \"foo\" io-open-input-file port? => #t\n\
 Return #t if OBJ is an IO object or #f, otherwise #f.\n\
 See also port-input? and port-output?."
-	FTH 		obj;
 	int 		flag;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -327,8 +327,8 @@ nil port-input? => #f\n\
 \"foo\" io-open-input-file port-input? => #t\n\
 Return #t if OBJ is an input IO object or #f, otherwise #f.\n\
 See also port? and port-output?."
-	FTH 		obj;
 	int 		flag;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -345,8 +345,8 @@ nil port-output? => #f\n\
 \"foo\" io-open-output-file port-output? => #t\n\
 Return #t if OBJ is an output IO object or #f, otherwise #f.\n\
 See also port? and port-input?."
-	FTH 		obj;
 	int 		flag;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -363,8 +363,8 @@ o1 port-closed? => #f\n\
 o1 port-close\n\
 o1 port-closed? => #t\n\
 Return #t if IO object is closed, otherwise #f."
-	FTH 		obj;
 	int 		flag;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -409,7 +409,8 @@ Return new soft port IO object with corresponding procs.\n\
 " h_port_keywords
 	int 		fam;
 	char           *name;
-	FTH 		prcs, port;
+	FTH 		prcs;
+	FTH 		port;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_WRITE);
 	name = fth_get_optkey_str(FTH_KEYWORD_PORT_NAME, "soft-port");
@@ -436,7 +437,8 @@ Return soft port IO object for reading.  \
 The *stdin* IO object is preserved in stdin-io for later use.\n\
 " h_port_keywords
 	char           *name;
-	FTH 		prcs, port;
+	FTH 		prcs;
+	FTH 		port;
 
 	name = fth_get_optkey_str(FTH_KEYWORD_PORT_NAME, "soft-port");
 	prcs = fth_init_soft_port_procs();
@@ -460,7 +462,8 @@ Return soft port IO object for writing.  \
 The *stdout* IO object is preserved in stdout-io for later use.\n\
 " h_port_keywords
 	char           *name;
-	FTH 		prcs, port;
+	FTH 		prcs;
+	FTH 		port;
 
 	name = fth_get_optkey_str(FTH_KEYWORD_PORT_NAME, "soft-port");
 	prcs = fth_init_soft_port_procs();
@@ -477,8 +480,10 @@ fth_port_getc(FTH port)
 {
 	if (FTH_FALSE_P(port))
 		port = ficlVmGetPortIn(FTH_FICL_VM());
+
 	if (FTH_IO_P(port))
 		return (fth_io_getc(port));
+
 	FTH_ASSERT_ARGS(0, port, FTH_ARG1, "an open IO object or #f");
 	/* NOTREACHED */
 	return (-1);
@@ -550,8 +555,8 @@ ficl_port_putc(ficlVm *vm)
 Write character C to PRT IO object.  \
 If PRT is #f, write to current output port (stout).\n\
 See also port-puts and port-puts-format."
-	FTH 		prt;
 	int 		c;
+	FTH 		prt;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	c = (int) ficlStackPopInteger(vm->dataStack);
@@ -584,8 +589,8 @@ ficl_port_puts(ficlVm *vm)
 Write STR to PRT IO object.  \
 If PRT is #f, write to current output port (stout).\n\
 See also port-putc and port-puts-format."
-	FTH 		prt;
 	char           *str;
+	FTH 		prt;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	str = pop_cstring(vm);
@@ -601,7 +606,9 @@ ficl_port_puts_format(ficlVm *vm)
 Write string built from FMT and array FMT-ARGS to PRT IO object.  \
 If PRT is #f, write to current output port (stout).\n\
 See also port-putc and port-puts."
-	FTH 		prt, fmt, args;
+	FTH 		prt;
+	FTH 		fmt;
+	FTH 		args;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	args = fth_pop_ficl_cell(vm);
@@ -635,7 +642,8 @@ ficl_port_display(ficlVm *vm)
 Write the string representation of OBJ to PRT object.  \
 If PRT is #f, write to current output port (stout).\n\
 See also port-puts and port-puts-format."
-	FTH 		prt, obj;
+	FTH 		prt;
+	FTH 		obj;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	obj = fth_pop_ficl_cell(vm);
@@ -652,6 +660,7 @@ fth_port_to_string(FTH port)
 {
 	if (FTH_FALSE_P(port))
 		return (FTH_FALSE);
+
 	return (fth_io_to_string(port));
 }
 
@@ -675,6 +684,7 @@ fth_port_flush(FTH port)
 {
 	if (FTH_FALSE_P(port))
 		return;
+
 	fth_io_flush(port);
 }
 
@@ -696,6 +706,7 @@ fth_port_close(FTH port)
 {
 	if (FTH_FALSE_P(port))
 		return;
+
 	fth_io_close(port);
 }
 
@@ -766,7 +777,8 @@ io_keyword_args_ref(int fam)
 	arg = fth_get_optkey(FTH_KEYWORD_SOCKET, FTH_UNDEF);
 
 	if (FTH_BOUND_P(arg)) {
-		int 		d, p;
+		int 		d;
+		int 		p;
 
 		d = fth_get_optkey_fix(FTH_KEYWORD_DOMAIN, FTH_DEFAULT_ADDRFAM);
 		p = fth_get_optkey_fix(FTH_KEYWORD_PORT, FTH_DEFAULT_PORT);
@@ -776,7 +788,8 @@ io_keyword_args_ref(int fam)
 	arg = fth_get_optkey(FTH_KEYWORD_SOFT_PORT, FTH_UNDEF);
 
 	if (FTH_BOUND_P(arg)) {
-		char           *name, *s;
+		char           *name;
+		char           *s;
 		FTH 		prcs;
 
 		s = fth_string_ref(arg);
@@ -813,7 +826,10 @@ Close IO object and return resulting string.\n\
 " keyword_args_string "\n\
 See also with-output-port, with-input-from-port, with-output-to-port, \
 with-error-to-port."
-	FTH 		arg, res, io, proc;
+	FTH 		arg;
+	FTH 		res;
+	FTH 		io;
+	FTH 		proc;
 
 	io = io_keyword_args_ref(FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -857,7 +873,9 @@ Close IO object.\n\
 " keyword_args_string "\n\
 See also with-input-port, with-input-from-port, with-output-to-port, \
 with-error-to-port."
-	FTH 		arg, io, proc;
+	FTH 		arg;
+	FTH 		io;
+	FTH 		proc;
 
 	io = io_keyword_args_ref(FICL_FAM_WRITE);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -898,7 +916,10 @@ Close IO object and return resulting string.  \
 " keyword_args_string "\n\
 See also with-input-port, with-output-port, with-output-to-port, \
 with-error-to-port."
-	FTH 		arg, res, old_io, io, proc;
+	FTH 		arg;
+	FTH 		res;
+	FTH 		old_io;
+	FTH 		io;
 
 	io = io_keyword_args_ref(FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -908,6 +929,8 @@ with-error-to-port."
 	if (FTH_NIL_P(arg))
 		res = fth_io_read_line(io);
 	else {
+		FTH 		proc;
+
 		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 
 		if (!FTH_PROC_P(proc)) {
@@ -948,7 +971,9 @@ Close IO object.  \
 " keyword_args_string "\n\
 See also with-input-port, with-output-port, with-input-from-port, \
 with-error-to-port."
-	FTH 		arg, old_io, io, proc;
+	FTH 		arg;
+	FTH 		old_io;
+	FTH 		io;
 
 	io = io_keyword_args_ref(FICL_FAM_WRITE);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -958,6 +983,8 @@ with-error-to-port."
 	if (FTH_STRING_P(arg))
 		fth_io_write(io, fth_string_ref(arg));
 	else {
+		FTH 		proc;
+
 		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 
 		if (!FTH_PROC_P(proc)) {
@@ -997,7 +1024,9 @@ Close IO object.  \
 " keyword_args_string "\n\
 See also with-input-port, with-output-port, with-input-from-port, \
 with-output-to-port."
-	FTH 		arg, old_io, io, proc;
+	FTH 		arg;
+	FTH 		old_io;
+	FTH 		io;
 
 	io = io_keyword_args_ref(FICL_FAM_WRITE);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -1007,6 +1036,8 @@ with-output-to-port."
 	if (FTH_STRING_P(arg))
 		fth_io_write(io, fth_string_ref(arg));
 	else {
+		FTH 		proc;
+
 		proc = proc_from_proc_or_xt(arg, 0, 0, 0);
 
 		if (!FTH_PROC_P(proc)) {

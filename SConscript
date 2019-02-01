@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.6 1/30/19
+# @(#)SConscript	1.7 2/1/19
 
 import os
 
@@ -67,8 +67,6 @@ misc_env = env.Clone(CPPDEFINES = ['HAVE_CONFIG_H',
 if shared:
 	ms = misc_env.SharedObject('src/misc.c')
 	so = env.SharedLibrary(so_lib, [sources, ms])
-	rs = misc_env.StaticObject('src/misc.c')
-	ar = env.StaticLibrary(so_lib, [sources, rs])
 	po = env.SharedObject('src/fth.c')
 	pg = env.Clone(LIBS = [prog, 'm']).Program(pg_fth, [po])
 else:
@@ -124,8 +122,6 @@ cat3dir		= mandir + '/cat3'
 
 if shared:
 	iso = env.InstallAs(libdir + '/lib' + prog + '.so', so)
-	if os.uname()[0] != 'FreeBSD':
-		inst.extend(env.InstallAs(libdir + '/lib' + prog + '.a', ar))
 	if dbm:
 		inst.extend(env.InstallAs(pkglibdir + '/dbm.so', el))
 else:
