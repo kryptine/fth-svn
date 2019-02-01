@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.8 1/30/19
+ * @(#)utils.c	2.9 1/31/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1025,7 +1025,7 @@ repl_gl_init(void)
 static void
 ficl_history(ficlVm *vm)
 {
-#define h_history "( :optional action arg -- )  handle histoy events\n\
+#define h_history "( :optional action arg -- )  handle history events\n\
              history => return entire history as string\n\
 gl-show      history => same as above\n\
         10   history => show 10 last history events\n\
@@ -1309,7 +1309,7 @@ See tecla(7) for key-bindings and actions."
 		break;
 	case 1:
 		/*-
-		 * gl_configure_getline()
+		 * gl_config()
 		 *
 		 * KEY is string:
 		 *	"edit-mode vi \n nobeep" bindkey
@@ -1969,7 +1969,7 @@ ficl_repl_cb(ficlVm *vm)
 {
 #define h_repl_cb "( -- )  show some hints at startup\n\
 A hard coded before-repl-hook.  \
-Before adding your own, do:\n\
+Before adding your own:\n\
 before-repl-hook reset-hook!."
 	(void) vm;
 	if (FTH_TRUE_P(fth_variable_ref("*fth-verbose*"))) {
@@ -2041,10 +2041,11 @@ ficl_pos_0 ## Numb(ficlVm *vm)						\
 	FTH		val;						\
 									\
 	ary = fth_variable_ref("*farray*");				\
-	val = FTH_FALSE;						\
 									\
 	if (fth_array_length(ary) > Numb)				\
 		val = fth_array_ref(ary, Numb);				\
+	else								\
+		val = fth_make_empty_string();				\
 									\
 	ficlStackPushFTH(vm->dataStack, val);				\
 }									\
@@ -2053,16 +2054,15 @@ static void								\
 ficl_print_pos_0 ## Numb(ficlVm *vm)					\
 {									\
 	FTH		ary;						\
-	FTH		val;						\
 									\
 	(void) vm;							\
 	ary = fth_variable_ref("*farray*");				\
-	val = FTH_FALSE;						\
 									\
 	if (fth_array_length(ary) > Numb)				\
-		val = fth_array_ref(ary, Numb);				\
+		fth_printf("%S", fth_array_ref(ary, Numb));		\
+	else								\
+		fth_printf("");						\
 									\
-	fth_printf("%S", val);						\
 	fth_printf("%S", fth_variable_ref("*ofs*"));			\
 }
 
@@ -2134,9 +2134,7 @@ If not set, use $FTH_HISTORY_LENGTH or " FTH_XString(FTH_HIST_LEN) ".\n\
 Default is undef.");
 	fth_define_variable("*savehist*", FTH_TRUE,
 	    "History variable (boolean).\n\
-If true, save at most *history*, $FTH_HISTORY_LENGTH, or \
-" FTH_XString(FTH_HIST_LEN) " history events to *history*, $FTH_HISTORY, or ~/\
-" FTH_HIST_FILE ", if false, don't save history events.\n\
+If true, save history events, otherwise not.\n\
 Default is #t.");
 	fth_define_variable("*argc*", FTH_ZERO,
 	    "number of arguments in *argv*");

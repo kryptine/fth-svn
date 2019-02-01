@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2007-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2007-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)file.c	2.1 1/2/18
+ * @(#)file.c	2.2 1/31/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -375,7 +375,7 @@ fth_file_rename(const char *src, const char *dst)
 		FTH_SYSTEM_ERROR_ARG_THROW(rename, buf);
 	}
 #else
-			fth_copy_file (src, dst);
+	fth_copy_file(src, dst);
 	fth_file_delete(src);
 #endif
 }

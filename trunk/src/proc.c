@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.6 2/1/18
+ * @(#)proc.c	2.7 1/31/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2577,7 +2577,7 @@ ficl_local_variables_co_im(ficlVm *vm)
 	local-variables each .$ space end-each\n\
 ;\n\
 20 word-with-locals => #{ \"bar\" => 10  \"foo\" => 20 }\n\
-Returns a hash of local variable name-value pairs up to \
+Return a hash of local variable name-value pairs up to \
 the location in definition.  \
 This word is immediate and compile only and can only \
 be used in word definitions."
