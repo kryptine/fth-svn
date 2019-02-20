@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.7 2/1/19
+# @(#)SConscript	1.8 2/20/19
 
 import os
 
@@ -100,7 +100,9 @@ fs		= []
 se		= Environment(tools = ['textfile'])
 for s in [fth_sh, fth_test, install, play_sound, xm]:
 	t = se.Substfile(s + '.in', SUBST_DICT = subst_dict)
-	fs.extend(Command(None, s, Chmod(s, 0755)))
+	# python3.7 isn't able to scan 0755 as octal number
+	# 0755 octal == 493 decimal.
+	fs.extend(Command(None, s, Chmod(s, 493)))
 
 #
 # install
