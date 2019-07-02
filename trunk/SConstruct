@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.15 1/30/19
+# @(#)SConstruct	1.16 7/2/19
 
 #
 # scons -h
@@ -287,7 +287,7 @@ def conf_test(env):
 	conf.CheckLib('nsl', 'gethostbyname')
 
 	env['have_crypto'] = False
-	if subprocess.call([pkgconf, "--max-version=1.0.2p", "libcrypto"]) == 0:
+	if subprocess.call([pkgconf, "--max-version=1.0.2z", "libcrypto"]) == 0:
 		env.ParseConfig(pkgconf + ' --cflags --libs libcrypto')
 		env['have_crypto'] = True
 

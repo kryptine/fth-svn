@@ -5458,7 +5458,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-if ${PKGCONF} --max-version=1.0.2p libcrypto; then :
+if ${PKGCONF} --max-version=1.0.2z libcrypto; then :
   for ac_header in openssl/bn.h openssl/err.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
