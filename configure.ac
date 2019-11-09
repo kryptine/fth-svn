@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.194 7/2/19
+dnl @(#)configure.ac	1.195 11/10/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -61,7 +61,7 @@ dnl AC_INIT arg   4: PACKAGE_TARNAME
 dnl AC_INIT arg   5: PACKAGE_URL
 dnl
 AC_INIT([FTH],
-    [1.3.9],
+    [1.4.0],
     [mi-scholz@users.sourceforge.net],
     [fth],
     [fth.sourceforge.net])
@@ -321,10 +321,10 @@ fi
 dnl
 dnl Check for --program-prefix|suffix.
 dnl
-# prog_name: --program-suffix="-1.3" ==> bin/fth-1.3
-#                                        include/fth-1.3/
-#                                        lib/fth-1.3/
-#                                        lib/libfth-1.3.so
+# prog_name: --program-suffix="-1.4" ==> bin/fth-1.4
+#                                        include/fth-1.4/
+#                                        lib/fth-1.4/
+#                                        lib/libfth-1.4.so
 prog_name="fth"
 if test "X${program_prefix}" != "XNONE" ; then
 	prog_name="${program_prefix}${prog_name}"
