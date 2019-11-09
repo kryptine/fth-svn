@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.35 1/30/19
+.\" @(#)README.man	1.36 11/9/19
 .\"
-.Dd 2019/01/30
+.Dd 2019/11/09
 .Dt README
 .Os
 .\"
@@ -91,7 +91,7 @@ you can configure Fth without it, see
 .Ss Bn
 Big integer arithmetic uses OpenSSL's BN_* function set like
 .Xr BN_new 3 .
-OpenSSL library version up to v1.0.2p is supported.
+OpenSSL library version up to v1.0.2z is supported.
 .\"
 .\" 64-Bit-NetBSD and Tecla
 .\"
