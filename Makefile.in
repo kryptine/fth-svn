@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.144 1/30/19
+# @(#)Makefile.in	1.145 11/18/19
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -75,6 +75,7 @@ HEADERS = \
 	${fthficldir}/ficl.h \
 	${fthficldir}/ficllocal.h \
 	${fthficldir}/ficltokens.h \
+	${fthlibdir}/mp.h \
 	${fthsrcdir}/fth.h \
 	${fthsrcdir}/fth-lib.h
 FS_LIB = \
