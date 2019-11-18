@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-lib.h	2.1 1/2/18
+ * @(#)fth-lib.h	2.3 11/18/19
  */
 
 #if !defined(_FTH_LIB_H_)
@@ -445,10 +445,8 @@ typedef struct FInstance {
 #if HAVE_COMPLEX
 		ficlComplex	cp;
 #endif
-#if HAVE_BN
 		ficlBignum	bi;
 		ficlRatio	rt;
-#endif
 		FTH		fp;
 		void           *p;
 	}		fcell;
@@ -468,10 +466,8 @@ typedef struct FInstance {
 #if HAVE_COMPLEX
 #define FTH_COMPLEX_OBJECT(Obj)		FTH_INSTANCE_REF(Obj)->fcell.cp
 #endif
-#if HAVE_BN
 #define FTH_BIGNUM_OBJECT(Obj)		FTH_INSTANCE_REF(Obj)->fcell.bi
 #define FTH_RATIO_OBJECT(Obj)		FTH_INSTANCE_REF(Obj)->fcell.rt
-#endif
 #define FTH_FTH_OBJECT(Obj)		FTH_INSTANCE_REF(Obj)->fcell.fp
 #define FTH_VOIDP_OBJECT(Obj)		FTH_INSTANCE_REF(Obj)->fcell.p
 
@@ -495,14 +491,12 @@ typedef struct FInstance {
 	FTH_INSTANCE_CELL_TYPE_SET(Obj, COMPLEX_T);			\
 	(FTH_COMPLEX_OBJECT(Obj) = (ficlComplex)(Val))
 #endif
-#if HAVE_BN
 #define FTH_BIGNUM_OBJECT_SET(Obj, Val)					\
 	FTH_INSTANCE_CELL_TYPE_SET(Obj, BIGNUM_T);			\
 	(FTH_BIGNUM_OBJECT(Obj) = (ficlBignum)(Val))
 #define FTH_RATIO_OBJECT_SET(Obj, Val)					\
 	FTH_INSTANCE_CELL_TYPE_SET(Obj, RATIO_T);			\
 	(FTH_RATIO_OBJECT(Obj) = (ficlRatio)(Val))
-#endif
 #define FTH_FTH_OBJECT_SET(Obj, Val)					\
 	FTH_INSTANCE_CELL_TYPE_SET(Obj, FTH_T);				\
 	(FTH_FTH_OBJECT(Obj) = (FTH)(Val))

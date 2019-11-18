@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	2.37 11/10/19";
+const char libfth_sccsid[] = "@(#)misc.c	2.38 11/18/19";
 #endif /* not lint */
 
-#define FTH_DATE		"2019/11/10"
+#define FTH_DATE		"2019/11/18"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -589,12 +589,10 @@ after-load-hook lambda: <{ fname -- }>\n\
 	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
 	    "?complex", ficl_parse_complex);
 #endif
-#if HAVE_BN
 	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
 	    "?bignum", ficl_parse_bignum);
 	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
 	    "?ratio", ficl_parse_ratio);
-#endif				/* HAVE_BN */
 	init_object();
 	init_proc();
 	init_array();
@@ -3449,9 +3447,6 @@ run_at_exit(void)
 	simple_array_free(depth_array);
 	simple_array_free(loop_array);
 	gc_free_all();
-#if HAVE_BN
-	free_number_types();
-#endif
 	ficlSystemDestroy(FTH_FICL_SYSTEM());
 	FTH_FREE(FTH_FICL_VAR());
 }

@@ -651,6 +651,7 @@ ac_subst_vars='LTLIBOBJS
 SO_DLDFLAGS
 SO_LDFLAGS
 SO_LD
+MPCFLAGS
 SO_DBM_LIB
 prog_name
 FTH_LIB
@@ -5458,67 +5459,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-if ${PKGCONF} --max-version=1.0.2z libcrypto; then :
-  for ac_header in openssl/bn.h openssl/err.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for BN_new in -lcrypto" >&5
-$as_echo_n "checking for BN_new in -lcrypto... " >&6; }
-if ${ac_cv_lib_crypto_BN_new+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcrypto  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char BN_new ();
-int
-main ()
-{
-return BN_new ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_crypto_BN_new=yes
-else
-  ac_cv_lib_crypto_BN_new=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_BN_new" >&5
-$as_echo "$ac_cv_lib_crypto_BN_new" >&6; }
-if test "x$ac_cv_lib_crypto_BN_new" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBCRYPTO 1
-_ACEOF
-
-  LIBS="-lcrypto $LIBS"
-
-fi
-
-fi
-
 # Minix seems to lack asinh(3), acosh(3), atanh(3)
 for ac_func in acosh asinh atanh
 do :
@@ -6059,6 +5999,8 @@ CWARNFLAGS="${CWARNFLAGS} -Wundef"
 # instead.
 #
 
+MPCFLAGS="${CFLAGS}"
+
 if test "X${enable_warnings}" = "Xyes"; then
 	CFLAGS="${CFLAGS} ${CWARNFLAGS}"
 fi
@@ -6116,6 +6058,7 @@ case "${host}" in
 	#	linux (freeshell.de x86_64-debian-linux-gnu3.16.0)
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
+		MPCFLAGS="-fPIC ${MPCFLAGS}"
 		SO_LDFLAGS="-shared"
 		SO_DLDFLAGS="-Wl,-soname,${FTH_LIB}"
 		;;
@@ -6127,6 +6070,7 @@ esac
 cat >>confdefs.h <<_ACEOF
 #define FTH_LIBS "${LIBS}"
 _ACEOF
+
 
 
 
@@ -7505,6 +7449,7 @@ C compiler ............. : ${CC}
 Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
+C compiler flags (mp) .. : ${MPCFLAGS}
 Linker flags ........... : ${LDFLAGS}
 Shared dlflags ......... : ${SO_LDFLAGS}
 Shared dldflags ........ : ${SO_DLDFLAGS}
@@ -7521,6 +7466,7 @@ C compiler ............. : ${CC}
 Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
+C compiler flags (mp) .. : ${MPCFLAGS}
 Linker flags ........... : ${LDFLAGS}
 Shared dlflags ......... : ${SO_LDFLAGS}
 Shared dldflags ........ : ${SO_DLDFLAGS}

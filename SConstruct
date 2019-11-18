@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.17 11/10/19
+# @(#)SConstruct	1.18 11/18/19
 
 #
 # scons -h
@@ -286,11 +286,6 @@ def conf_test(env):
 	conf.CheckLib('socket', 'socket')
 	conf.CheckLib('nsl', 'gethostbyname')
 
-	env['have_crypto'] = False
-	if subprocess.call([pkgconf, "--max-version=1.0.2z", "libcrypto"]) == 0:
-		env.ParseConfig(pkgconf + ' --cflags --libs libcrypto')
-		env['have_crypto'] = True
-
 	env['posix_regex'] = conf.CheckFunc('regcomp')
 	if not env['posix_regex']:
 		env['posix_regex'] = conf.CheckLib(['regex', 'gnuregex'],
@@ -461,9 +456,6 @@ def src_conf_test(env):
 		'time.h']:
 		src_conf_h.CheckCHeader(h)
 
-	if env['have_crypto']:
-		src_conf_h.CheckCHeader('openssl/err.h')
-
 	# Minix seems to lack asinh(3), acosh(3), atanh(3)
 	for f in ['access',
 		'acosh',
@@ -590,9 +582,6 @@ def fth_conf_test(env):
 		'string.h',
 		'unistd.h']:
 		fth_conf_h.CheckHeader(fh)
-
-	if env['have_crypto']:
-		fth_conf_h.CheckCHeader('openssl/bn.h')
 
 	if env['complex_i']:
 		fth_conf_h.Define('HAVE_COMPLEX_I', 1)

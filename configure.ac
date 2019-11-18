@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.195 11/10/19
+dnl @(#)configure.ac	1.197 11/18/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -207,10 +207,6 @@ AC_SEARCH_LIBS([regcomp], [c regex gnuregex], [AC_DEFINE([HAVE_POSIX_REGEX],
     [1], [Define to 1 if you have POSIX regex.])])
 AC_CHECK_DECLS([isnan, isinf], [], [], [@%:@include <math.h>])
 
-AS_IF([${PKGCONF} --max-version=1.0.2z libcrypto],
-    [AC_CHECK_HEADERS([openssl/bn.h openssl/err.h])
-     AC_CHECK_LIB([crypto], [BN_new])])
-
 dnl
 dnl Check for functions.	      
 dnl
@@ -311,6 +307,8 @@ CWARNFLAGS="${CWARNFLAGS} -Wundef"
 # instead.
 #
 
+MPCFLAGS="${CFLAGS}"
+
 dnl
 dnl Check for --enable-warnings.
 dnl
@@ -378,6 +376,7 @@ case "${host}" in
 	#	linux (freeshell.de x86_64-debian-linux-gnu3.16.0)
 	*)
 		CFLAGS="-fPIC ${CFLAGS}"
+		MPCFLAGS="-fPIC ${MPCFLAGS}"
 		SO_LDFLAGS="-shared"
 		SO_DLDFLAGS="-Wl,-soname,${FTH_LIB}"
 		;;
@@ -391,6 +390,7 @@ AC_SUBST(FTH_LIB)
 AC_DEFINE_UNQUOTED([FTH_LIBS], ["${LIBS}"], [Required libraries.])
 AC_SUBST(prog_name)
 AC_SUBST(SO_DBM_LIB)
+AC_SUBST(MPCFLAGS)
 AC_SUBST(SO_LD)
 AC_SUBST(SO_LDFLAGS)
 AC_SUBST(SO_DLDFLAGS)
@@ -431,6 +431,7 @@ C compiler ............. : ${CC}
 Shared linker .......... : ${SO_LD}
 C preprocessor flags ... : ${CPPFLAGS}
 C compiler flags ....... : ${CFLAGS}
+C compiler flags (mp) .. : ${MPCFLAGS}
 Linker flags ........... : ${LDFLAGS}
 Shared dlflags ......... : ${SO_LDFLAGS}
 Shared dldflags ........ : ${SO_DLDFLAGS}

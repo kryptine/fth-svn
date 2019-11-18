@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.8 2/20/19
+# @(#)SConscript	1.11 11/18/19
 
 import os
 
@@ -48,6 +48,9 @@ sources.extend(missing)
 sources.extend(Glob('src/*.c', exclude = ['src/fth.c', 'src/misc.c']))
 env.MergeFlags(['-g', '-O3'])
 
+# We don't use warnings (CFLAGS) for mp*.c sources.
+mp_env = env.Clone()
+
 if warnings:
 	env.Append(CFLAGS = [
 		'-ansi',
@@ -58,6 +61,7 @@ if warnings:
 		'-Wmissing-prototypes',
 		'-Wundef',
 		'-Wunused'])
+
 env['CPPDEFINES'] = ['HAVE_CONFIG_H']
 
 misc_env = env.Clone(CPPDEFINES = ['HAVE_CONFIG_H',
@@ -66,12 +70,14 @@ misc_env = env.Clone(CPPDEFINES = ['HAVE_CONFIG_H',
 
 if shared:
 	ms = misc_env.SharedObject('src/misc.c')
-	so = env.SharedLibrary(so_lib, [sources, ms])
+	mp = mp_env.SharedObject(['lib/mp.c', 'lib/mpi.c', 'lib/mpr.c'])
+	so = env.SharedLibrary(so_lib, [sources, ms, mp])
 	po = env.SharedObject('src/fth.c')
 	pg = env.Clone(LIBS = [prog, 'm']).Program(pg_fth, [po])
 else:
 	ms = misc_env.StaticObject('src/misc.c')
-	so = env.StaticLibrary(so_lib, [sources, ms])
+	mp = mp_env.StaticObject(['lib/mp.c', 'lib/mpi.c', 'lib/mpr.c'])
+	so = env.StaticLibrary(so_lib, [sources, ms, mp])
 	po = env.StaticObject('src/fth.c')
 	pg = env.Program(pg_fth, [po, so])
 

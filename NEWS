@@ -1,8 +1,4 @@
-* version 1.3.9
+* version 1.4.0
 
-configure.ac and SConstruct check for --max-version=1.0.2z of libcrypto.
-
-*0* - *9* as well as .*0* - .*9* added for simple access of *farray*
-elements.
-
-*ofs* output field separator added.
+use xedit/lisp/mp/mp*.[ch] for bignum and ratio
+remove libcrypto/openssl dependency

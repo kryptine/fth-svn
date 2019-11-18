@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2007-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# @(#)common.mk	1.27 1/26/18
+# @(#)common.mk	1.29 11/18/19
 
 ficlbuilddir   ?= ${top_builddir}/ficl
 libbuilddir    ?= ${top_builddir}/lib

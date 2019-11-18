@@ -66,7 +66,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)ficllocal.h	1.71 1/29/19
+ * @(#)ficllocal.h	1.72 11/18/19
  */
 
 #if !defined(_FICLLOCAL_H_)
@@ -152,20 +152,13 @@ double		creal(double complex);
 typedef complex double ficlComplex;
 #endif
 
-#if defined(HAVE_OPENSSL_BN_H)
-#include <openssl/bn.h>
-#define HAVE_BN		1
-/* bn(3) */
-typedef BIGNUM * ficlBignum;
-
-typedef struct {
-	ficlBignum num;
-	ficlBignum den;
-} FRatio;
-typedef FRatio * ficlRatio;
-#else
-#define HAVE_BN		0
-#endif
+/*
+ * Author: Paulo Cesar Pereira de Andrade
+ *	from xedit/lisp/mp
+ */
+#include <mp.h>
+typedef mpi * ficlBignum;
+typedef mpr * ficlRatio;
 
 #if !defined(true)
 #define false 		0
