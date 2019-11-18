@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	2.2 1/29/19
+ * @(#)fth.h	2.3 11/18/19
  */
 
 #if !defined(_FTH_H_)
@@ -747,23 +747,19 @@ FTH 		fth_make_complex(ficlComplex);
 FTH 		fth_make_polar(ficlFloat, ficlFloat);
 FTH 		fth_make_rectangular(ficlFloat, ficlFloat);
 #endif				/* HAVE_COMPLEX */
-#if HAVE_BN
 FTH 		fth_make_bignum(ficlBignum);
 FTH 		fth_make_big(FTH);
-#endif				/* HAVE_BN */
 /* ratio */
 FTH		fth_exact_to_inexact(FTH);
 FTH		fth_inexact_to_exact(FTH);
 FTH		fth_denominator(FTH);
 FTH		fth_numerator(FTH);
-#if HAVE_BN
 FTH 		fth_make_ratio(FTH, FTH);
 FTH 		fth_make_ratio_from_float(ficlFloat);
 FTH 		fth_make_ratio_from_int(ficlInteger, ficlInteger);
 FTH 		fth_make_rational(ficlRatio);
 FTH 		fth_ratio_floor(FTH);
 FTH 		fth_rationalize(FTH, FTH);
-#endif				/* HAVE_BN */
 FTH		fth_number_add(FTH, FTH);
 FTH		fth_number_div(FTH, FTH);
 int		fth_number_equal_p(FTH, FTH);

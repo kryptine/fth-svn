@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)proc.c	2.7 1/31/19
+ * @(#)proc.c	2.8 11/18/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1391,7 +1391,9 @@ ficl_word_to_source(ficlDictionary *dict, ficlCell *cell)
 			continue;
 		}
 
-		switch ((kind = ficlWordClassify(word))) {
+		kind = ficlWordClassify(word);
+
+		switch (kind) {
 		case FICL_WORDKIND_INSTRUCTION:
 			fth_string_sformat(fs, "%s",
 			    ficlDictionaryInstructionNames[(long) word]);

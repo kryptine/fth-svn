@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2018 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.h	2.1 1/2/18
+ * @(#)utils.h	2.2 11/18/19
  */
 
 #if !defined(_UTILS_H_)
@@ -255,9 +255,6 @@ void		init_hook_type(void);
 void		init_string_type(void);
 void		init_regexp_type(void);
 void		init_number_types(void);
-#if HAVE_BN
-void		free_number_types(void);
-#endif
 void		init_array(void);
 void		init_hash (void);
 void		init_io   (void);
@@ -295,10 +292,8 @@ int		ficl_parse_number(ficlVm *, ficlString);
 #if HAVE_COMPLEX
 int		ficl_parse_complex(ficlVm *, ficlString);
 #endif
-#if HAVE_BN
 int		ficl_parse_bignum(ficlVm *, ficlString);
 int		ficl_parse_ratio(ficlVm *, ficlString);
-#endif
 
 /* object.c */
 FTH		make_object_type(const char *, fobj_t);

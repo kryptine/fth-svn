@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.9 1/31/19
+ * @(#)utils.c	2.10 11/18/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -1950,7 +1950,7 @@ fth_repl(int argc, char **argv)
 		gl_save_history(gl, FGL_HISTFILE_CSTR(), FGL_COMMENT,
 		    FGL_HISTORY_CINT());
 
-	ficlVmGetRepl(vm) = gl = del_GetLine(gl);
+	ficlVmGetRepl(vm) = del_GetLine(gl);
 #endif
 	if (fth_print_p)
 		fth_print("\n");

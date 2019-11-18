@@ -44,7 +44,7 @@
 /*-
  * Adapted to work with FTH
  *
- * Copyright (c) 2004-2013 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)prefix.c	1.28 10/17/13
+ * @(#)prefix.c	1.29 11/18/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -154,10 +154,8 @@ static void ficlPrimitiveTempBase(ficlVm *vm)
 
   vm->base = base;
   status = ficl_parse_number(vm, number);
-#if HAVE_BN
   if (!status)
     status = ficl_parse_bignum(vm, number);
-#endif
   vm->base = oldbase;
   
   if (!status)
