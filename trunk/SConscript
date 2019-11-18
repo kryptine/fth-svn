@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.11 11/18/19
+# @(#)SConscript	1.12 11/18/19
 
 import os
 
@@ -145,6 +145,7 @@ inst.extend(env.Install(incdir, [
 	'ficl/ficl.h',
 	'ficl/ficllocal.h',
 	'ficl/ficltokens.h',
+	'lib/mp.h',
 	'fth-config.h',
 	'src/fth-lib.h',
 	'src/fth.h']))
