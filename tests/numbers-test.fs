@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)numbers-test.fs	1.27 1/11/15
+\ @(#)numbers-test.fs	1.28 11/20/19
 
 require test-utils.fs
 
@@ -567,11 +567,9 @@ require test-utils.fs
 		\ numerator
 		3/4 numerator 3 <> "3/4 numerator 3 <>?" test-expr
 		5   numerator 5 <> "5 numerator 5 <>?" test-expr
-		1.5 numerator  0<> "1.5 numerator 0<>?" test-expr
 		\ denominator
 		3/4 denominator 4 <> "3/4 denominator 4 <>?" test-expr
 		5   denominator 1 <> "5 denominator 1 <>?" test-expr
-		1.5 denominator 1 <> "1.5 denominator 1 <>?" test-expr
 	;
 [else]
 	<'> noop alias ratio-test ( -- )
