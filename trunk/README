@@ -34,10 +34,6 @@ REQUIREMENTS
      won't use tecla(7), you can configure Fth without it, see CONFIGURE AND
      BUILD FTH WITH SCONS.
 
-   Bn
-     Big integer arithmetic uses OpenSSL's BN_* function set like BN_new(3).
-     OpenSSL library version up to v1.0.2z is supported.
-
    64-Bit-NetBSD and Tecla
      The libtecla package on NetBSD provides a static library libtecla.a.  On
      64-bit machines this package should be compiled with:
