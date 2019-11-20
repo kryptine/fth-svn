@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.49 11/18/19
+# @(#)Makefile.in	1.50 11/20/19
 
 #
 # From FreeBSD /usr/src:
@@ -37,6 +37,13 @@
 #
 #      strsep.3: /usr/src/lib/libc/string/strsep.3
 #      strsep.c: /usr/src/lib/libc/string/strsep.c
+#
+# From NetBSD /usr/xsrc:
+#
+#          mp.h: /usr/xsrc/external/mit/xedit/dist/lisp/mp/mp.h
+#          mp.c: /usr/xsrc/external/mit/xedit/dist/lisp/mp/mp.c
+#         mpi.c: /usr/xsrc/external/mit/xedit/dist/lisp/mp/mpi.c
+#         mpr.c: /usr/xsrc/external/mit/xedit/dist/lisp/mp/mpr.c
 #
 # From elsewhere:
 #
