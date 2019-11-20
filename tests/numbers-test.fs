@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)numbers-test.fs	1.29 11/20/19
+\ @(#)numbers-test.fs	1.31 11/20/19
 
 require test-utils.fs
 
@@ -321,6 +321,21 @@ require test-utils.fs
 		246913578024691357802469135780
 		    123456789012345678901234567890 b/ bignum? not
 		    "big big b/ (bignum)?" test-expr
+		\ bgcd, blcm
+		1769 551 bgcd 29 b<> "1769 551 bgcd 29 b<>?" test-expr
+		31408 2718 bgcd 302 b<> "31408 2718 bgcd 302 b<>?" test-expr
+		40902 24140 bgcd 34 b<> "40902 24140 bgcd 34 b<>?" test-expr
+		7000 { u }
+		4400 { v }
+		u v bgcd 200 b<> "u v bgcd 200 b<>?" test-expr
+		u v blcm 154000 b<> "u v blcm 154000 b<>?" test-expr
+		u v bgcd u v blcm b*  u v b*  b<>
+		    "u v bgcd u v blcm b*  u v b*  b<>?" test-expr
+		40902 to u
+		24140 to v
+		u v blcm 29040420 b<> "u v blcm 29040420 b<>?" test-expr
+		u v b*  u v bgcd b/  u v blcm b<>
+		    "u v b*  u v bgcd b/  u v blcm b<>?" test-expr
 		\ b**
 		123456789012345678901234567890 10 b**
 		    822526259969628839104253165869933624624768975718986341753117113191672345101686635234711078432787527087114699126238380568851450669625883238384735536304145587136095844229774592556217075848515269880288897142287955821529180675549369033497201746908666410370342866279796500763077997366010000000000 b<>
@@ -328,6 +343,20 @@ require test-utils.fs
 		10 10 b** 10000000000 b<> "10 10 b** 10^10 b<>?" test-expr
 		1024 10 b** 1267650600228229401496703205376 b<>
 		    "1024 10 b** 1024^10 b<>?" test-expr
+		\ broot
+		123456788986481564509689970688 3 broot
+		    1 <> swap 4979338592 b<> ||
+		    "big 3 broot 1 big?" test-expr
+		123456788986481564509689970689 3 broot
+		    0<> swap 4979338592 b<> ||
+		    "big 3 broot 0 big?" test-expr
+		\ bsqrt
+		123456789012345380023044696196 bsqrt
+		    1 <> swap 351364182882014 b<> ||
+		    "big bsqrt 1 big?" test-expr
+		123456789012345678901234567890 bsqrt
+		    0 <> swap 351364182882014 b<> ||
+		    "big bsqrt 0 big?" test-expr
 		\ bnegate
 		123456789012345678901234567890 bnegate
 		    -123456789012345678901234567890 b<>
@@ -364,6 +393,18 @@ require test-utils.fs
 		\ b2/
 		10 b2/ 5 b<> "10 b2/ 5 b<>?" test-expr
 		10 b2/ bignum? not "10 b2/ (bignum)?" test-expr
+		\ bmod
+		123456789012345678901234567890 2 bmod b0<>
+		    "big 2 bmod 0?" test-expr
+		123456789012345678901234567891 2 bmod 1 b<>
+		    "big 2 bmod 1?" test-expr
+		\ b/mod
+		123456789012345678901234567890 2 b/mod
+		61728394506172839450617283945 b<> swap b0<> ||
+		    "big 2 b/mod 0 big?" test-expr
+		123456789012345678901234567891 2 b/mod
+		61728394506172839450617283945 b<> swap 1 b<> ||
+		    "big 2 b/mod 1 big?" test-expr
 		\ blshift
 		1234 4 blshift 19744 b<> "1234 4 blshift 19744 b<>?" test-expr
 		1234 4 blshift bignum? not "1234 4 blshift (bignum)?" test-expr
@@ -689,8 +730,8 @@ require test-utils.fs
 	3.0  	  facosh   1.76275 fneq "facosh?"      test-expr
 	0.5  	  fatanh   0.54931 fneq "fatanh?"      test-expr
 	complex-test
-	ratio-test
 	bignum-test
+	ratio-test
 ;
 
 *fth-test-count* 0 [do] number-test [loop]

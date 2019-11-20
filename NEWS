@@ -1,4 +1,14 @@
-* version 1.4.0
+* new bignum words in src/numbers.c, tests/numbers.fs:
 
-use xedit/lisp/mp/mp*.[ch] for bignum and ratio
-remove libcrypto/openssl dependency
+	bgcd  ( x y -- z )	z = gcd(x, y)
+	blcm  ( x y -- z )	z = lcm(x, y)
+	broot ( b1 u -- b2 n )	b2 = root(b1, u); n=1 if exact, n=0 otherwise
+	bsqrt ( b1 -- b2 n )	b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
+	bmod  ( b1 b2 -- b3 )	b3 = b1 % b2
+	b/mod ( b1 b2 -- b3 b4 ) b1 / b2;  b3 = reminder;  b4 = quotient 
+
+* use xedit/lisp/mp/mp*.[ch] for bignum and ratio
+
+* remove libcrypto/openssl dependency
+
+* version 1.4.0

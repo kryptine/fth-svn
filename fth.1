@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.149 11/10/19
+.\" @(#)fth.1	1.150 11/20/19
 .\"
-.Dd 2019/11/10
+.Dd 2019/11/20
 .Dt FTH 1
 .Os
 .\"
@@ -5267,6 +5267,66 @@ Two argument arbitrary precision bignum functions.
 and
 .Ar b2
 can be any type of number.
+.\"
+.\" bgcd
+.\"
+.It Cm bgcd No (\ x y -- z\ )
+Greatest common divisor.
+.Ar x
+and
+.Ar y
+can be any type of number,
+.Ar z
+is of type bignum.
+.\"
+.\" blcm
+.\"
+.It Cm blcm No (\ x y -- z\ )
+Least common multiple.
+.Ar x
+and
+.Ar y
+can be any type of number,
+.Ar z
+is of type bignum.
+.\"
+.\" broot
+.\"
+.It Cm broot No (\ b1 u -- b2 n\ )
+Returns the integer part of the
+.Ar u th
+root of
+.Ar b1 .
+On top of stack 1 if result is exact, otherwise 0.
+.\"
+.\" bsqrt
+.\"
+.It Cm bsqrt No (\ b1 -- b2 n\ )
+Returns the integer part of the square root of
+.Ar b1 .
+On top of stack 1 if result is exact, otherwise 0.
+.\"
+.\" bmod
+.\"
+.It Cm bmod No (\ b1 b2 -- b3 n\ )
+.Ar b3 
+becomes
+.Ar b1
+modulo
+.Ar b2 .
+.\"
+.\" b/mod
+.\"
+.It Cm b/mod No (\ b1 b2 -- b3 b4 n\ )
+Divide
+.Ar b1
+by
+.Ar b2
+where
+.Ar b3
+becomes the remainder and
+.Ar b4
+becomes the quotient.
 .\"
 .\" blshift brshift
 .\"

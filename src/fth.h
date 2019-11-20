@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	2.3 11/18/19
+ * @(#)fth.h	2.4 11/20/19
  */
 
 #if !defined(_FTH_H_)
@@ -714,6 +714,8 @@ int		fth_unsigned_p(FTH);
 #if HAVE_COMPLEX
 ficlComplex	fth_complex_ref(FTH);
 #endif
+ficlBignum	fth_bignum_ref(FTH);
+ficlRatio	fth_ratio_ref(FTH);
 ficlFloat	fth_float_ref(FTH);
 ficlFloat	fth_float_ref_or_else(FTH, ficlFloat);
 ficlInteger	fth_integer_ref(FTH);
@@ -747,9 +749,14 @@ FTH 		fth_make_complex(ficlComplex);
 FTH 		fth_make_polar(ficlFloat, ficlFloat);
 FTH 		fth_make_rectangular(ficlFloat, ficlFloat);
 #endif				/* HAVE_COMPLEX */
+/* bignum */
+ficlBignum	ficlStackPopBignum(ficlStack *);
+void 		ficlStackPushBignum(ficlStack *, ficlBignum);
 FTH 		fth_make_bignum(ficlBignum);
 FTH 		fth_make_big(FTH);
 /* ratio */
+ficlRatio	ficlStackPopRatio(ficlStack *);
+void 		ficlStackPushRatio(ficlStack *, ficlRatio);
 FTH		fth_exact_to_inexact(FTH);
 FTH		fth_inexact_to_exact(FTH);
 FTH		fth_denominator(FTH);

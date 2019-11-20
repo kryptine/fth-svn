@@ -2038,6 +2038,23 @@ DDEESSCCRRIIPPTTIIOONN
      bbppooww ( b1 b2 -- b3 ) alias for _b_*_*
           Two argument arbitrary precision bignum functions.  _b_1 and _b_2 can be
           any type of number.
+     bbggccdd ( x y -- z )
+          Greatest common divisor.  _x and _y can be any type of number, _z is of
+          type bignum.
+     bbllccmm ( x y -- z )
+          Least common multiple.  _x and _y can be any type of number, _z is of
+          type bignum.
+     bbrroooott ( b1 u -- b2 n )
+          Returns the integer part of the _u _t_h root of _b_1.  On top of stack 1
+          if result is exact, otherwise 0.
+     bbssqqrrtt ( b1 -- b2 n )
+          Returns the integer part of the square root of _b_1.  On top of stack
+          1 if result is exact, otherwise 0.
+     bbmmoodd ( b1 b2 -- b3 n )
+          _b_3 becomes _b_1 modulo _b_2.
+     bb//mmoodd ( b1 b2 -- b3 b4 n )
+          Divide _b_1 by _b_2 where _b_3 becomes the remainder and _b_4 becomes the
+          quotient.
      bbllsshhiifftt ( b1 n -- b2 )
      bbrrsshhiifftt ( b1 n -- b2 )
           Shifts arbitrary precision number _b_1 _n bits to left resp. right.  _b_1
@@ -3419,4 +3436,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.17                    2019/11/10                    NetBSD 9.99.17
+NetBSD 9.99.17                    2019/11/20                    NetBSD 9.99.17
