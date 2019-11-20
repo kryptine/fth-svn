@@ -25,7 +25,7 @@
  *
  * This product includes software written by Eric Young (eay@cryptsoft.com).
  *
- * @(#)numbers.c	2.8 11/18/19
+ * @(#)numbers.c	2.9 11/20/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -3013,9 +3013,6 @@ ficl_parse_bignum(ficlVm *vm, ficlString s)
 	ficlBignum 	bn;
 
 	if (s.length < 10)
-		return (FICL_FALSE);
-	
-	if (memchr(s.text, '/', s.length) != NULL)
 		return (FICL_FALSE);
 	
 	bn = mpi_new();
