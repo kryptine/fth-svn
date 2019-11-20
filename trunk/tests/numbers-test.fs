@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)numbers-test.fs	1.28 11/20/19
+\ @(#)numbers-test.fs	1.29 11/20/19
 
 require test-utils.fs
 
@@ -567,9 +567,11 @@ require test-utils.fs
 		\ numerator
 		3/4 numerator 3 <> "3/4 numerator 3 <>?" test-expr
 		5   numerator 5 <> "5 numerator 5 <>?" test-expr
+		1.5 numerator  0<> "1.5 numerator 0<>?" test-expr
 		\ denominator
 		3/4 denominator 4 <> "3/4 denominator 4 <>?" test-expr
 		5   denominator 1 <> "5 denominator 1 <>?" test-expr
+		1.5 denominator 1 <> "1.5 denominator 1 <>?" test-expr
 	;
 [else]
 	<'> noop alias ratio-test ( -- )
@@ -687,8 +689,8 @@ require test-utils.fs
 	3.0  	  facosh   1.76275 fneq "facosh?"      test-expr
 	0.5  	  fatanh   0.54931 fneq "fatanh?"      test-expr
 	complex-test
-	bignum-test
 	ratio-test
+	bignum-test
 ;
 
 *fth-test-count* 0 [do] number-test [loop]

@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	2.40 11/20/19";
+const char libfth_sccsid[] = "@(#)misc.c	2.41 11/20/19";
 #endif /* not lint */
 
 #define FTH_DATE		"2019/11/20"
@@ -590,9 +590,9 @@ after-load-hook lambda: <{ fname -- }>\n\
 	    "?complex", ficl_parse_complex);
 #endif
 	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
-	    "?bignum", ficl_parse_bignum);
-	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
 	    "?ratio", ficl_parse_ratio);
+	ficlSystemAddPrimitiveParseStep(FTH_FICL_SYSTEM(),
+	    "?bignum", ficl_parse_bignum);
 	init_object();
 	init_proc();
 	init_array();
