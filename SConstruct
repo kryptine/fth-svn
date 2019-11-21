@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.18 11/18/19
+# @(#)SConstruct	1.19 11/21/19
 
 #
 # scons -h
@@ -297,8 +297,8 @@ def conf_test(env):
 	if libtecla:
 		env['tecla'] = conf.CheckLib('tecla', None)
 		if not env['tecla']:
-			# This is required if only a static library
-			# exists (libtecla.a).
+			# If only a static library exists (libtecla.a),
+			# tputs() from curses is required.
 			conf.CheckLib(['curses', 'ncurses'], 'tputs')
 			env['tecla'] = conf.CheckLib('tecla', None) 
 	else:

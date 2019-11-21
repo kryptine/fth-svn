@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.197 11/18/19
+dnl @(#)configure.ac	1.198 11/21/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -228,9 +228,25 @@ dnl Check for --with-tecla.
 dnl
 if test "X${with_tecla}" != "Xno"; then
 	AC_CHECK_HEADERS([libtecla.h])
-	# This is required if only a static library exists (libtecla.a).
-	AC_SEARCH_LIBS([tputs], [curses ncurses])
-	AC_CHECK_LIB([tecla], [new_GetLine])
+	# If only a static library exists (libtecla.a),
+	# tputs() from curses is required.
+	OLD_LIBS="${LIBS}"
+	LIBS="-ltecla ${OLD_LIBS}"
+	AC_LINK_IFELSE([AC_LANG_CALL([], [new_GetLine])],
+	    # libtecla.so found
+	    [LIBS="${OLD_LIBS}"
+	     AC_CHECK_LIB([tecla], [new_GetLine])],
+	    # libtecla.a?
+	    [LIBS="${OLD_LIBS}"
+	     AC_SEARCH_LIBS([tputs], [curses ncurses])
+	     NEW_LIBS="${LIBS}"
+	     LIBS="-ltecla ${LIBS}"
+	     AC_LINK_IFELSE([AC_LANG_CALL([], [new_GetLine])],
+	    	 # libtecla.a found
+		 [LIBS="${NEW_LIBS}"
+		  AC_CHECK_LIB([tecla], [new_GetLine])],
+	    	 # no tecla support
+		 [LIBS="${OLD_LIBS}"])])
 fi
 
 dnl
