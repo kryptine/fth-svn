@@ -5606,8 +5606,80 @@ fi
 
 done
 
-	# This is required if only a static library exists (libtecla.a).
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tputs" >&5
+	# If only a static library exists (libtecla.a),
+	# tputs() from curses is required.
+	OLD_LIBS="${LIBS}"
+	LIBS="-ltecla ${OLD_LIBS}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char new_GetLine ();
+int
+main ()
+{
+return new_GetLine ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  # libtecla.so found
+	    LIBS="${OLD_LIBS}"
+	     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for new_GetLine in -ltecla" >&5
+$as_echo_n "checking for new_GetLine in -ltecla... " >&6; }
+if ${ac_cv_lib_tecla_new_GetLine+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltecla  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char new_GetLine ();
+int
+main ()
+{
+return new_GetLine ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_tecla_new_GetLine=yes
+else
+  ac_cv_lib_tecla_new_GetLine=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tecla_new_GetLine" >&5
+$as_echo "$ac_cv_lib_tecla_new_GetLine" >&6; }
+if test "x$ac_cv_lib_tecla_new_GetLine" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBTECLA 1
+_ACEOF
+
+  LIBS="-ltecla $LIBS"
+
+fi
+
+else
+  # libtecla.a?
+	    LIBS="${OLD_LIBS}"
+	     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tputs" >&5
 $as_echo_n "checking for library containing tputs... " >&6; }
 if ${ac_cv_search_tputs+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5663,7 +5735,30 @@ if test "$ac_res" != no; then :
 
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for new_GetLine in -ltecla" >&5
+	     NEW_LIBS="${LIBS}"
+	     LIBS="-ltecla ${LIBS}"
+	     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char new_GetLine ();
+int
+main ()
+{
+return new_GetLine ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  # libtecla.a found
+		 LIBS="${NEW_LIBS}"
+		  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for new_GetLine in -ltecla" >&5
 $as_echo_n "checking for new_GetLine in -ltecla... " >&6; }
 if ${ac_cv_lib_tecla_new_GetLine+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -5708,6 +5803,15 @@ _ACEOF
 
 fi
 
+else
+  # no tecla support
+		 LIBS="${OLD_LIBS}"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 fi
 
 
