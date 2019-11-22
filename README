@@ -11,7 +11,7 @@ INTRODUCTION
 
      The core language of Fth is John Sadler's Forth-inspired command language
      Ficl.  Fth has object type extensions, for example array, hash, string,
-     regexp etc.
+     regexp, bignum, ratio etc.
 
 WHERE IS FTH LOCATED?
      You can get the latest archive from http://www.sf.net/projects/fth/.  If
