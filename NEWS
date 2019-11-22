@@ -1,3 +1,8 @@
+* version 1.4.0
+
+* libcrypto/openssl dependency removed
+* /usr/src/xedit/lisp/mp/mp*.[ch] to ./lib/ added for bignum and ratio 
+
 * new bignum words in src/numbers.c, tests/numbers.fs:
 
 	bgcd  ( x y -- z )	z = gcd(x, y)
@@ -6,9 +11,3 @@
 	bsqrt ( b1 -- b2 n )	b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
 	bmod  ( b1 b2 -- b3 )	b3 = b1 % b2
 	b/mod ( b1 b2 -- b3 b4 ) b1 / b2;  b3 = reminder;  b4 = quotient 
-
-* use xedit/lisp/mp/mp*.[ch] for bignum and ratio
-
-* remove libcrypto/openssl dependency
-
-* version 1.4.0

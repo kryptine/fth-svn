@@ -73,16 +73,16 @@ CONFIGURE AND BUILD FTH WITH SCONS
 	  More than one version of fth may be installed at the same time.  You
 	  can have different names, for example:
 
-		% scons --prefix=/usr/local --program-suffix=-1.3 test install
+		% scons --prefix=/usr/local --program-suffix=-1.4 test install
 
-	  installs the interpreter as fth-1.3, the library as libfth-1.3.so,
-	  creates a library path /usr/local/lib/fth-1.3 for local dynamic libs
-	  and installs the header files in /usr/local/include/fth-1.3:
+	  installs the interpreter as fth-1.4, the library as libfth-1.4.so,
+	  creates a library path /usr/local/lib/fth-1.4 for local dynamic libs
+	  and installs the header files in /usr/local/include/fth-1.4:
 
-		/usr/local/bin/fth-1.3
-		/usr/local/lib/libfth-1.3.so
-		/usr/local/lib/fth-1.3/
-		/usr/local/include/fth-1.3/
+		/usr/local/bin/fth-1.4
+		/usr/local/lib/libfth-1.4.so
+		/usr/local/lib/fth-1.4/
+		/usr/local/include/fth-1.4/
 
      --enable-warnings
 	  Enable extra C compiler warning flags.
@@ -117,21 +117,20 @@ CONFIGURE AND BUILD FTH WITH SCONS
      CFLAGS = '-fstack-protector -fno-strict-aliasing'
 
      Here is the full list of variables:
-     CC cc
-	  C Compiler, default cc.
-     CFLAGS cflags
+     CC	  C Compiler, default cc.
+     CFLAGS
 	  Additional CFLAGS, default empty.
-     LDFLAGS ldflags
+     LDFLAGS
 	  Additional LDFLAGS, default empty.
-     build path
+     build
 	  Build path, default ./build.
-     prefix path
+     prefix
 	  Install prefix.
-     program_prefix string
-     program_suffix string
+     program_prefix
+     program_suffix
 	  Prepend or append string to the fth program and library.  See above
 	  for an example.
-     tecla_prefix path
+     tecla_prefix
 	  tecla(7) prefix.
      libtecla
 	  Set to yes or no, default yes.
@@ -203,7 +202,7 @@ AUTOCONF MACRO FTH_CHECK_LIB
      FTH  Set to full path of the interpreter or "no", e.g.
 	  "/usr/local/bin/fth".
      FTH_VERSION
-	  Set to version number of the Fth package or "no", e.g.  "1.3.8".
+	  Set to version number of the Fth package or "no", e.g.  "1.4.0".
      FTH_CFLAGS
 	  Set to include path or "no", e.g. "-I/usr/local/include/fth".
      FTH_LIBS
