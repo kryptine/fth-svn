@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.38 11/23/19
+.\" @(#)README.man	1.39 11/23/19
 .\"
 .Dd 2019/11/23
 .Dt README
@@ -50,7 +50,7 @@ into an application to use Fth as extension language.
 .Pp
 The core language of Fth is John Sadler's Forth-inspired command
 language Ficl.  Fth has object type extensions, for example array,
-hash, string, regexp etc.
+hash, string, regexp, bignum, ratio etc.
 .\"
 .\" WHERE IS FTH LOCATED?
 .\"
