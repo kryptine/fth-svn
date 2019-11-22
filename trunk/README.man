@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.37 11/20/19
+.\" @(#)README.man	1.38 11/23/19
 .\"
-.Dd 2019/11/20
+.Dd 2019/11/23
 .Dt README
 .Os
 .\"
@@ -143,17 +143,17 @@ to the installed program and library name.  More than one version
 of fth may be installed at the same time.  You can have different
 names, for example:
 .Pp
-.Dl % scons --prefix=/usr/local --program-suffix=-1.3 test install
+.Dl % scons --prefix=/usr/local --program-suffix=-1.4 test install
 .Pp
-installs the interpreter as fth-1.3, the library as libfth-1.3.so,
-creates a library path /usr/local/lib/fth-1.3 for local dynamic
-libs and installs the header files in /usr/local/include/fth-1.3:
+installs the interpreter as fth-1.4, the library as libfth-1.4.so,
+creates a library path /usr/local/lib/fth-1.4 for local dynamic
+libs and installs the header files in /usr/local/include/fth-1.4:
 .Pp
 .Bd -literal -compact
-.Dl /usr/local/bin/fth-1.3
-.Dl /usr/local/lib/libfth-1.3.so
-.Dl /usr/local/lib/fth-1.3/
-.Dl /usr/local/include/fth-1.3/
+.Dl /usr/local/bin/fth-1.4
+.Dl /usr/local/lib/libfth-1.4.so
+.Dl /usr/local/lib/fth-1.4/
+.Dl /usr/local/include/fth-1.4/
 .Ed
 .Pp
 .It Fl Fl enable-warnings
@@ -198,24 +198,24 @@ CFLAGS = '-fstack-protector -fno-strict-aliasing'
 .Pp
 Here is the full list of variables:
 .Bl -tag -width MMM -compact
-.It Cm CC Ar cc
+.It Cm CC
 C Compiler, default
 .Cm cc .
-.It Cm CFLAGS Ar cflags
+.It Cm CFLAGS
 Additional CFLAGS, default empty.
-.It Cm LDFLAGS Ar ldflags
+.It Cm LDFLAGS
 Additional LDFLAGS, default empty.
-.It Cm build Ar path
+.It Cm build
 Build path, default
 .Pa ./build .
-.It Cm prefix Ar path
+.It Cm prefix
 Install prefix.
-.It Cm program_prefix Ar string
-.It Cm program_suffix Ar string
+.It Cm program_prefix
+.It Cm program_suffix
 Prepend or append
 .Ar string
 to the fth program and library.  See above for an example.
-.It Cm tecla_prefix Ar path
+.It Cm tecla_prefix
 .Xr tecla 7
 prefix.
 .It Cm libtecla
@@ -247,7 +247,7 @@ for explanations of them.  For more, try:
 .It Fl Fl prefix Ar path
 .It Fl Fl with-tecla-prefix Ar path
 .It Fl Fl program-prefix Ar string
-.It Fl Fl program-suffix Ar string
+.It Fl Fl program-suffix Ar string 
 .It Fl Fl enable-warnings
 .It Fl Fl enable-maintainer-mode
 .It Fl Fl disable-shared
@@ -303,7 +303,7 @@ Set to full path of the interpreter or \(dqno\(dq, e.g.
 \(dq/usr/local/bin/fth\(dq.
 .It FTH_VERSION
 Set to version number of the Fth package or \(dqno\(dq, e.g.
-\(dq1.3.8\(dq.
+\(dq1.4.0\(dq.
 .It FTH_CFLAGS
 Set to include path or \(dqno\(dq, e.g. \(dq-I/usr/local/include/fth\(dq.
 .It FTH_LIBS
