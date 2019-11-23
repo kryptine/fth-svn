@@ -22,7 +22,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.20 11/23/19
+# @(#)SConstruct	1.21 11/23/19
+
+version		= '1.4.1'
 
 #
 # scons -h
@@ -192,12 +194,12 @@ else:
 
 # os.uname()[0] uname -s	'NetBSD'
 # os.uname()[1] uname -n 	'pumpkin.fth-devel.net'
-# os.uname()[2] uname -r	'7.99.26'
+# os.uname()[2] uname -r	'9.99.18'
 # os.uname()[3] uname -v	'full version'
 # os.uname()[4] uname -m	'amd64'
 
 env['NAME']		= prg_prefix + 'fth' + prg_suffix
-env['VERSION']		= '1.4.1'
+env['VERSION']		= version
 env['SOURCE_URL']	= 'http://fth.sourceforge.net'
 env['LICENSE']		= 'bsd-2-clause'
 env['SUMMARY']		= "FTH Forth Scripting"
