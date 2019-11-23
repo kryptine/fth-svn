@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	2.45 11/23/19";
+const char libfth_sccsid[] = "@(#)misc.c	2.46 11/23/19";
 #endif /* not lint */
 
 #define FTH_DATE		"2019/11/23"

@@ -23,9 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This product includes software written by Eric Young (eay@cryptsoft.com).
- *
- * @(#)numbers.c	2.12 11/20/19
+ * @(#)numbers.c	2.13 11/23/19
  */
 
 #if defined(HAVE_CONFIG_H)
