@@ -1,15 +1,23 @@
-* version 1.4.1
+version 1.4.1
+=============
 
-* version 1.4.0
+version 1.4.0
+=============
 
 * libcrypto/openssl dependency removed
-* /usr/src/xedit/lisp/mp/mp*.[ch] to ./lib/ added for bignum and ratio 
 
-* new bignum words in src/numbers.c, tests/numbers.fs:
+* bignum and ratio
 
-	bgcd  ( x y -- z )	z = gcd(x, y)
-	blcm  ( x y -- z )	z = lcm(x, y)
-	broot ( b1 u -- b2 n )	b2 = root(b1, u); n=1 if exact, n=0 otherwise
-	bsqrt ( b1 -- b2 n )	b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
-	bmod  ( b1 b2 -- b3 )	b3 = b1 % b2
-	b/mod ( b1 b2 -- b3 b4 ) b1 / b2;  b3 = reminder;  b4 = quotient 
+	multi-precision library added from
+	/usr/xsrc/external/mit/xedit/dist/lisp/mp/mp*.[ch] to ./lib/ for
+	bignum and ratio numbers
+
+* new bignum words in src/numbers.c and tests/numbers.fs
+
+        bgcd  ( x y -- z )	z = gcd(x, y)
+        blcm  ( x y -- z )	z = lcm(x, y)
+        broot ( b1 u -- b2 n )	b2 = root(b1, u); n=1 if exact, n=0 otherwise
+        bsqrt ( b1 -- b2 n )	b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
+        bmod  ( b1 b2 -- b3 )	b3 = b1 % b2
+        b/mod ( b1 b2 -- b3 b4 ) b1 / b2;  b3 = reminder;  b4 = quotient 
+
