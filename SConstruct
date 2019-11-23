@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.19 11/21/19
+# @(#)SConstruct	1.20 11/23/19
 
 #
 # scons -h
@@ -197,7 +197,7 @@ else:
 # os.uname()[4] uname -m	'amd64'
 
 env['NAME']		= prg_prefix + 'fth' + prg_suffix
-env['VERSION']		= '1.4.0'
+env['VERSION']		= '1.4.1'
 env['SOURCE_URL']	= 'http://fth.sourceforge.net'
 env['LICENSE']		= 'bsd-2-clause'
 env['SUMMARY']		= "FTH Forth Scripting"

@@ -3426,7 +3426,7 @@ SSEEEE AALLSSOO
      sethostname(3), strftime(3), time(3), times(3), tecla(7).
 
 HHIISSTTOORRYY
-     This manual page describes version 1.4.0.  fftthh is based on _F_i_c_l,
+     This manual page describes version 1.4.1.  fftthh is based on _F_i_c_l,
      _F_o_r_t_h_-_i_n_s_p_i_r_e_d _c_o_m_m_a_n_d _l_a_n_g_u_a_g_e, version 4.0.31 written by John Sadler.
 
 AAUUTTHHOORRSS
@@ -3436,4 +3436,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.17                    2019/11/20                    NetBSD 9.99.17
+NetBSD 9.99.18                    2019/11/23                    NetBSD 9.99.18
