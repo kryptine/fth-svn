@@ -1,6 +1,10 @@
 version 1.4.1
 =============
 
+* log1p for log(x + 1) and expm1 for exp(x) - 1 (thanks to Sanjay Jain!)
+	
+	alias flog1p added for flogp1
+
 version 1.4.0
 =============
 

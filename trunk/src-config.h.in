@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)src-config.h.in	1.26 11/18/19
+ * @(#)src-config.h.in	1.27 11/24/19
  */
 
 #undef HAVE_ACCESS
@@ -42,6 +42,7 @@
 #undef HAVE_DLOPEN
 #undef HAVE_EXECLP
 #undef HAVE_EXECVP
+#undef HAVE_EXPM1
 #undef HAVE_FCNTL_H
 #undef HAVE_FLOOR
 #undef HAVE_FORK
@@ -64,6 +65,7 @@
 #undef HAVE_LDEXP
 #undef HAVE_LIBTECLA
 #undef HAVE_LIBTECLA_H
+#undef HAVE_LOG1P
 #undef HAVE_LOG2
 #undef HAVE_LSTAT
 #undef HAVE_MKDIR
