@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.21 11/23/19
+# @(#)SConstruct	1.22 11/24/19
 
 version		= '1.4.1'
 
@@ -470,6 +470,7 @@ def src_conf_test(env):
 		'dlopen',
 		'execlp',
 		'execvp',
+		'expm1',
 		'floor',
 		'fork',
 		'frexp',
@@ -489,6 +490,7 @@ def src_conf_test(env):
 		'issetugid',
 		'kill',
 		'ldexp',
+		'log1p',
 		'log2',
 		'lstat',
 		'mkdir',

@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)numbers.c	2.13 11/23/19
+ * @(#)numbers.c	2.14 11/24/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2016,26 +2016,45 @@ ficl_falign(ficlVm *vm)
 	ficlDictionaryAlign(ficlVmGetDictionary(vm));
 }
 
+/*
+ * Thanks to Sanjay Jain, we use expm1() and log1p()!
+ */
 static void
 ficl_fexpm1(ficlVm *vm)
 {
-#define h_fexpm1 "( x -- y )  y = exp(x) - 1.0"
 	ficlFloat 	f;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	f = ficlStackPopFloat(vm->dataStack);
+#if HAVE_EXPM1
+#define h_fexpm1 "( x -- y )  y = expm1(x)"
+	ficlStackPushFloat(vm->dataStack, expm1(f));
+#else
+#define h_fexpm1 "( x -- y )  y = exp(x) - 1.0"
 	ficlStackPushFloat(vm->dataStack, exp(f) - 1.0);
+#endif
 }
 
 static void
 ficl_flogp1(ficlVm *vm)
 {
-#define h_flogp1 "( x -- y )  y = log(x + 1.0)"
 	ficlFloat 	f;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	f = ficlStackPopFloat(vm->dataStack);
-	ficlStackPushFloat(vm->dataStack, fth_log(f + 1.0));
+
+	if (f >= 0.0) {
+#if HAVE_LOG1P
+#define h_flogp1 "( x -- y )  y = log1p(x)"
+		ficlStackPushFloat(vm->dataStack, log1p(f));
+#else
+#define h_flogp1 "( x -- y )  y = log(x + 1.0)"
+		ficlStackPushFloat(vm->dataStack, log(f + 1.0));
+#endif
+		return;
+	}
+	FTH_MATH_ERROR_THROW("log1p, x < 0");
+	/* NOTREACHED */
 }
 
 static void
@@ -4337,6 +4356,7 @@ init_number(void)
 	FTH_PRI1("fexpm1", ficl_fexpm1, h_fexpm1);
 	FTH_PRI1("flog", ficl_flog, h_flog);
 	FTH_PRI1("flogp1", ficl_flogp1, h_flogp1);
+	FTH_PRI1("flog1p", ficl_flogp1, h_flogp1);
 	FTH_PRI1("flog2", ficl_flog2, h_flog2);
 	FTH_PRI1("flog10", ficl_flog10, h_flog10);
 	FTH_PRI1("falog", ficl_falog, h_falog);
