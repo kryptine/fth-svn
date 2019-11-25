@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)numbers.c	2.17 11/25/19
+ * @(#)numbers.c	2.18 11/25/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -213,6 +213,9 @@ static FTH 	rt_div(FTH, FTH);
 static FTH 	number_floor(FTH);
 static FTH 	number_inv(FTH);
 static void 	ficl_rationalize(ficlVm *);
+
+static void	ficl_fegetround(ficlVm *);
+static void	ficl_fesetround(ficlVm *);
 
 #define NUMB_FIXNUM_P(Obj)	(IMMEDIATE_P(Obj) && FIXNUM_P(Obj))
 #define FTH_FLOAT_REF_INT(Obj)	FTH_ROUND(FTH_FLOAT_OBJECT(Obj))
@@ -4184,6 +4187,60 @@ finish:
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
 
+/*-
+ * fesetround(3) may use one of the following constants:
+ *
+ * FE_TONEAREST
+ * FE_DOWNWARD
+ * FE_UPWARD
+ * FE_TOWARDZERO
+ */
+#if defined(HAVE_FENV_H)
+#include <fenv.h>
+#endif
+
+static void
+ficl_fegetround(ficlVm *vm)
+{
+#define h_fegetround "( -- n )  float rounding mode\
+Return current floating-point rounding mode,  one of:\n\
+FE_TONEAREST\n\
+FE_DOWNWARD\n\
+FE_UPWARD\n\
+FE_TOWARDZERO\n\
+See also fesetround."
+	ficlInteger	n;
+
+	FTH_STACK_CHECK(vm, 0, 1);
+#if defined(HAVE_FEGETROUND)
+	n = fegetround();
+#else
+	n = -1;
+#endif
+	ficlStackPushInteger(vm->dataStack, n);
+}
+
+static void
+ficl_fesetround(ficlVm *vm)
+{
+#define h_fesetround "( n -- )  set float rounding mode\
+Set current floating-point rounding mode,  one of:\n\
+FE_TONEAREST\n\
+FE_DOWNWARD\n\
+FE_UPWARD\n\
+FE_TOWARDZERO\n\
+See also fegetround."
+	ficlInteger	n;
+
+	FTH_STACK_CHECK(vm, 1, 0);
+	n = ficlStackPopInteger(vm->dataStack);
+
+#if defined(HAVE_FESETROUND)
+	if (fesetround(n) < 0)
+		fth_warning("%d not supported, nothing changed", n);
+#endif
+}
+
 void
 init_number_types(void)
 {
@@ -4235,13 +4292,8 @@ init_number_types(void)
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
-
 #if defined(HAVE_TIME_H)
 #include <time.h>
-#endif
-
-#if defined(HAVE_FENV_H)
-#include <fenv.h>
 #endif
 
 void
@@ -4259,18 +4311,6 @@ init_number(void)
 		tmp = inf;
 	}
 	fth_infinity = inf;
-#endif
-
-#if defined(HAVE_FESETROUND)
-	/*-
-	 * fesetround(3) may use one of the following constants:
-	 *
-	 * FE_TONEAREST
-	 * FE_DOWNWARD
-	 * FE_UPWARD
-	 * FE_TOWARDZERO
-	 */
-	fesetround(FE_TONEAREST);
 #endif
 
 	/* int, llong, rand */
@@ -4587,6 +4627,16 @@ init_number(void)
 	FTH_PRI1("odd?", ficl_odd_p, h_odd_p);
 	FTH_PRI1("even?", ficl_even_p, h_even_p);
 	FTH_PRI1("prime?", ficl_prime_p, h_prime_p);
+
+	/* fenv(3), fegetround(3), fesetround(3) */
+	FTH_PRI1("fegetround", ficl_fegetround, h_fegetround);
+	FTH_PRI1("fesetround", ficl_fesetround, h_fesetround);
+#if defined(HAVE_FENV_H)
+	FTH_SET_CONSTANT(FE_TONEAREST);
+	FTH_SET_CONSTANT(FE_DOWNWARD);
+	FTH_SET_CONSTANT(FE_UPWARD);
+	FTH_SET_CONSTANT(FE_TOWARDZERO);
+#endif
 
 	/* From ficlSystemCompileCore(), ficl/primitive.c */
 	env = ficlSystemGetEnvironment(FTH_FICL_SYSTEM());

@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.202 11/25/19
+dnl @(#)configure.ac	1.203 11/25/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -213,7 +213,7 @@ dnl
 # Minix seems to lack asinh(3), acosh(3), atanh(3)
 AC_CHECK_FUNCS([acosh asinh atanh])
 AC_CHECK_FUNCS([access ceil chdir chmod chroot])
-AC_CHECK_FUNCS([execlp execvp expm1 fesetround])
+AC_CHECK_FUNCS([execlp execvp expm1 fegetround fesetround])
 AC_CHECK_FUNCS([floor fork frexp ftruncate])
 AC_CHECK_FUNCS([getegid getenv geteuid getgid gethostname getlogin getpid])
 AC_CHECK_FUNCS([getppid getservbyname getservbyport gettimeofday getuid])

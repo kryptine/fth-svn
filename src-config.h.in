@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)src-config.h.in	1.29 11/25/19
+ * @(#)src-config.h.in	1.30 11/25/19
  */
 
 #undef HAVE_ACCESS
@@ -44,6 +44,7 @@
 #undef HAVE_EXECVP
 #undef HAVE_EXPM1
 #undef HAVE_FCNTL_H
+#undef HAVE_FEGETROUND
 #undef HAVE_FESETROUND
 #undef HAVE_FLOOR
 #undef HAVE_FORK

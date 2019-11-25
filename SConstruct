@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.24 11/25/19
+# @(#)SConstruct	1.25 11/25/19
 
 version		= '1.4.1'
 
@@ -471,6 +471,7 @@ def src_conf_test(env):
 		'execlp',
 		'execvp',
 		'expm1',
+		'fegetround',
 		'fesetround',
 		'floor',
 		'fork',

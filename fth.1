@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.152 11/25/19
+.\" @(#)fth.1	1.153 11/25/19
 .\"
 .Dd 2019/11/25
 .Dt FTH 1
@@ -5362,6 +5362,24 @@ Two argument arbitrary precision rational functions.
 and
 .Ar q2
 can be any type of number.
+.\"
+.\" fegetround fesetround
+.\" FE_TONEAREST etc.
+.\"
+.It Cm fegetround (\ -- n\ )
+.It Cm fesetround (\ n --\ )
+Return or set current floating-point rounding mode, one of:
+.Bl -tag -compact
+.It Cm FE_TONEARES
+.It Cm FE_DOWNWARD
+.It Cm FE_UPWARD
+.It Cm FE_TOWARDZERO
+.El
+See
+.Xr fenv 3 ,
+.Xr fegetround 3
+and
+.Xr fesetround 3 .
 .El
 .Pp
 .\"
@@ -8661,6 +8679,9 @@ Wrong argument type provided.
 .Xr sendto 2 ,
 .Xr shutdown 2 ,
 .Xr socket 2 ,
+.Xr fegetround 3 ,
+.Xr fenv 3 ,
+.Xr fesetround 3 ,
 .Xr fopen 3 ,
 .Xr getopt 3 ,
 .Xr getservbyname 3 ,

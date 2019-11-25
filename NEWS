@@ -3,7 +3,16 @@ version 1.4.1
 
 * log1p for log(x + 1) and expm1 for exp(x) - 1 (thanks to Sanjay Jain!)
 	
-	alias flog1p added for flogp1
+        alias flog1p added for flogp1
+
+* new fenv(3) words and corresponding constants:
+
+	fegetround ( -- n )
+	fesetround ( n -- )
+	FE_TONEAREST
+	FE_DOWNWARD
+	FE_UPWARD
+	FE_TOWARDZERO
 
 version 1.4.0
 =============
