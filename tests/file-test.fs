@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2012 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)file-test.fs	1.26 9/13/13
+\ @(#)file-test.fs	1.27 11/26/19
 
 require test-utils.fs
 
@@ -123,8 +123,12 @@ require test-utils.fs
 		"/usr/local"
 	else
 		"/usr/pkg"
-	then file-chdir
-	"../bin" file-realpath "/usr/bin" string<> "file-realpath" test-expr
+	then dup file-chdir file-pwd string= if
+		\ This works only if /usr/{local,pkg} is a real path.
+		\ Eg in sdf.org we are at /sdf/sys/pkg6_amd64/ or so.
+		"../bin" file-realpath "/usr/bin"
+		    string<> "file-realpath" test-expr
+	then
 	cur-path file-chdir
 	\ file-chdir
 	"foo" 0o755 file-mkdir
