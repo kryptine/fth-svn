@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.200 11/24/19
+dnl @(#)configure.ac	1.202 11/25/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -134,7 +134,7 @@ dnl
 dnl Check for header files.
 dnl
 AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
-AC_CHECK_HEADERS([errno.h fcntl.h float.h])
+AC_CHECK_HEADERS([errno.h fcntl.h fenv.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h])
 AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
@@ -213,7 +213,8 @@ dnl
 # Minix seems to lack asinh(3), acosh(3), atanh(3)
 AC_CHECK_FUNCS([acosh asinh atanh])
 AC_CHECK_FUNCS([access ceil chdir chmod chroot])
-AC_CHECK_FUNCS([execlp execvp expm1 floor fork frexp ftruncate])
+AC_CHECK_FUNCS([execlp execvp expm1 fesetround])
+AC_CHECK_FUNCS([floor fork frexp ftruncate])
 AC_CHECK_FUNCS([getegid getenv geteuid getgid gethostname getlogin getpid])
 AC_CHECK_FUNCS([getppid getservbyname getservbyport gettimeofday getuid])
 AC_CHECK_FUNCS([issetugid kill labs ldexp log1p log2 lstat])

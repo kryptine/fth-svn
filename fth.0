@@ -1975,7 +1975,8 @@ DDEESSCCRRIIPPTTIIOONN
      fflloogg ( r1 -- r2 )
      fflloogg1100 ( r1 -- r2 )
      fflloogg22 ( r1 -- r2 )
-     ffllooggpp11 ( r1 -- r2 )
+     fflloogg11pp ( r1 -- r2 )
+     ffllooggpp11 ( r1 -- r2 ) alias for _f_l_o_g_1_p
      fflloooorr ( r1 -- r2 )
      ffppooww ( r1 r2 -- r3 ) alias for _f_*_*
      ffrroouunndd ( r1 -- r2 )
@@ -1986,9 +1987,8 @@ DDEESSCCRRIIPPTTIIOONN
      ffttaann ( r1 -- r2 )
      ffttaannhh ( r1 -- r2 )
      ffttrruunncc ( r1 -- r2 )
-          Math library functions for real numbers.  ffeexxppmm11 returns exp(r1) -
-          1.0, ffllooggpp11 returns log(r1 + 1.0) and ffssiinnccooss returns sin(r1) and
-          cos(r1).  _r_1 and probable second argument _r_2 can be any type of
+          Math library functions for real numbers.  ffssiinnccooss returns sin(r1)
+          and cos(r1).  _r_1 and probable second argument _r_2 can be any type of
           number but should fit in ficlFloat.
      11//cc ( c1 -- c2 )
      cc** ( c1 c2 -- c3 )
@@ -3436,4 +3436,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.18                    2019/11/23                    NetBSD 9.99.18
+NetBSD 9.99.18                    2019/11/25                    NetBSD 9.99.18

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.22 11/24/19
+# @(#)SConstruct	1.24 11/25/19
 
 version		= '1.4.1'
 
@@ -471,6 +471,7 @@ def src_conf_test(env):
 		'execlp',
 		'execvp',
 		'expm1',
+		'fesetround',
 		'floor',
 		'fork',
 		'frexp',
@@ -575,6 +576,7 @@ def fth_conf_test(env):
 
 	for fh in ['complex.h',
 		'errno.h',
+		'fenv.h',
 		'float.h',
 		'limits.h',
 		'memory.h',
