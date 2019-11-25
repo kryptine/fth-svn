@@ -2075,6 +2075,14 @@ DDEESSCCRRIIPPTTIIOONN
      qqppooww ( q1 q2 -- q3 ) alias for _q_*_*
           Two argument arbitrary precision rational functions.  _q_1 and _q_2 can
           be any type of number.
+     ffeeggeettrroouunndd (( ---- nn ))
+     ffeesseettrroouunndd (( nn ---- ))
+          Return or set current floating-point rounding mode, one of:
+          FFEE__TTOONNEEAARREESS
+          FFEE__DDOOWWNNWWAARRDD
+          FFEE__UUPPWWAARRDD
+          FFEE__TTOOWWAARRDDZZEERROO
+          See fenv(3), fegetround(3) and fesetround(3).
 
      Constants:
      eeuulleerr     e (~2.71828)
@@ -3421,9 +3429,10 @@ DDIIAAGGNNOOSSTTIICCSS
 SSEEEE AALLSSOO
      csh(1), snd(1), tcsh(1), vi(1), accept(2), bind(2), connect(2),
      listen(2), recv(2), recvfrom(2), send(2), sendto(2), shutdown(2),
-     socket(2), fopen(3), getopt(3), getservbyname(3), getservbyport(3),
-     gl_prompt_style(3), libfth(3), printf(3), realpath(3), regex(3),
-     sethostname(3), strftime(3), time(3), times(3), tecla(7).
+     socket(2), fegetround(3), fenv(3), fesetround(3), fopen(3), getopt(3),
+     getservbyname(3), getservbyport(3), gl_prompt_style(3), libfth(3),
+     printf(3), realpath(3), regex(3), sethostname(3), strftime(3), time(3),
+     times(3), tecla(7).
 
 HHIISSTTOORRYY
      This manual page describes version 1.4.1.  fftthh is based on _F_i_c_l,
