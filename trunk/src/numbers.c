@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)numbers.c	2.14 11/24/19
+ * @(#)numbers.c	2.17 11/25/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -2026,7 +2026,7 @@ ficl_fexpm1(ficlVm *vm)
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	f = ficlStackPopFloat(vm->dataStack);
-#if HAVE_EXPM1
+#if defined(HAVE_EXPM1)
 #define h_fexpm1 "( x -- y )  y = expm1(x)"
 	ficlStackPushFloat(vm->dataStack, expm1(f));
 #else
@@ -2044,7 +2044,7 @@ ficl_flogp1(ficlVm *vm)
 	f = ficlStackPopFloat(vm->dataStack);
 
 	if (f >= 0.0) {
-#if HAVE_LOG1P
+#if defined(HAVE_LOG1P)
 #define h_flogp1 "( x -- y )  y = log1p(x)"
 		ficlStackPushFloat(vm->dataStack, log1p(f));
 #else
@@ -4235,8 +4235,13 @@ init_number_types(void)
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
+
 #if defined(HAVE_TIME_H)
 #include <time.h>
+#endif
+
+#if defined(HAVE_FENV_H)
+#include <fenv.h>
 #endif
 
 void
@@ -4255,6 +4260,19 @@ init_number(void)
 	}
 	fth_infinity = inf;
 #endif
+
+#if defined(HAVE_FESETROUND)
+	/*-
+	 * fesetround(3) may use one of the following constants:
+	 *
+	 * FE_TONEAREST
+	 * FE_DOWNWARD
+	 * FE_UPWARD
+	 * FE_TOWARDZERO
+	 */
+	fesetround(FE_TONEAREST);
+#endif
+
 	/* int, llong, rand */
 	fth_srand((ficlUnsigned) time(NULL));
 	FTH_PRI1("number?", ficl_number_p, h_number_p);

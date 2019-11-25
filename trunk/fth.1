@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.151 11/23/19
+.\" @(#)fth.1	1.152 11/25/19
 .\"
-.Dd 2019/11/23
+.Dd 2019/11/25
 .Dt FTH 1
 .Os
 .\"
@@ -5179,7 +5179,8 @@ can be any type of number but should fit in ficlFloat.
 .It Cm flog No (\ r1 -- r2\ )
 .It Cm flog10 No (\ r1 -- r2\ )
 .It Cm flog2 No (\ r1 -- r2\ )
-.It Cm flogp1 No (\ r1 -- r2\ )
+.It Cm flog1p No (\ r1 -- r2\ )
+.It Cm flogp1 No (\ r1 -- r2\ ) alias for Sx flog1p
 .It Cm floor No (\ r1 -- r2\ )
 .It Cm fpow No (\ r1 r2 -- r3\ ) alias for Sx f**
 .It Cm fround No (\ r1 -- r2\ )
@@ -5191,10 +5192,6 @@ can be any type of number but should fit in ficlFloat.
 .It Cm ftanh No (\ r1 -- r2\ )
 .It Cm ftrunc No (\ r1 -- r2\ )
 Math library functions for real numbers.
-.Cm fexpm1
-returns exp(r1) - 1.0,
-.Cm flogp1
-returns log(r1 + 1.0) and
 .Cm fsincos
 returns sin(r1) and cos(r1).
 .Ar r1

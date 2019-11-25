@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth-config.h.in	1.91 11/18/19
+ * @(#)fth-config.h.in	1.92 11/25/19
  */
 
 #undef FTH_ALIGNOF_VOID_P
@@ -67,6 +67,7 @@
 #undef HAVE_CTAN
 #undef HAVE_CTANH
 #undef HAVE_ERRNO_H
+#undef HAVE_FENV_H
 #undef HAVE_FLOAT_H
 #undef HAVE_LIMITS_H
 #undef HAVE_LONG_LONG
