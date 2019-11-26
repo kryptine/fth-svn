@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.50 11/20/19
+# @(#)Makefile.in	1.51 11/26/19
 
 #
 # From FreeBSD /usr/src:
@@ -83,6 +83,9 @@ dist: Makefile
 include ${top_srcdir}/common.mk
 
 MP_CFLAGS	= ${fth_cflags} -I${prefix}/include ${MPCFLAGS}
+
+.SUFFIXES:
+.SUFFIXES: .o .c
 
 .c.o:
 	${CC} ${DEFS} ${MP_CFLAGS} -c $<
