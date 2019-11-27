@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)list-test.fs	1.22 1/11/15
+\ @(#)list-test.fs	1.23 11/27/19
 
 require test-utils.fs
 
@@ -73,6 +73,7 @@ require test-utils.fs
 	end-each
 	'foo <'> make-list 'wrong-type-arg nil fth-catch car 'wrong-type-arg <>
 	    "'foo make-list" test-expr
+	stack-reset
 	\ >list
 	0 1 2 3 >list '( 0 1 2 ) list<> "0 1 2 3 >list" test-expr
 	\ cons
@@ -138,12 +139,14 @@ require test-utils.fs
 	l1 -4 list-ref 0<> "list-ref -4" test-expr
 	l1 -5 <'> list-ref 'out-of-range nil fth-catch car 'out-of-range <>
 	    "list-ref -5" test-expr
+	stack-reset
 	\ list-set!
 	'( 0 1 2 3 ) to l1
 	l1 -4 4 list-set!
 	l1 -4 list-ref 4 <> "list-set! -4" test-expr
 	l1 -5 4 <'> list-set! 'out-of-range nil fth-catch car 'out-of-range <>
 	    "list-set! -5" test-expr
+	stack-reset
 	\ list-append
 	0 1 '( 2 3 4 ) 5 6  5 list-append '( 0 1 2 3 4 5 6 ) list<>
 	    "0 1 '( 2 3 4 ) 5 6  5 list-append" test-expr

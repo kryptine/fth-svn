@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2016 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)hash-test.fs	1.21 3/23/16
+\ @(#)hash-test.fs	1.22 11/27/19
 
 require test-utils.fs
 
@@ -67,12 +67,14 @@ lambda: <{ key val -- x }> val 10 + ; value hash-map-cb
 	h1 'baz hash-ref #f <> "hash-ref ('baz)" test-expr
 	10 'foo <'> hash-ref 'wrong-type-arg nil fth-catch
 	    car 'wrong-type-arg <> "10 'foo hash-ref" test-expr
+	stack-reset
 	\ hash-set!
 	hash{ 'foo 0 'bar 1 } to h1
 	h1 'baz 2 hash-set!
 	h1 'baz hash-ref 2 <> "hash-set!" test-expr
 	10 'baz 30 <'> hash-set! 'wrong-type-arg nil fth-catch
 	    car 'wrong-type-arg <> "10 'baz hash-set!" test-expr
+	stack-reset
 	\ hash-delete!
 	h1 'baz hash-delete! #( 'baz 2 ) array= not "hash-delete! (0)" test-expr
 	h1 'baz hash-delete! #f <> "hash-delete! (1)" test-expr

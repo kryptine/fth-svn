@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)regexp-test.fs	1.17 1/12/15
+\ @(#)regexp-test.fs	1.18 11/28/19
 
 'regexp provided? [unless] skip-file [then]
 
@@ -79,9 +79,11 @@ require test-utils.fs
 	/(foo)/ "foo-bar" "***\\2***" <'> regexp-replace
 	    'regexp-error dup fth-catch 'regexp-error <>
 	    "regexp-replace (4)" test-expr
+	stack-reset
 	/(foo)/ "foo-bar" "***\\***" <'> regexp-replace
 	    'regexp-error dup fth-catch 'regexp-error <>
 	    "regexp-replace (5)" test-expr
+	stack-reset
 	\ re-match
 	/a*/ "aaaaab" 0 re-match 5 <> "/a*/ 0 re-match 5 <>" test-expr
 	/a*/ "aaaaab" 2 re-match 3 <> "/a*/ 2 re-match 3 <>" test-expr
