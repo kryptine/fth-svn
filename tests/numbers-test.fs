@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)numbers-test.fs	1.31 11/20/19
+\ @(#)numbers-test.fs	1.32 11/27/19
 
 require test-utils.fs
 
@@ -152,32 +152,33 @@ require test-utils.fs
 
 'bignum provided? [if]
 	: bignum-test ( -- )
-		123456789012345678901234567890 bignum? not
-		    "bignum? (bignum)?" test-expr
-		123456789012345678901234567890 exact? not
-		    "exact? (bignum)?" test-expr
-		123456789012345678901234567890 integer? not
-		    "integer? (bignum)?" test-expr
-		123456789012345678901234567890 number? not
-		    "number? (bignum)?" test-expr
-		123456789012345678901234567890 unsigned? not
-		    "unsigned? (bignum)?" test-expr
-		123456789012345678901234567890 complex?
-		    "complex? (bignum)?" test-expr
-		123456789012345678901234567890 fixnum?
-		    "fixnum? (bignum)?" test-expr
-		123456789012345678901234567890 float?
-		    "float? (bignum)?" test-expr
-		123456789012345678901234567890 inexact?
-		    "inexact? (bignum)?" test-expr
-		123456789012345678901234567890 long-long?
-		    "long-long? (big)?" test-expr
-		123456789012345678901234567890 rational?
-		    "rational? (bignum)?" test-expr
-		123456789012345678901234567890 ulong-long?
-		    "ulong-long? (big)?" test-expr
-		\ >bignum
 		12 s>d { d12 }
+		12 s>b { b12 }
+		123456789012345678901234567890 { bn1 }
+		-123456789012345678901234567890 { bn1-neg }
+		123456789012345678901234567891 { bn1+1 }
+		246913578024691357802469135780 { bn1+bn1 }
+		123456789012345678901234567889 { bn1-1 }
+		-123456789012345678901234567889 { bn1-1-neg }
+		1234567890123456789012345678900 { bn1*10 }	\ big * 10
+		15241578753238836750495351562536198787501905199875019052100
+		    { bn1*bn1 }
+		12345678901234567890123456789 { bn1/10 }
+		61728394506172839450617283945 { bn1/2 }
+		\ bignum?
+		bn1 bignum? not "bignum? (bignum)?" test-expr
+		bn1 exact? not "exact? (bignum)?" test-expr
+		bn1 integer? not "integer? (bignum)?" test-expr
+		bn1 number? not "number? (bignum)?" test-expr
+		bn1 unsigned? not "unsigned? (bignum)?" test-expr
+		bn1 complex? "complex? (bignum)?" test-expr
+		bn1 fixnum? "fixnum? (bignum)?" test-expr
+		bn1 float? "float? (bignum)?" test-expr
+		bn1 inexact? "inexact? (bignum)?" test-expr
+		bn1 long-long? "long-long? (big)?" test-expr
+		bn1 rational? "rational? (bignum)?" test-expr
+		bn1 ulong-long? "ulong-long? (big)?" test-expr
+		\ >bignum
 		123 >bignum bignum? not "123 >bignum (bignum)?" test-expr
 		12e >bignum bignum? not "12e >bignum (bignum)?" test-expr
 		d12 >bignum bignum? not "12d >bignum (bignum)?" test-expr
@@ -186,141 +187,90 @@ require test-utils.fs
 		123 s>b bignum? not "123 s>b (bignum)?" test-expr
 		12e f>b bignum? not "12e f>b (bignum)?" test-expr
 		\ b>s b>f
-		12 s>b { b12 }
 		b12 b>s 12   <> "b12 b>s 12 <>?" test-expr
 		b12 b>f 12e f<> "b12 f>s 12e f<>?" test-expr
 		\ b0=
 		0 b0= not "0 b0=" test-expr
-		123456789012345678901234567890 b0= "big b0=" test-expr
+		bn1 b0= "big b0=" test-expr
 		\ b0<>
 		0 b0<> "0 b0<>" test-expr
-		123456789012345678901234567890 b0<> not "big b0<>" test-expr
+		bn1 b0<> not "big b0<>" test-expr
 		\ b0<
 		-1 b0< not "-1 b0<" test-expr
-		-123456789012345678901234567890 b0< not "-big b0<" test-expr
-		123456789012345678901234567890 b0< "big b0<" test-expr
+		bn1-neg b0< not "-big b0<" test-expr
+		bn1 b0< "big b0<" test-expr
 		\ b0>
 		1 b0> not "1 b0>" test-expr
-		123456789012345678901234567890 b0> not "big b0>" test-expr
-		-123456789012345678901234567890 b0> "-big b0>" test-expr
+		bn1 b0> not "big b0>" test-expr
+		bn1-neg b0> "-big b0>" test-expr
 		\ b0<=
 		0 b0<= not "0 b0<=" test-expr
-		-123456789012345678901234567890 b0<= not "-big b0<=" test-expr
-		123456789012345678901234567890 b0<= "big b0<=" test-expr
+		bn1-neg b0<= not "-big b0<=" test-expr
+		bn1 b0<= "big b0<=" test-expr
 		\ b0>=
 		0 b0>= not "0 b0>=" test-expr
-		123456789012345678901234567890 b0>= not "big b0>=" test-expr
-		-123456789012345678901234567890 b0>= "-big b0>=" test-expr
+		bn1 b0>= not "big b0>=" test-expr
+		bn1-neg b0>= "-big b0>=" test-expr
 		\ b=
 		1 1 b= not "1 1 b=?" test-expr
-		123456789012345678901234567890 1 b= "big 1 b=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b= not
-		    "big big b=?" test-expr
+		bn1 1 b= "big 1 b=?" test-expr
+		bn1 bn1 b= not "big big b=?" test-expr
 		\ b<>
 		1 1 b<> "1 1 b<>?" test-expr
-		123456789012345678901234567890 1 b<> not "big 1 b<>?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b<> "big big b<>?" test-expr
+		bn1 1 b<> not "big 1 b<>?" test-expr
+		bn1 bn1 b<> "big big b<>?" test-expr
 		\ b<
 		1 1 b< "1 1 b<?" test-expr
-		123456789012345678901234567890 1 b< "big 1 b<?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b< "big big b<?" test-expr
+		bn1 1 b< "big 1 b<?" test-expr
+		bn1 bn1 b< "big big b<?" test-expr
 		\ b>
 		1 1 b> "1 1 b>?" test-expr
-		123456789012345678901234567890 1 b> not "big 1 b>?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b> "big big b>?" test-expr
+		bn1 1 b> not "big 1 b>?" test-expr
+		bn1 bn1 b> "big big b>?" test-expr
 		\ b<=
 		1 1 b<= not "1 1 b<=?" test-expr
-		123456789012345678901234567890 1 b<= "big 1 b<=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b<= not
-		    "big big b<=?" test-expr
+		bn1 1 b<= "big 1 b<=?" test-expr
+		bn1 bn1 b<= not "big big b<=?" test-expr
 		\ b>=
 		1 1 b>= not "1 1 b>=?" test-expr
-		123456789012345678901234567890 1 b>= not "big 1 b>=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b>= not
-		    "big big b>=?" test-expr
+		bn1 1 b>= not "big 1 b>=?" test-expr
+		bn1 bn1 b>= not "big big b>=?" test-expr
 		\ b+
 		1 1 b+ 2 b= not "1 1 b+ 2 b=?" test-expr
 		1 1 b+ bignum? not "1 1 b+ (bignum)?" test-expr
-		123456789012345678901234567890 1 b+
-		    123456789012345678901234567891 b= not
-		    "big 1 b+ big+1 b=?" test-expr
-		1 123456789012345678901234567890 b+
-		    123456789012345678901234567891 b= not
-		    "1 big b+ 1+big b=?" test-expr
-		123456789012345678901234567890 1 b+ bignum? not 
-		    "big 1 b+ (bignum)?" test-expr
-		1 123456789012345678901234567890 b+ bignum? not 
-		    "1 big b+ (bignum)?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b+
-		    246913578024691357802469135780 b= not
-		    "big big b+ big+big b=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b+ bignum? not
-		    "big big b+ (bignum)?" test-expr
+		bn1 1 b+ bn1+1 b= not "big 1 b+ big+1 b=?" test-expr
+		1 bn1 b+ bn1+1 b= not "1 big b+ 1+big b=?" test-expr
+		bn1 1 b+ bignum? not "big 1 b+ (bignum)?" test-expr
+		1 bn1 b+ bignum? not "1 big b+ (bignum)?" test-expr
+		bn1 bn1 b+ bn1+bn1 b= not "big big b+ big+big b=?" test-expr
+		bn1 bn1 b+ bignum? not "big big b+ (bignum)?" test-expr
 		\ b-
 		1 1 b- 0 b= not "1 1 b- 0 b=?" test-expr
 		1 1 b- bignum? not "1 1 b- (bignum)?" test-expr
-		123456789012345678901234567890 1 b-
-		    123456789012345678901234567889 b= not
-		    "big 1 b- big-1 b=?" test-expr
-		1 123456789012345678901234567890 b-
-		    -123456789012345678901234567889 b= not
-		    "1 big b- 1-big b=?" test-expr
-		123456789012345678901234567890 1 b- bignum? not
-		    "big 1 b- (bignum)?" test-expr
-		1 123456789012345678901234567890 b- bignum? not
-		    "1 big b- (bignum)?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b- 0 b= not
-		    "big big b- big-big b=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b- bignum? not
-		    "big big b- (bignum)?" test-expr
+		bn1 1 b- bn1-1 b= not "big 1 b- big-1 b=?" test-expr
+		1 bn1 b- bn1-1-neg b= not "1 big b- 1-big b=?" test-expr
+		bn1 1 b- bignum? not "big 1 b- (bignum)?" test-expr
+		1 bn1 b- bignum? not "1 big b- (bignum)?" test-expr
+		bn1 bn1	b- 0 b= not "big big b- big-big b=?" test-expr
+		bn1 bn1 b- bignum? not "big big b- (bignum)?" test-expr
 		\ b*
 		1 -1 b* -1 b= not "1 -1 b* -1 b=?" test-expr
 		1 -1 b* bignum? not "1 -1 b* (bignum)?" test-expr
-		123456789012345678901234567890 10 b*
-		    1234567890123456789012345678900 b= not
-		    "big 10 b* big*10 b=?" test-expr
-		10 123456789012345678901234567890 b*
-		    1234567890123456789012345678900 b= not
-		    "10 big b* 10*big b=?" test-expr
-		123456789012345678901234567890 10 b* bignum? not
-		    "big 10 b* (bignum)?" test-expr
-		10 123456789012345678901234567890 b* bignum? not
-		    "10 big b* (bignum)?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b*
-		    15241578753238836750495351562536198787501905199875019052100
-		    b= not "big big b* big*big b=?" test-expr
-		123456789012345678901234567890
-		    123456789012345678901234567890 b* bignum? not
-		    "big big b* (bignum)?" test-expr
+		bn1 10 b* bn1*10 b= not "big 10 b* big*10 b=?" test-expr
+		10 bn1 b* bn1*10 b= not "10 big b* 10*big b=?" test-expr
+		bn1 10 b* bignum? not "big 10 b* (bignum)?" test-expr
+		10 bn1 b* bignum? not "10 big b* (bignum)?" test-expr
+		bn1 bn1 b* bn1*bn1 b= not "big big b* big*big b=?" test-expr
+		bn1 bn1 b* bignum? not "big big b* (bignum)?" test-expr
 		\ b/
 		1 -1 b/ -1 b= not "1 -1 b/ -1 b=?" test-expr
 		1 -1 b/ bignum? not "1 -1 b/ (bignum)?" test-expr
-		123456789012345678901234567890 10 b/
-		    12345678901234567890123456789 b= not
-		    "big 10 b/ big/10 b=?" test-expr
-		10 123456789012345678901234567890 b/ 0 b= not
-		    "10 big b/ 0 b=?" test-expr
-		123456789012345678901234567890 10 b/ bignum? not
-		    "big 10 b/ (bignum)?" test-expr
-		10 123456789012345678901234567890 b/ bignum? not
-		    "10 big b/ (bignum)?" test-expr
-		246913578024691357802469135780
-		    123456789012345678901234567890 b/ 2 b= not
-		    "big big b/ 2 b=?" test-expr
-		246913578024691357802469135780
-		    123456789012345678901234567890 b/ bignum? not
-		    "big big b/ (bignum)?" test-expr
+		bn1 10 b/ bn1/10 b= not "big 10 b/ big/10 b=?" test-expr
+		10 bn1 b/ 0 b= not "10 big b/ 0 b=?" test-expr
+		bn1 10 b/ bignum? not "big 10 b/ (bignum)?" test-expr
+		10 bn1 b/ bignum? not "10 big b/ (bignum)?" test-expr
+		bn1+bn1 bn1 b/ 2 b= not "big big b/ 2 b=?" test-expr
+		bn1+bn1 bn1 b/ bignum? not "big big b/ (bignum)?" test-expr
 		\ bgcd, blcm
 		1769 551 bgcd 29 b<> "1769 551 bgcd 29 b<>?" test-expr
 		31408 2718 bgcd 302 b<> "31408 2718 bgcd 302 b<>?" test-expr
@@ -358,23 +308,15 @@ require test-utils.fs
 		    0 <> swap 351364182882014 b<> ||
 		    "big bsqrt 0 big?" test-expr
 		\ bnegate
-		123456789012345678901234567890 bnegate
-		    -123456789012345678901234567890 b<>
-		    "big dnegate -big b=?" test-expr
-		-123456789012345678901234567890 bnegate
-		    123456789012345678901234567890 b<>
-		    "-big dnegate big b=?" test-expr
-		10 bnegate -10 b<> "10 dnegate -10 b<>?" test-expr
-		-10 bnegate 10 b<> "-10 dnegate 10 b<>?" test-expr
+		1 bnegate -1 b<> "1 bnegate -1 b<>?" test-expr
+		-1 bnegate 1 b<> "-1 bnegate 1 b<>?" test-expr
+		10 bnegate -10 b<> "10 bnegate -10 b<>?" test-expr
+		-10 bnegate 10 b<> "-10 bnegate 10 b<>?" test-expr
 		10 bnegate bignum? not "10 bnegate (bignum)?" test-expr
 		-10 bnegate bignum? not "-10 bnegate (bignum)?" test-expr
 		\ babs
-		123456789012345678901234567890 babs
-		    123456789012345678901234567890 b<>
-		    "big babs big b<>?" test-expr
-		-123456789012345678901234567890 babs
-		    123456789012345678901234567890 b<>
-		    "-big babs big b<>?" test-expr
+		1234567890 babs 1234567890 b<> "big babs big b<>?" test-expr
+		-1234567890 babs 1234567890 b<> "-big babs big b<>?" test-expr
 		10 babs 10 b<> "10 babs 10 b<>?" test-expr
 		-10 babs 10 b<> "-10 babs 10 b<>?" test-expr
 		10 babs bignum? not "10 babs (bignum)?" test-expr
@@ -394,16 +336,12 @@ require test-utils.fs
 		10 b2/ 5 b<> "10 b2/ 5 b<>?" test-expr
 		10 b2/ bignum? not "10 b2/ (bignum)?" test-expr
 		\ bmod
-		123456789012345678901234567890 2 bmod b0<>
-		    "big 2 bmod 0?" test-expr
-		123456789012345678901234567891 2 bmod 1 b<>
-		    "big 2 bmod 1?" test-expr
+		bn1 2 bmod b0<> "big 2 bmod 0?" test-expr
+		bn1+1 2 bmod 1 b<> "big 2 bmod 1?" test-expr
 		\ b/mod
-		123456789012345678901234567890 2 b/mod
-		61728394506172839450617283945 b<> swap b0<> ||
+		bn1 2 b/mod bn1/2 b<> swap b0<> ||
 		    "big 2 b/mod 0 big?" test-expr
-		123456789012345678901234567891 2 b/mod
-		61728394506172839450617283945 b<> swap 1 b<> ||
+		bn1+1 2 b/mod bn1/2 b<> swap 1 b<> ||
 		    "big 2 b/mod 1 big?" test-expr
 		\ blshift
 		1234 4 blshift 19744 b<> "1234 4 blshift 19744 b<>?" test-expr
@@ -432,6 +370,9 @@ require test-utils.fs
 
 'ratio provided? [if]  
 	: ratio-test ( -- )
+		123456789012345678901234567890 { bn1 }
+		-123456789012345678901234567890 { bn1-neg }
+		\ ratio?
 		12345/6789 exact?    not "exact? (ratio)?"      test-expr
 		12345/6789 number?   not "number? (ratio)?"     test-expr
 		12345/6789 rational? not "rational? (ratio)?"   test-expr
@@ -464,43 +405,38 @@ require test-utils.fs
 		10e f>q 10/1 q<> "10e f>q 10/1 q<>?" test-expr
 		\ q0=
 		0/1 q0= not "0/1 q0= not?" test-expr
-		123456789012345678901234567890  q0= "big q0=?" test-expr
-		-123456789012345678901234567890 q0= "-big q0=?" test-expr
+		bn1 q0= "big q0=?" test-expr
+		bn1-neg q0= "-big q0=?" test-expr
 		10  q0=     "10 q0=?" test-expr
 		-10 q0=     "-10 q0=?" test-expr
 		\ q0<>
 		0/1 q0<>     "0/1 q0<>?" test-expr
-		123456789012345678901234567890 q0<> not
-		    "big q0<> not?" test-expr
-		-123456789012345678901234567890 q0<> not
-		    "-big q0<> not?" test-expr
+		bn1 q0<> not "big q0<> not?" test-expr
+		bn1-neg q0<> not "-big q0<> not?" test-expr
 		10  q0<> not "10 q0<> not?" test-expr
 		-10 q0<> not "-10 q0<> not?" test-expr
 		\ q0<
 		0/1 q0<     "0/1 q0<?" test-expr
-		123456789012345678901234567890 q0< "big q0<?" test-expr
-		-123456789012345678901234567890 q0< not
-		    "-big q0< not?" test-expr
+		bn1 q0< "big q0<?" test-expr
+		bn1-neg q0< not "-big q0< not?" test-expr
 		10  q0<     "10 q0<?" test-expr
 		-10 q0< not "-10 q0< not?" test-expr
 		\ q0>
 		0/1 q0>     "0/1 q0>?" test-expr
-		123456789012345678901234567890 q0> not "big q0> not?" test-expr
-		-123456789012345678901234567890 q0> "-big q0>?" test-expr
+		bn1 q0> not "big q0> not?" test-expr
+		bn1-neg q0> "-big q0>?" test-expr
 		10  q0> not "10 q0> not?" test-expr
 		-10 q0>     "-10 q0>?" test-expr
 		\ q0<=
 		0/1 q0<= not "0/1 q0<= not?" test-expr
-		123456789012345678901234567890 q0<= "big q0<=?" test-expr
-		-123456789012345678901234567890 q0<= not
-		    "-big q0<= not?" test-expr
+		bn1 q0<= "big q0<=?" test-expr
+		bn1-neg q0<= not "-big q0<= not?" test-expr
 		10  q0<=     "10 q0<=?" test-expr
 		-10 q0<= not "-10 q0<= not?" test-expr
 		\ q0>=
 		0/1 q0>= not "0/1 q0>= not?" test-expr
-		123456789012345678901234567890 q0>= not
-		    "big q0>= not?" test-expr
-		-123456789012345678901234567890 q0>= "-big q0>=?" test-expr
+		bn1 q0>= not "big q0>= not?" test-expr
+		bn1-neg q0>= "-big q0>=?" test-expr
 		10  q0>= not "10 q0>= not?" test-expr
 		-10 q0>=     "-10 q0>=?" test-expr
 		\ q=
