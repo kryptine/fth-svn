@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)numbers.c	2.18 11/25/19
+ * @(#)numbers.c	2.19 11/27/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -163,12 +163,12 @@ static void 	bn_free(FTH);
 
 static ficlBignum mpi_new(void);
 static void 	mpi_free(ficlBignum);
-static void 	fth_to_bn(ficlBignum, FTH);
 static ficlBignum bn_math(FTH, FTH, int);
 static FTH 	bn_add(FTH, FTH);
 static FTH 	bn_sub(FTH, FTH);
 static FTH 	bn_mul(FTH, FTH);
 static FTH 	bn_div(FTH, FTH);
+static void 	ficl_to_bn(ficlVm *);
 static void 	ficl_bn_dot(ficlVm *);
 
 static void 	ficl_bgcd(ficlVm *);
@@ -195,10 +195,8 @@ static void 	rt_free(FTH);
 
 static ficlRatio mpr_new(void);
 static void 	mpr_free(ficlRatio);
-static void 	fth_to_rt(ficlRatio, FTH);
 static FTH	make_rational(ficlBignum, ficlBignum);
-static ficlFloat rt_to_float(ficlRatio);
-static void 	ficl_to_ratio(ficlVm *);
+static void 	ficl_to_rt(ficlVm *);
 static void 	ficl_q_dot(ficlVm *);
 static void 	ficl_qnegate(ficlVm *);
 static void 	ficl_qfloor(ficlVm *);
@@ -278,7 +276,7 @@ ficlStackPushBignum(ficlStack *stack, ficlBignum bn)
 }
 
 /*
- * Don't forget mpr_free(rt!
+ * Don't forget mpr_free(rt)!
  */
 ficlRatio
 ficlStackPopRatio(ficlStack *stack)
@@ -721,6 +719,10 @@ conj(ficlComplex z)
 
 /* End of missing complex functions. */
 
+/*
+ * ficlFloat
+ * ficlComplex
+ */
 #define N_FUNC_ONE_ARG(Name, CName, Type)				\
 static void								\
 ficl_ ## Name(ficlVm *vm)						\
@@ -733,6 +735,10 @@ ficl_ ## Name(ficlVm *vm)						\
 }									\
 static char* h_ ## Name = "( x -- y )  y = " #CName "(x)"
 
+/*
+ * ficlFloat
+ * ficlComplex
+ */
 #define N_FUNC_TWO_ARGS(Name, CName, Type)				\
 static void								\
 ficl_ ## Name(ficlVm *vm)						\
@@ -747,6 +753,10 @@ ficl_ ## Name(ficlVm *vm)						\
 }									\
 static char* h_ ## Name = "( x y -- z )  z = " #CName "(x, y)"
 
+/*
+ * ficl2Integer
+ * ficlComplex
+ */
 #define N_FUNC_TWO_ARGS_OP(Name, OP, Type)				\
 static void								\
 ficl_ ## Name(ficlVm *vm)						\
@@ -761,6 +771,9 @@ ficl_ ## Name(ficlVm *vm)						\
 }									\
 static char* h_ ## Name = "( x y -- z )  z = x " #OP " y"
 
+/*
+ * ficl2Integer
+ */
 #define N_FUNC_TEST_ZERO(Name, OP, Type)				\
 static void								\
 ficl_ ## Name(ficlVm *vm)						\
@@ -773,6 +786,11 @@ ficl_ ## Name(ficlVm *vm)						\
 }									\
 static char* h_ ## Name = "( x -- f )  x " #OP " 0 => flag"
 
+/*
+ * ficlUnsigned
+ * ficl2Integer
+ * ficl2Unsigned
+ */
 #define N_FUNC_TEST_TWO_OP(Name, OP, Type)				\
 static void								\
 ficl_ ## Name(ficlVm *vm)						\
@@ -844,6 +862,28 @@ ficl_to_c(ficlVm *vm)
 }
 #endif
 
+static void
+ficl_to_bn(ficlVm *vm)
+{
+#define h_to_bn "( x -- y )  Convert any number X to ficlBignum"
+	ficlBignum	bn;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	bn = ficlStackPopBignum(vm->dataStack);
+	ficlStackPushBignum(vm->dataStack, bn);
+}
+
+static void
+ficl_to_rt(ficlVm *vm)
+{
+#define h_to_rt "( x -- y )  Convert any number X to ficlRatio"
+	ficlRatio	rt;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	rt = ficlStackPopRatio(vm->dataStack);
+	ficlStackPushRatio(vm->dataStack, rt);
+}
+
 /* === LONG-LONG === */
 
 #define h_list_of_llong_functions "\
@@ -856,7 +896,7 @@ rand-seed-ref  rand-seed-set!\n\
 random    frandom\n\
 .r   u.r  d.   ud.  d.r  ud.r\n\
 u=   u<>  u<   u>   u<=  u>=\n\
-s>d  d>s  f>d  d>f\n\
+s>d  s>ud d>s  f>d  f>ud d>f\n\
 d0=  (dzero?)  d0<> d0<  (dnegative?) d0>  d0<= d0>= (dpositive?)\n\
 d=   d<>  d<   d>   d<=  d>=\n\
 du=  du<> du<  du>  du<= du>=\n\
@@ -1169,7 +1209,6 @@ fth_integer_ref(FTH x)
 ficlInteger
 fth_int_ref(FTH obj)
 {
-	int 		type;
 	ficlInteger 	i;
 
 	if (NUMB_FIXNUM_P(obj))
@@ -1178,24 +1217,22 @@ fth_int_ref(FTH obj)
 	if (!FTH_NUMBER_T_P(obj))
 		FTH_WRONG_NUMBER_TYPE(obj, "a ficlInteger");
 
-	type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_LLONG_T:
 		i = (ficlInteger) FTH_LONG_OBJECT(obj);
 		break;
 	case FTH_FLOAT_T:
 		i = (ficlInteger) FTH_FLOAT_REF_INT(obj);
 		break;
-	case FTH_COMPLEX_T:
-		i = (ficlInteger) FTH_ROUND(FTH_COMPLEX_REAL(obj));
+	case FTH_RATIO_T:
+		i = FTH_RATIO_REF_INT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		i = FTH_BIGNUM_REF_INT(obj);
 		break;
-	case FTH_RATIO_T:
+	case FTH_COMPLEX_T:
 	default:
-		i = FTH_RATIO_REF_INT(obj);
+		i = (ficlInteger) FTH_ROUND(FTH_COMPLEX_REAL(obj));
 		break;
 	}
 
@@ -1209,35 +1246,30 @@ fth_int_ref(FTH obj)
 ficlInteger
 fth_int_ref_or_else(FTH obj, ficlInteger fallback)
 {
-	int 		type;
 	ficlInteger 	i;
 
 	if (NUMB_FIXNUM_P(obj))
 		return (FIX_TO_INT(obj));
 
-	type = -1;
+	if (!FTH_NUMBER_T_P(obj))
+		return (fallback);
 
-	if (FTH_NUMBER_T_P(obj))
-		type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_LLONG_T:
 		i = (ficlInteger) FTH_LONG_OBJECT(obj);
 		break;
 	case FTH_FLOAT_T:
 		i = (ficlInteger) FTH_FLOAT_REF_INT(obj);
 		break;
-	case FTH_COMPLEX_T:
-		i = (ficlInteger) FTH_ROUND(FTH_COMPLEX_REAL(obj));
+	case FTH_RATIO_T:
+		i = FTH_RATIO_REF_INT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		i = FTH_BIGNUM_REF_INT(obj);
 		break;
-	case FTH_RATIO_T:
-		i = FTH_RATIO_REF_INT(obj);
-		break;
+	case FTH_COMPLEX_T:
 	default:
-		i = fallback;
+		i = (ficlInteger) FTH_ROUND(FTH_COMPLEX_REAL(obj));
 		break;
 	}
 
@@ -1250,7 +1282,6 @@ fth_int_ref_or_else(FTH obj, ficlInteger fallback)
 ficl2Integer
 fth_long_long_ref(FTH obj)
 {
-	int 		type;
 	ficl2Integer 	d;
 
 	if (FTH_LLONG_P(obj))
@@ -1262,21 +1293,19 @@ fth_long_long_ref(FTH obj)
 	if (!FTH_NUMBER_T_P(obj))
 		FTH_WRONG_NUMBER_TYPE(obj, "a ficl2Integer");
 
-	type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_FLOAT_T:
 		d = (ficl2Integer) FTH_FLOAT_REF_INT(obj);
 		break;
-	case FTH_COMPLEX_T:
-		d = (ficl2Integer) FTH_ROUND(FTH_COMPLEX_REAL(obj));
+	case FTH_RATIO_T:
+		d = (ficl2Integer) FTH_RATIO_REF_INT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		d = (ficl2Integer) FTH_BIGNUM_REF_INT(obj);
 		break;
-	case FTH_RATIO_T:
+	case FTH_COMPLEX_T:
 	default:
-		d = (ficl2Integer) FTH_RATIO_REF_INT(obj);
+		d = (ficl2Integer) FTH_ROUND(FTH_COMPLEX_REAL(obj));
 		break;
 	}
 
@@ -1289,7 +1318,6 @@ fth_long_long_ref(FTH obj)
 ficlUnsigned
 fth_unsigned_ref(FTH obj)
 {
-	int 		type;
 	ficlUnsigned 	u;
 
 	if (NUMB_FIXNUM_P(obj))
@@ -1298,24 +1326,22 @@ fth_unsigned_ref(FTH obj)
 	if (!FTH_NUMBER_T_P(obj))
 		FTH_WRONG_NUMBER_TYPE(obj, "a ficlUnsigned");
 
-	type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_LLONG_T:
 		u = (ficlUnsigned) FTH_LONG_OBJECT(obj);
 		break;
 	case FTH_FLOAT_T:
 		u = (ficlUnsigned) FTH_FLOAT_REF_INT(obj);
 		break;
-	case FTH_COMPLEX_T:
-		u = (ficlUnsigned) FTH_ROUND(FTH_COMPLEX_REAL(obj));
+	case FTH_RATIO_T:
+		u = (ficlUnsigned) FTH_RATIO_REF_INT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		u = (ficlUnsigned) FTH_BIGNUM_REF_UINT(obj);
 		break;
-	case FTH_RATIO_T:
+	case FTH_COMPLEX_T:
 	default:
-		u = (ficlUnsigned) FTH_RATIO_REF_INT(obj);
+		u = (ficlUnsigned) FTH_ROUND(FTH_COMPLEX_REAL(obj));
 		break;
 	}
 
@@ -1328,7 +1354,6 @@ fth_unsigned_ref(FTH obj)
 ficl2Unsigned
 fth_ulong_long_ref(FTH obj)
 {
-	int 		type;
 	ficl2Unsigned 	ud;
 
 	if (FTH_ULLONG_P(obj))
@@ -1340,21 +1365,19 @@ fth_ulong_long_ref(FTH obj)
 	if (!FTH_NUMBER_T_P(obj))
 		FTH_WRONG_NUMBER_TYPE(obj, "a ficl2Unsigned");
 
-	type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_FLOAT_T:
 		ud = (ficl2Unsigned) FTH_FLOAT_REF_INT(obj);
 		break;
-	case FTH_COMPLEX_T:
-		ud = (ficl2Unsigned) FTH_ROUND(FTH_COMPLEX_REAL(obj));
+	case FTH_RATIO_T:
+		ud = (ficl2Unsigned) FTH_RATIO_REF_INT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		ud = (ficl2Unsigned) FTH_BIGNUM_REF_UINT(obj);
 		break;
-	case FTH_RATIO_T:
+	case FTH_COMPLEX_T:
 	default:
-		ud = (ficl2Unsigned) FTH_RATIO_REF_INT(obj);
+		ud = (ficl2Unsigned) FTH_ROUND(FTH_COMPLEX_REAL(obj));
 		break;
 	}
 
@@ -1368,7 +1391,6 @@ fth_ulong_long_ref(FTH obj)
 ficlFloat
 fth_float_ref(FTH obj)
 {
-	int 		type;
 	ficlFloat 	f;
 
 	if (FTH_FLOAT_T_P(obj))
@@ -1380,21 +1402,19 @@ fth_float_ref(FTH obj)
 	if (!FTH_NUMBER_T_P(obj))
 		FTH_WRONG_NUMBER_TYPE(obj, "a ficlFloat");
 
-	type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_COMPLEX_T:
 		f = FTH_COMPLEX_REAL(obj);
 		break;
-	case FTH_LLONG_T:
-		f = (ficlFloat) FTH_LONG_OBJECT(obj);
+	case FTH_RATIO_T:
+		f = FTH_RATIO_REF_FLOAT(obj);
 		break;
 	case FTH_BIGNUM_T:
 		f = FTH_BIGNUM_REF_FLOAT(obj);
 		break;
-	case FTH_RATIO_T:
+	case FTH_LLONG_T:
 	default:
-		f = FTH_RATIO_REF_FLOAT(obj);
+		f = (ficlFloat) FTH_LONG_OBJECT(obj);
 		break;
 	}
 
@@ -1413,7 +1433,6 @@ fth_real_ref(FTH x)
 ficlFloat
 fth_float_ref_or_else(FTH obj, ficlFloat fallback)
 {
-	int 		type;
 	ficlFloat 	f;
 
 	if (FTH_FLOAT_T_P(obj))
@@ -1422,26 +1441,22 @@ fth_float_ref_or_else(FTH obj, ficlFloat fallback)
 	if (NUMB_FIXNUM_P(obj))
 		return ((ficlFloat) FIX_TO_INT(obj));
 
-	type = -1;
+	if (!FTH_NUMBER_T_P(obj))
+		return (fallback);
 
-	if (FTH_NUMBER_T_P(obj))
-		type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
+	switch (FTH_INSTANCE_TYPE(obj)) {
 	case FTH_COMPLEX_T:
 		f = FTH_COMPLEX_REAL(obj);
-		break;
-	case FTH_LLONG_T:
-		f = (ficlFloat) FTH_LONG_OBJECT(obj);
-		break;
-	case FTH_BIGNUM_T:
-		f = FTH_BIGNUM_REF_FLOAT(obj);
 		break;
 	case FTH_RATIO_T:
 		f = FTH_RATIO_REF_FLOAT(obj);
 		break;
+	case FTH_BIGNUM_T:
+		f = FTH_BIGNUM_REF_FLOAT(obj);
+		break;
+	case FTH_LLONG_T:
 	default:
-		f = fallback;
+		f = (ficlFloat) FTH_LONG_OBJECT(obj);
 		break;
 	}
 
@@ -1470,12 +1485,38 @@ fth_bignum_ref(FTH obj)
 	ficlBignum	bn;
 
 	bn = mpi_new();
-	fth_to_bn(bn, obj);
+
+	if (!FTH_NUMBER_T_P(obj)) {
+		mpi_seti(bn, fth_integer_ref(obj));
+		return (bn);
+	}
+
+	switch (FTH_INSTANCE_TYPE(obj)) {
+	case FTH_BIGNUM_T:
+		mpi_set(bn, FTH_BIGNUM_OBJECT(obj));
+		break;
+	case FTH_FLOAT_T:
+		mpi_setd(bn, FTH_FLOAT_OBJECT(obj));
+		break;
+	case FTH_RATIO_T:
+		mpi_setd(bn, FTH_RATIO_REF_FLOAT(obj));
+		break;
+	case FTH_LLONG_T:
+		mpi_seti(bn, FTH_LONG_OBJECT(obj));
+		break;
+	case FTH_COMPLEX_T:
+		mpi_setd(bn, FTH_COMPLEX_REAL(obj));
+		break;
+	default:
+		mpi_seti(bn, fth_integer_ref(obj));
+		break;
+	}
+
 	return (bn);
 }
 
 /*
- * Don't forget mpr_free(rt!
+ * Don't forget mpr_free(rt)!
  */
 ficlRatio
 fth_ratio_ref(FTH obj)
@@ -1483,7 +1524,34 @@ fth_ratio_ref(FTH obj)
 	ficlRatio	rt;
 
 	rt = mpr_new();
-	fth_to_rt(rt, obj);
+
+	if (!FTH_NUMBER_T_P(obj)) {
+		mpr_seti(rt, fth_integer_ref(obj), 1);
+		return (rt);
+	}
+
+	switch (FTH_INSTANCE_TYPE(obj)) {
+	case FTH_RATIO_T:
+		mpr_set(rt, FTH_RATIO_OBJECT(obj));
+		break;
+	case FTH_FLOAT_T:
+		mpr_setd(rt, FTH_FLOAT_OBJECT(obj));
+		break;
+	case FTH_BIGNUM_T:
+		mpi_set(mpr_num(rt), FTH_BIGNUM_OBJECT(obj));
+		mpi_seti(mpr_den(rt), 1);
+		break;
+	case FTH_LLONG_T:
+		mpr_seti(rt, (long)FTH_LONG_OBJECT(obj), 1);
+		break;
+	case FTH_COMPLEX_T:
+		mpr_setd(rt, FTH_COMPLEX_REAL(obj));
+		break;
+	default:
+		mpr_seti(rt, fth_integer_ref(obj), 1);
+		break;
+	}
+
 	return (rt);
 }
 
@@ -1781,7 +1849,7 @@ falign    f>s       s>f\n\
 f**       (fpow)    fabs\n\
 fmod      floor     fceil     ftrunc\n\
 fround    fsqrt     fexp      fexpm1\n\
-flog      flogp1    flog2     flog10    falog\n\
+flog      flogp1    (flog1p)  flog2     flog10    falog\n\
 fsin      fcos      ftan      fsincos\n\
 fasin     facos     fatan     fatan2\n\
 fsinh     fcosh     ftanh\n\
@@ -2191,11 +2259,10 @@ okay:
 #define h_list_of_complex_functions "\
 *** COMPLEX PRIMITIVES ***\n\
 complex?  real-ref  imag-ref (image-ref)\n\
-make-rectangular    alias >complex\n\
+make-rectangular (>complex)\n\
 make-polar\n\
-c.   s>c  c>s  f>c  c>f  q>c  >c\n\
-c0=  c=<> c0<  c0<= c0>  c0>=\n\
-c=   c<>  c<   c<=  c>   c>=\n\
+c.   s>c  c>s  f>c  c>f  q>c  (r>c)  >c\n\
+c0=  c0<> c=   c<>\n\
 c+   c-   c*   c/   1/c\n\
 carg      cabs (magnitude)    cabs2\n\
 c**  (cpow)    conj (conjugate)\n\
@@ -2583,16 +2650,19 @@ ficl_parse_complex(ficlVm *vm, ficlString s)
 
 #endif				/* HAVE_COMPLEX */
 
-/* === BIGNUM via bn(3) === */
+/* === BIGNUM via xedit/lisp/mp === */
 
 #define h_list_of_bignum_functions "\
 *** BIGNUMB PRIMITIVES ***\n\
-bignum?  >bignum\n\
+bignum?   >bignum   bn.\n\
 s>b  b>s  f>b  b>f\n\
 b0=  b0<> b0<  b0>  b0<= b0>=\n\
 b=   b<>  b<   b>   b<=  b>=\n\
-b+   b-   b*   b/   b** (bpow)\n\
-bnegate   babs"
+b+   b-   b*   b/\n\
+bgcd blcm b** (bpow)\n\
+broot bsqrt\n\
+bnegate   babs bmin bmax\n\
+b2*  b2/  bmod b/mod blshift brshift"
 
 static void
 ficl_bignum_p(ficlVm *vm)
@@ -2651,36 +2721,6 @@ static void
 bn_free(FTH self)
 {
 	mpi_free(FTH_BIGNUM_OBJECT(self));
-}
-
-static void
-fth_to_bn(ficlBignum bn, FTH obj)
-{
-	int 		type;
-
-	type = -1;
-
-	if (FTH_NUMBER_T_P(obj))
-		type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
-	case FTH_BIGNUM_T:
-		mpi_set(bn, FTH_BIGNUM_OBJECT(obj));
-		break;
-	case FTH_FLOAT_T:
-		mpi_setd(bn, FTH_FLOAT_OBJECT(obj));
-		break;
-	case FTH_COMPLEX_T:
-	case FTH_RATIO_T:
-		mpi_setd(bn, fth_float_ref(obj));
-		break;
-	case FTH_LLONG_T:
-		mpi_seti(bn, FTH_LONG_OBJECT(obj));
-		break;
-	default:
-		mpi_seti(bn, fth_integer_ref(obj));
-		break;
-	}
 }
 
 enum {
@@ -2776,10 +2816,6 @@ mpi_free(ficlBignum bn)
 FTH
 fth_make_big(FTH m)
 {
-#define h_make_big "( numb -- b )  NUMB to bignum\n\
-1 make-bignum => 1\n\
-1 make-bignum bignum? => #t\n\
-Return a new bignum object from NUMB."
 	return (fth_make_bignum(fth_bignum_ref(m)));
 }
 
@@ -2811,8 +2847,7 @@ fth_bn_ ## Name(FTH m)							\
 	else {								\
 		ficlBignum	x;					\
 									\
-		x = mpi_new();						\
-		fth_to_bn(x, m);					\
+		x = fth_bignum_ref(m);					\
 		flag = (mpi_cmpi(x, 0) OP 0);				\
 		mpi_free(x);						\
 	}								\
@@ -2854,26 +2889,22 @@ fth_bn_ ## Name(FTH m, FTH n)						\
 		else {							\
 			ficlBignum	y; 				\
 									\
-			y = mpi_new();					\
-			fth_to_bn(y, n);				\
+			y = fth_bignum_ref(n);				\
 			flag = (mpi_cmp(FTH_BIGNUM_OBJECT(m), y) OP 0);	\
 			mpi_free(y);					\
 		}							\
 	} else if (FTH_BIGNUM_P(n)) {					\
 		ficlBignum	x;					\
 									\
-		x = mpi_new();						\
-		fth_to_bn(x, m);					\
+		x = fth_bignum_ref(m);					\
 		flag = (mpi_cmp(x, FTH_BIGNUM_OBJECT(n)) OP 0);		\
 		mpi_free(x);						\
 	} else {							\
 		ficlBignum	x;					\
 		ficlBignum	y;					\
 									\
-		x = mpi_new();						\
-		y = mpi_new();						\
-		fth_to_bn(x, m);					\
-		fth_to_bn(y, n);					\
+		x = fth_bignum_ref(m);					\
+		y = fth_bignum_ref(n);					\
 		flag = (mpi_cmp(x, y) OP 0);				\
 		mpi_free(x);						\
 		mpi_free(y);						\
@@ -2919,7 +2950,7 @@ ficl_ ## Name(ficlVm *vm)						\
 	m = fth_pop_ficl_cell(vm);					\
 	ficlStackPushFTH(vm->dataStack, FName(m, n));			\
 }									\
-static char* h_ ## Name = "( x y -- z )  z = x " #OP " y (bignum/ratio)"
+static char* h_ ## Name = "( x y -- z )  z = x " #OP " y (bignum)"
 
 N_BIGNUM_MATH_FUNC_OP(badd, +, bn_add);
 N_BIGNUM_MATH_FUNC_OP(bsub, -, bn_sub);
@@ -3049,16 +3080,18 @@ ficl_bmin(ficlVm *vm)
 {
 	ficlBignum 	x;
 	ficlBignum 	y;
-	ficlBignum 	z;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	z = mpi_new();
 	y = ficlStackPopBignum(vm->dataStack);
 	x = ficlStackPopBignum(vm->dataStack);
-	mpi_set(z, (mpi_cmp(x, y) < 0) ? x : y);
-	mpi_free(x);
-	mpi_free(y);
-	ficlStackPushBignum(vm->dataStack, z);
+
+	if (mpi_cmp(x, y) < 0) {
+		mpi_free(y);
+		ficlStackPushBignum(vm->dataStack, x);
+	} else {
+		mpi_free(x);
+		ficlStackPushBignum(vm->dataStack, y);
+	}
 }
 
 static void
@@ -3066,16 +3099,18 @@ ficl_bmax(ficlVm *vm)
 {
 	ficlBignum 	x;
 	ficlBignum 	y;
-	ficlBignum 	z;
 
 	FTH_STACK_CHECK(vm, 2, 1);
-	z = mpi_new();
 	y = ficlStackPopBignum(vm->dataStack);
 	x = ficlStackPopBignum(vm->dataStack);
-	mpi_set(z, (mpi_cmp(x, y) >= 0) ? x : y);
-	mpi_free(x);
-	mpi_free(y);
-	ficlStackPushBignum(vm->dataStack, z);
+
+	if (mpi_cmp(x, y) >= 0) {
+		mpi_free(y);
+		ficlStackPushBignum(vm->dataStack, x);
+	} else {
+		mpi_free(x);
+		ficlStackPushBignum(vm->dataStack, y);
+	}
 }
 
 static void
@@ -3192,7 +3227,7 @@ ficl_parse_bignum(ficlVm *vm, ficlString s)
 	
 	bn = mpi_new();
 	mpi_setstr(bn, s.text, 10);
-	ficlStackPushFTH(vm->dataStack, fth_make_bignum(bn));
+	ficlStackPushBignum(vm->dataStack, bn);
 
 	if (vm->state == FICL_VM_STATE_COMPILE)
 		ficlPrimitiveLiteralIm(vm);
@@ -3204,15 +3239,18 @@ ficl_parse_bignum(ficlVm *vm, ficlString s)
 
 #define h_list_of_ratio_functions "\
 *** RATIONAL PRIMITIVES ***\n\
-ratio? (rational?)\n\
-make-ratio     >ratio\n\
-rationalize    exact->inexact      inexact->exact\n\
-numerator      denominator\n\
-q.   s>q  q>s  f>q  q>f\n\
+ratio? (rational?)  make-ratio  >ratio\n\
+q.   rationalize\n\
+s>q  q>s  c>q  f>q  q>f\n\
 q0=  q0<> q0<  q0>  q0<= q0>=\n\
 q=   q<>  q<   q>   q<=  q>=\n\
 q+   q-   q*   q/   1/q  q** (qpow)\n\
-qnegate   qfloor    qceil    qabs"
+qnegate   qfloor    qceil    qabs\n\
+and some aliases:\n\
+r.   1/r  s>r  r>s  c>r  f>r  r>f\n\
+rnegate   rfloor    rceil    rabs\n\
+exact->inexact      inexact->exact\n\
+numerator      denominator"
 
 static void
 ficl_ratio_p(ficlVm *vm)
@@ -3293,45 +3331,6 @@ mpr_free(ficlRatio rt)
 	mp_free(rt);
 }
 
-static void
-fth_to_rt(ficlRatio rt, FTH obj)
-{
-	int 		type;
-
-	type = -1;
-
-	if (FTH_NUMBER_T_P(obj))
-		type = FTH_INSTANCE_TYPE(obj);
-
-	switch (type) {
-	case FTH_RATIO_T:
-		mpr_set(rt, FTH_RATIO_OBJECT(obj));
-		break;
-	case FTH_BIGNUM_T:
-		mpi_set(mpr_num(rt), FTH_BIGNUM_OBJECT(obj));
-		mpi_seti(mpr_den(rt), 1);
-		break;
-	case FTH_FLOAT_T:
-		mpr_setd(rt, FTH_FLOAT_OBJECT(obj));
-		break;
-	case FTH_COMPLEX_T:
-		mpr_setd(rt, fth_float_ref(obj));
-		break;
-	case FTH_LLONG_T:
-		mpr_seti(rt, (long)FTH_LONG_OBJECT(obj), 1);
-		break;
-	default:
-		mpr_seti(rt, fth_integer_ref(obj), 1);
-		break;
-	}
-}
-
-static ficlFloat
-rt_to_float(ficlRatio r)
-{
-	return (mpr_getd(r));
-}
-
 static FTH
 make_rational(ficlBignum num, ficlBignum den)
 {
@@ -3398,21 +3397,6 @@ fth_make_ratio_from_float(ficlFloat f)
 }
 
 static void
-ficl_to_ratio(ficlVm *vm)
-{
-#define h_to_ratio "( numb -- ratio )  NUMB to ratio\n\
-1 s>r => 1/1\n\
-1 s>r ratio? => #t\n\
-0.25 s>r => 1/4\n\
-1 s>d s>r => 1/1\n\
-1 s>b s>r => 1/1\n\
-aliases: f>r, c>r, >ratio\n\
-Convert any number NUMB to a ratio object."
-	FTH_STACK_CHECK(vm, 1, 1);
-	ficlStackPushRatio(vm->dataStack, ficlStackPopRatio(vm->dataStack));
-}
-
-static void
 ficl_q_dot(ficlVm *vm)
 {
 #define h_q_dot "( numb -- )  number output\n\
@@ -3458,7 +3442,11 @@ fth_ratio_floor(FTH rt)
 {
 	ficlInteger 	i;
 
-	i = (ficlInteger) FTH_FLOOR(rt_to_float(FTH_RATIO_OBJECT(rt)));
+	if (FTH_RATIO_P(rt))
+		i = (ficlInteger) FTH_FLOOR(mpr_getd(FTH_RATIO_OBJECT(rt)));
+	else
+		i = fth_int_ref(rt);
+
 	return (fth_make_ratio_from_int(i, 1L));
 }
 
@@ -3471,7 +3459,8 @@ ficl_qfloor(ficlVm *vm)
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	x = ficlStackPopRatio(vm->dataStack);
-	y = (ficlInteger) FTH_FLOOR(rt_to_float(x));
+	y = (ficlInteger) FTH_FLOOR(mpr_getd(x));
+	mpr_free(x);
 	ficlStackPushInteger(vm->dataStack, y);
 }
 
@@ -3483,7 +3472,8 @@ ficl_qceil(ficlVm *vm)
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	x = ficlStackPopRatio(vm->dataStack);
-	y = (ficlInteger) FTH_CEIL(rt_to_float(x));
+	y = (ficlInteger) FTH_CEIL(mpr_getd(x));
+	mpr_free(x);
 	ficlStackPushInteger(vm->dataStack, y);
 }
 
@@ -3685,7 +3675,7 @@ N_BIGNUM_MATH_FUNC_OP(qdiv, /, rt_div);
 int
 ficl_parse_ratio(ficlVm *vm, ficlString s)
 {
-	ficlRatio	r;
+	ficlRatio	rt;
 
 	if (s.length < 3)
 		return (FICL_FALSE);
@@ -3693,9 +3683,9 @@ ficl_parse_ratio(ficlVm *vm, ficlString s)
 	if (memchr(s.text, '/', s.length) == NULL)
 		return (FICL_FALSE);
 	
-	r = mpr_new();
-	mpr_setstr(r, s.text, 10);
-	ficlStackPushFTH(vm->dataStack, fth_make_rational(r));
+	rt = mpr_new();
+	mpr_setstr(rt, s.text, 10);
+	ficlStackPushRatio(vm->dataStack, rt);
 
 	if (vm->state == FICL_VM_STATE_COMPILE)
 		ficlPrimitiveLiteralIm(vm);
@@ -3722,7 +3712,7 @@ number_floor(FTH x)
 		return (fth_make_float(FTH_FLOOR(FTH_FLOAT_OBJECT(x))));
 		break;
 	case FTH_RATIO_T:
-		f = FTH_FLOOR(rt_to_float(FTH_RATIO_OBJECT(x)));
+		f = FTH_FLOOR(mpr_getd(FTH_RATIO_OBJECT(x)));
 		return (fth_make_ratio_from_float(f));
 		break;
 	default:
@@ -4523,12 +4513,12 @@ init_number(void)
 
 	/* bignum */
 	FTH_PRI1("bignum?", ficl_bignum_p, h_bignum_p);
-	FTH_PROC("make-bignum", fth_make_big, 1, 0, 0, h_make_big);
-	FTH_PROC(">bignum", fth_make_big, 1, 0, 0, h_make_big);
+	FTH_PRI1("make-bignum", ficl_to_bn, h_to_bn);
+	FTH_PRI1(">bignum", ficl_to_bn, h_to_bn);
 	FTH_PRI1("bn.", ficl_bn_dot, h_bn_dot);
-	FTH_PROC("s>b", fth_make_big, 1, 0, 0, h_make_big);
+	FTH_PRI1("s>b", ficl_to_bn, h_to_bn);
 	FTH_PRI1("b>s", ficl_to_s, h_to_s);
-	FTH_PROC("f>b", fth_make_big, 1, 0, 0, h_make_big);
+	FTH_PRI1("f>b", ficl_to_bn, h_to_bn);
 	FTH_PRI1("b>f", ficl_to_f, h_to_f);
 	FTH_PRI1("b0=", ficl_beqz, h_beqz);
 	FTH_PRI1("b0<>", ficl_bnoteqz, h_bnoteqz);
@@ -4568,18 +4558,18 @@ init_number(void)
 	FTH_PRI1("ratio?", ficl_ratio_p, h_ratio_p);
 	FTH_PRI1("rational?", ficl_ratio_p, h_ratio_p);
 	FTH_PROC("make-ratio", fth_make_ratio, 2, 0, 0, h_make_ratio);
-	FTH_PRI1(">ratio", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1(">ratio", ficl_to_rt, h_to_rt);
 	FTH_PRI1("rationalize", ficl_rationalize, h_rationalize);
 	FTH_PRI1("q.", ficl_q_dot, h_q_dot);
 	FTH_PRI1("r.", ficl_q_dot, h_q_dot);
-	FTH_PRI1("s>q", ficl_to_ratio, h_to_ratio);
-	FTH_PRI1("s>r", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("s>q", ficl_to_rt, h_to_rt);
+	FTH_PRI1("s>r", ficl_to_rt, h_to_rt);
 	FTH_PRI1("q>s", ficl_to_s, h_to_s);
 	FTH_PRI1("r>s", ficl_to_s, h_to_s);
-	FTH_PRI1("c>q", ficl_to_ratio, h_to_ratio);
-	FTH_PRI1("c>r", ficl_to_ratio, h_to_ratio);
-	FTH_PRI1("f>q", ficl_to_ratio, h_to_ratio);
-	FTH_PRI1("f>r", ficl_to_ratio, h_to_ratio);
+	FTH_PRI1("c>q", ficl_to_rt, h_to_rt);
+	FTH_PRI1("c>r", ficl_to_rt, h_to_rt);
+	FTH_PRI1("f>q", ficl_to_rt, h_to_rt);
+	FTH_PRI1("f>r", ficl_to_rt, h_to_rt);
 	FTH_PRI1("q>f", ficl_to_f, h_to_f);
 	FTH_PRI1("r>f", ficl_to_f, h_to_f);
 	FTH_PRI1("q0=", ficl_qeqz, h_qeqz);
