@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)proc-test.fs	1.26 1/12/15
+\ @(#)proc-test.fs	1.27 11/27/19
 
 require test-utils.fs
 
@@ -30,6 +30,10 @@ require test-utils.fs
 : proc-test-xt ; *lineno* value proc-test-lineno
 
 <'> noop alias hash1-test
+<'> noop 0 make-proc value prc-noop
+<'> + 2 make-proc value prc-+
+<'> + #( 2 0 #f ) make-proc value prc-+-3-args
+<'> f+ 2 make-proc value prc-f+
 
 lambda: <{ a b -- c }>
 	a b +
@@ -72,20 +76,17 @@ lambda: <{ val -- res }>
 ;
 
 : proc-test ( -- )
-	nil nil { prc0 prc1 }
 	\ word?, proc?, thunk?, xt?, make-proc
 	<'> -           proc?  #f <> "proc? -" test-expr
 	<'> source-file proc?    not "proc? source-file" test-expr
 	<'> source-file thunk? #f <> "thunk? source-file" test-expr
-	<'> noop 0 make-proc thunk? not "thunk? noop" test-expr
-	<'> noop 0 make-proc xt? #f <> "xt? noop" test-expr
+	prc-noop thunk? not "thunk? noop" test-expr
+	prc-noop xt? #f <> "xt? noop" test-expr
 	<'> make-array       xt? not   "xt? make-array" test-expr
 	10 word? #f <> "word? 10" test-expr
-	<'> noop 0 make-proc word? not "word? noop" test-expr
-	<'> + 2 make-proc to prc0
-	<'> + #( 2 0 #f ) make-proc to prc1
-	prc0 #( 0 1 ) proc-apply 1 <> "prc0 -> 1" test-expr
-	prc1 #( 2 3 ) proc-apply 5 <> "prc1 -> 5" test-expr
+	prc-noop word? not "word? noop" test-expr
+	prc-+ #( 0 1 ) proc-apply 1 <> "prc-+ -> 1" test-expr
+	prc-+-3-args #( 2 3 ) proc-apply 5 <> "prc-+-3-args -> 5" test-expr
 	\ proc-arity
 	<'> - proc-arity #f <> "proc-arity -" test-expr
 	<'> source-line proc-arity #( 1 0 #f ) array= not
@@ -95,15 +96,14 @@ lambda: <{ val -- res }>
 	\ proc-source-ref|set!
 	<'> noop #f proc-source-set!
 	<'> f+   #f proc-source-set!
-	<'> noop 0 make-proc to prc0
-	<'> f+   2 make-proc to prc1
-	prc0 proc-source-ref "noop" string<> "proc-source-ref (noop)" test-expr
-	prc1 proc-source-ref "f+"   string<> "proc-source-ref (f+)"   test-expr
-	prc0 "we do nothing" proc-source-set!
-	prc0 proc-source-ref "we do nothing" string<>
+	prc-noop proc-source-ref "noop" string<>
+	    "proc-source-ref (noop)" test-expr
+	prc-f+ proc-source-ref "f+"   string<> "proc-source-ref (f+)"   test-expr
+	prc-noop "we do nothing" proc-source-set!
+	prc-noop proc-source-ref "we do nothing" string<>
 	    "proc-source-set! (we do nothing)" test-expr
-	prc1 "( a b -- c ) f+ " proc-source-set!
-	prc1 proc-source-ref "( a b -- c ) f+ " string<>
+	prc-f+ "( a b -- c ) f+ " proc-source-set!
+	prc-f+ proc-source-ref "( a b -- c ) f+ " string<>
 	    "proc-source-set! ( a b -- c ) f+" test-expr
 	\ proc->xt
 	<'> noop 0 make-proc proc->xt <'> noop <> "proc->xt (1)" test-expr
@@ -113,7 +113,7 @@ lambda: <{ val -- res }>
 	f*prc #( 1.5 1.5 ) run-proc 2.25 f<> "run-proc f*" test-expr
 	<'> noop 0 make-proc { noop-prc }
 	noop-prc #() run-proc #f <> "run-proc noop" test-expr
-	prc1 #( 0 1 ) run-proc 1 f<> "0 1 run-proc" test-expr
+	prc-f+ #( 0 1 ) run-proc 1 f<> "0 1 run-proc" test-expr
 	lambda-proc #( 2 3 ) run-proc 5  <> "2 3 run-proc" test-expr
 	\ <'set>
 	object-print-length { old-len }

@@ -1,4 +1,4 @@
-\ Copyright (c) 2006-2015 Michael Scholz <mi-scholz@users.sourceforge.net>
+\ Copyright (c) 2006-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
 \ All rights reserved.
 \
 \ Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
 \
-\ @(#)array-test.fs	1.28 1/11/15
+\ @(#)array-test.fs	1.29 11/27/19
 
 require test-utils.fs
 
@@ -71,6 +71,7 @@ require test-utils.fs
 	end-each
 	'foo <'> make-array 'wrong-type-arg nil fth-catch car 'wrong-type-arg <>
 	    "'foo make-array" test-expr
+	stack-reset
 	\ >array
 	0 1 2 3 >array #( 0 1 2 ) array<> "0 1 2 3 >array" test-expr
 	\ #()
@@ -103,12 +104,14 @@ require test-utils.fs
 	a1 -4 array-ref 0<> "array-ref -4" test-expr
 	a1 -5 <'> array-ref 'out-of-range nil fth-catch car 'out-of-range <>
 	    "array-ref -5" test-expr
+	stack-reset
 	\ array-set!
 	#( 0 1 2 3 ) to a1
 	a1 -4 4 array-set!
 	a1 -4 array-ref 4 <> "array-set! -4" test-expr
 	a1 -5 4 <'> array-set! 'out-of-range nil fth-catch car 'out-of-range <>
 	    "array-set! -5" test-expr
+	stack-reset
 	\ array-push
 	#( 0 1 ) to ary
 	ary 2 array-push #( 0 1 2 ) array<> "array-push" test-expr
