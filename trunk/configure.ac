@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.203 11/25/19
+dnl @(#)configure.ac	1.204 12/1/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -206,6 +206,7 @@ AC_SEARCH_LIBS([dlopen], [c dl], [AC_DEFINE([HAVE_DLOPEN], [1],
 AC_SEARCH_LIBS([regcomp], [c regex gnuregex], [AC_DEFINE([HAVE_POSIX_REGEX],
     [1], [Define to 1 if you have POSIX regex.])])
 AC_CHECK_DECLS([isnan, isinf], [], [], [@%:@include <math.h>])
+AC_CHECK_DECLS([_SC_CLK_TCK], [], [], [@%:@include <sys/unistd.h>])
 
 dnl
 dnl Check for functions.	      

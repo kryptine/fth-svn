@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.25 11/25/19
+# @(#)SConstruct	1.26 12/1/19
 
 version		= '1.4.1'
 
@@ -367,6 +367,7 @@ def src_conf_test(env):
 
 	for d in ['isinf', 'isnan']:
 		src_conf_h.CheckDeclaration(d, '#include <math.h>')
+	src_conf_h.CheckDeclaration('_SC_CLK_TCK', '#include <sys/unistd.h>')
 
 	if not src_conf_h.TryCompile("""
 	#include <sys/types.h>
