@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)src-config.h.in	1.30 11/25/19
+ * @(#)src-config.h.in	1.31 12/1/19
  */
 
 #undef HAVE_ACCESS
@@ -37,6 +37,7 @@
 #undef HAVE_CHROOT
 #undef HAVE_DECL_ISINF
 #undef HAVE_DECL_ISNAN
+#undef HAVE_DECL__SC_CLK_TCK
 #undef HAVE_DIRENT_H
 #undef HAVE_DLFCN_H
 #undef HAVE_DLOPEN
