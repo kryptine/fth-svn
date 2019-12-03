@@ -4587,7 +4587,20 @@ fi
 
 done
 
-for ac_header in sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h
+for ac_header in sys/time.h sys/times.h sys/uio.h sys/un.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/wait.h time.h varargs.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -5020,6 +5033,16 @@ if test "x$ac_cv_type_long_long" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_LONG_LONG 1
+_ACEOF
+
+
+fi
+
+ac_fn_c_check_type "$LINENO" "long double" "ac_cv_type_long_double" "$ac_includes_default"
+if test "x$ac_cv_type_long_double" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_LONG_DOUBLE 1
 _ACEOF
 
 
@@ -5508,7 +5531,7 @@ _ACEOF
 fi
 done
 
-for ac_func in floor fork frexp ftruncate
+for ac_func in floor fork ftruncate
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -5544,7 +5567,7 @@ _ACEOF
 fi
 done
 
-for ac_func in issetugid kill labs ldexp log1p log2 lstat
+for ac_func in issetugid kill labs log1p log2 lstat
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -5604,7 +5627,7 @@ _ACEOF
 fi
 done
 
-for ac_func in tzset utimes wait waitpid
+for ac_func in tzset utimes wait waitpid vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
