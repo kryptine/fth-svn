@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.26 12/1/19
+# @(#)SConstruct	1.27 12/3/19
 
 version		= '1.4.1'
 
@@ -274,6 +274,7 @@ def conf_test(env):
 	env['sizeof_void_p'] = conf.CheckTypeSize('void *')
 	env['sizeof_long'] = conf.CheckTypeSize('long')
 	env['sizeof_long_long'] = conf.CheckTypeSize('long long')
+	env['long_double'] = conf.CheckType('long double')
 	env['mode_t'] = conf.CheckType('mode_t', '#include <sys/types.h>')
 	env['size_t'] = conf.CheckType('size_t', '#include <sys/types.h>')
 	env['off_t'] = conf.CheckType('off_t', '#include <sys/types.h>')
@@ -456,7 +457,8 @@ def src_conf_test(env):
 		'sys/uio.h',
 		'sys/un.h',
 		'sys/wait.h',
-		'time.h']:
+		'time.h',
+		'varargs.h']:
 		src_conf_h.CheckCHeader(h)
 
 	# Minix seems to lack asinh(3), acosh(3), atanh(3)
@@ -476,7 +478,6 @@ def src_conf_test(env):
 		'fesetround',
 		'floor',
 		'fork',
-		'frexp',
 		'ftruncate',
 		'getegid',
 		'getenv',
@@ -492,7 +493,6 @@ def src_conf_test(env):
 		'getuid',
 		'issetugid',
 		'kill',
-		'ldexp',
 		'log1p',
 		'log2',
 		'lstat',
@@ -524,6 +524,7 @@ def src_conf_test(env):
 		'truncate',
 		'tzset',
 		'utimes',
+		'vsnprintf',
 		'wait',
 		'waitpid']:
 		src_conf_h.CheckFunc(f)

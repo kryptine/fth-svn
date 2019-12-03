@@ -22,7 +22,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.204 12/1/19
+dnl @(#)configure.ac	1.205 12/3/19
 dnl
 dnl Process this file with autoconf to produce configure.
 
@@ -137,7 +137,8 @@ AC_CHECK_HEADERS([arpa/inet.h complex.h dirent.h dlfcn.h])
 AC_CHECK_HEADERS([errno.h fcntl.h fenv.h float.h])
 AC_CHECK_HEADERS([limits.h netdb.h netinet/in.h])
 AC_CHECK_HEADERS([regex.h setjmp.h signal.h stdarg.h sys/socket.h])
-AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h sys/wait.h time.h])
+AC_CHECK_HEADERS([sys/time.h sys/times.h sys/uio.h sys/un.h])
+AC_CHECK_HEADERS([sys/wait.h time.h varargs.h])
 # Special FreeBSD library 'libmissing'
 # added to ports/math/libmissing (2012/12/20).
 AC_CHECK_HEADERS([missing_math.h missing_complex.h],
@@ -174,6 +175,7 @@ AC_CHECK_MEMBERS([struct dirent.d_ino,
 @%:@include <dirent.h>
 @%:@endif])
 AC_CHECK_TYPES([long long])
+AC_CHECK_TYPES([long double])
 AC_CHECK_TYPES([sig_t], [], [], [
 @%:@if HAVE_SIGNAL_H
 @%:@include <signal.h>
@@ -215,15 +217,15 @@ dnl
 AC_CHECK_FUNCS([acosh asinh atanh])
 AC_CHECK_FUNCS([access ceil chdir chmod chroot])
 AC_CHECK_FUNCS([execlp execvp expm1 fegetround fesetround])
-AC_CHECK_FUNCS([floor fork frexp ftruncate])
+AC_CHECK_FUNCS([floor fork ftruncate])
 AC_CHECK_FUNCS([getegid getenv geteuid getgid gethostname getlogin getpid])
 AC_CHECK_FUNCS([getppid getservbyname getservbyport gettimeofday getuid])
-AC_CHECK_FUNCS([issetugid kill labs ldexp log1p log2 lstat])
+AC_CHECK_FUNCS([issetugid kill labs log1p log2 lstat])
 AC_CHECK_FUNCS([mkdir mkfifo opendir pow psignal qsort])
 AC_CHECK_FUNCS([realpath rename rint rmdir setegid setenv seteuid setgid])
 AC_CHECK_FUNCS([sethostname setuid sleep strncasecmp strerror])
 AC_CHECK_FUNCS([strptime symlink sysconf times trunc truncate])
-AC_CHECK_FUNCS([tzset utimes wait waitpid])
+AC_CHECK_FUNCS([tzset utimes wait waitpid vsnprintf])
 
 dnl
 dnl Check for --with-tecla.
