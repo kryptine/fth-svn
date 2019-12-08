@@ -114,7 +114,7 @@ CONFIGURE AND BUILD FTH WITH SCONS
 
      % cat ~/.scons/fth.py
      CC = 'clang'
-     CFLAGS = '-fstack-protector -fno-strict-aliasing'
+     CFLAGS = '-fno-strict-aliasing'
 
      Here is the full list of variables:
      CC	  C Compiler, default cc.

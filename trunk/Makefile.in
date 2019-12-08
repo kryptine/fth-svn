@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)Makefile.in	1.145 11/18/19
+# @(#)Makefile.in	1.146 12/8/19
 
 @SET_MAKE@
 srcdir		= @srcdir@
@@ -221,6 +221,7 @@ distpaths = \
 DIST_FILES = \
 	AUTHORS \
 	COPYING \
+	HISTORY \
 	Makefile.in \
 	NEWS \
 	README \
