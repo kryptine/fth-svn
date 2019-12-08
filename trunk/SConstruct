@@ -22,9 +22,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.27 12/3/19
+# @(#)SConstruct	1.28 12/8/19
 
-version		= '1.4.1'
+version		= '1.4.2'
 
 #
 # scons -h
