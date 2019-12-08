@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)README.man	1.39 11/23/19
+.\" @(#)README.man	1.40 12/8/19
 .\"
-.Dd 2019/11/23
+.Dd 2019/12/08
 .Dt README
 .Os
 .\"
@@ -193,7 +193,7 @@ single or double quotes corresponding to Python requirements.
 .Bd -literal
 % cat ~/.scons/fth.py
 CC = 'clang'
-CFLAGS = '-fstack-protector -fno-strict-aliasing'
+CFLAGS = '-fno-strict-aliasing'
 .Ed
 .Pp
 Here is the full list of variables:
