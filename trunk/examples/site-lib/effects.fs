@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/10/16 23:04:30
-\ Changed: 19/12/23 16:54:29
+\ Changed: 19/12/23 17:57:11
 \
-\ @(#)effects.fs	1.61 12/23/19
+\ @(#)effects.fs	1.62 12/23/19
 
 \ General (nogui/motif/gtk)
 \
@@ -948,7 +948,7 @@ set-current
 : help-cb { label message -- prc; w c i self -- x }
 	3 proc-create label , message , ( prc )
   does> { w c info self -- x }
-	self @ ( label ) self cell+ @ ( message ) help-dialog
+	self @ ( label ) self cell+ @ ( message ) info-dialog
 ;
 
 : target-cb ( gen -- prc; target self -- )
