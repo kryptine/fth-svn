@@ -2,9 +2,9 @@
 
 \ Translator/Author: Michael Scholz <mi-scholz@users.sourceforge.net>
 \ Created: 05/12/23 00:28:28
-\ Changed: 19/12/23 15:15:50
+\ Changed: 19/12/23 17:58:28
 \
-\ @(#)popup.fs	1.51 12/23/19
+\ @(#)popup.fs	1.52 12/23/19
 
 \ selection-popup-menu
 \ graph-popup-menu
@@ -1446,7 +1446,7 @@ let: ( -- menu )
 	selected if
 		selected undef snd-help { help }
 		help if
-			selected help undef undef help-dialog
+			selected help info-dialog
 		then
 	then
 ;
