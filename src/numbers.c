@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)numbers.c	2.19 11/27/19
+ * @(#)numbers.c	2.21 12/28/19
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -149,8 +149,10 @@ static void 	ficl_ceqz(ficlVm *);
 static void 	ficl_cnoteq(ficlVm *);
 static void 	ficl_cnoteqz(ficlVm *);
 static void 	ficl_creciprocal(ficlVm *);
-static void 	ficl_make_complex_polar(ficlVm *);
+static void 	ficl_complex_i(ficlVm *);
+static void 	ficl_cnegate(ficlVm *);
 static void 	ficl_make_complex_rectangular(ficlVm *);
+static void 	ficl_make_complex_polar(ficlVm *);
 static void 	ficl_to_c(ficlVm *);
 static ficlComplex make_polar(ficlFloat, ficlFloat);
 #endif				/* HAVE_COMPLEX */
@@ -403,7 +405,7 @@ fth_isinf(ficlFloat x)
 #if defined(HAVE_DECL_ISINF)
 	return (isinf(x));
 #else
-	return (0);
+	return ((x == x) && fth_isnan(x - x));
 #endif
 }
 
@@ -413,7 +415,7 @@ fth_isnan(ficlFloat x)
 #if defined(HAVE_DECL_ISNAN)
 	return ((int) isnan(x));
 #else
-	return (x == sqrt(-1.0));	/* NaN */
+	return (x != x);	/* NaN */
 #endif
 }
 
@@ -1896,13 +1898,6 @@ fl_inspect(FTH self)
 
 	f = FTH_FLOAT_OBJECT(self);
 	fs = fth_make_string_format("%s: ", FTH_INSTANCE_NAME(self));
-
-	if (fth_isnan(f))
-		return (fth_string_sformat(fs, "NaN"));
-
-	if (fth_isinf(f))
-		fth_string_sformat(fs, "%sInfinite", f < 0 ? "-" : "");
-
 	s = format_double(numbers_scratch, sizeof(numbers_scratch), f);
 	return (fth_string_sformat(fs, "%s", s));
 }
@@ -1914,13 +1909,6 @@ fl_to_string(FTH self)
 	char           *s;
 
 	f = FTH_FLOAT_OBJECT(self);
-
-	if (fth_isnan(f))
-		return (fth_make_string("#<nan>"));
-
-	if (fth_isinf(f))
-		return (fth_make_string("#<inf>"));
-
 	s = format_double(numbers_scratch, sizeof(numbers_scratch), f);
 	return (fth_make_string(s));
 }
@@ -2306,8 +2294,12 @@ cp_to_string(FTH self)
 	im = numbers_scratch_02;
 	size = sizeof(numbers_scratch);
 	fs = fth_make_string(format_double(re, size, FTH_COMPLEX_REAL(self)));
-	fth_string_scat(fs, FTH_COMPLEX_IMAG(self) >= 0.0 ? "+" : "");
-	fth_string_scat(fs, format_double(im, size, FTH_COMPLEX_IMAG(self)));
+	format_double(im, size, FTH_COMPLEX_IMAG(self));
+
+	if (im[0] != '+' && im[0] != '-')
+		fth_string_scat(fs, "+");
+
+	fth_string_scat(fs, im);
 	fth_string_scat(fs, "i");
 	return (fs);
 }
@@ -2411,13 +2403,43 @@ fth_make_rectangular(ficlFloat real, ficlFloat image)
 }
 
 static void
+ficl_complex_i(ficlVm *vm)
+{
+#define h_complex_i "( -- I )  return _Complex_I\n\
+1 Complex-I c* => 0.0+1.0i\n\
+1i => 0.0+1.0i\n\
+0+1i => 0.0+1.0i\n\
+-1 Complex-I c* value -z1\n\
+-z1 => -0.0-1.0i\n\
+3+i value z3\n\
+z3 => 3.0+1.0i\n\
+z3 -z1 c* => 1.0-3.0i"
+	FTH_STACK_CHECK(vm, 0, 1);
+	ficlStackPushComplex(vm->dataStack, _Complex_I);
+}
+
+static void
+ficl_cnegate(ficlVm *vm)
+{
+#define h_cnegate "( z -- -z )  z * (-1.0 * _Complex_I)\n\
+3+i => 3.0+1.0i\n\
+3+1 cnegate => 1.0-3.0i"
+	ficlComplex	cp;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	cp = ficlStackPopComplex(vm->dataStack);
+	ficlStackPushComplex(vm->dataStack, cp * (-1.0 * _Complex_I));
+}
+
+static void
 ficl_make_complex_rectangular(ficlVm *vm)
 {
 #define h_make_complex_rectangular "( real image -- complex )  complex numb\n\
 1 1 make-rectangular => 1.0+1.0i\n\
 Return complex object with REAL and IMAGE part.\n\
 See also make-polar."
-	ficlFloat 	real, image;
+	ficlFloat 	real;
+	ficlFloat 	image;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	image = fth_float_ref(fth_pop_ficl_cell(vm));
@@ -2444,7 +2466,8 @@ ficl_make_complex_polar(ficlVm *vm)
 1 1 make-polar => 0.540302+0.841471i\n\
 Return polar complex object from REAL and THETA.\n\
 See also make-rectangular."
-	ficlFloat 	real, theta;
+	ficlFloat 	real;
+	ficlFloat 	theta;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	theta = fth_float_ref(fth_pop_ficl_cell(vm));
@@ -2458,14 +2481,8 @@ ficl_c_dot(ficlVm *vm)
 #define h_c_dot "( c -- )  print number\n\
 1+i c. => |1.0+1.0i |\n\
 Print complex number C."
-	ficlComplex 	cp;
-
 	FTH_STACK_CHECK(vm, 1, 0);
-	cp = ficlStackPopComplex(vm->dataStack);
-	fth_printf("%f%s%fi ",
-	    creal(cp),
-	    cimag(cp) >= 0.0 ? "+" : "",
-	    cimag(cp));
+	fth_printf("%S ", cp_to_string(fth_pop_ficl_cell(vm)));
 }
 
 static void
@@ -2488,10 +2505,10 @@ ficl_ceqz(ficlVm *vm)
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	cp = ficlStackPopComplex(vm->dataStack);
-	flag = (creal(cp) == 0.0);
+	flag = FICL_TRUE;
 
-	if (flag)
-		flag = (cimag(cp) == 0.0);
+	if (creal(cp) != 0.0 || cimag(cp) != 0.0)
+		flag = FICL_FALSE;
 
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -2505,10 +2522,10 @@ ficl_cnoteqz(ficlVm *vm)
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	cp = ficlStackPopComplex(vm->dataStack);
-	flag = (creal(cp) != 0.0);
+	flag = FICL_FALSE;
 
-	if (flag)
-		flag = (cimag(cp) != 0.0);
+	if (creal(cp) != 0.0 || cimag(cp) != 0.0)
+		flag = FICL_TRUE;
 
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -2523,10 +2540,10 @@ ficl_ceq(ficlVm *vm)
 	FTH_STACK_CHECK(vm, 2, 1);
 	y = ficlStackPopComplex(vm->dataStack);
 	x = ficlStackPopComplex(vm->dataStack);
-	flag = (creal(x) == creal(y));
+	flag = FICL_TRUE;
 
-	if (flag)
-		flag = (cimag(x) == cimag(y));
+	if (creal(x) != creal(y) || cimag(x) != cimag(y))
+		flag = FICL_FALSE;
 
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -2541,10 +2558,10 @@ ficl_cnoteq(ficlVm *vm)
 	FTH_STACK_CHECK(vm, 2, 1);
 	y = ficlStackPopComplex(vm->dataStack);
 	x = ficlStackPopComplex(vm->dataStack);
-	flag = (creal(x) != creal(y));
+	flag = FICL_FALSE;
 
-	if (flag)
-		flag = (cimag(x) != cimag(y));
+	if (creal(x) != creal(y) || cimag(x) != cimag(y))
+		flag = FICL_TRUE;
 
 	ficlStackPushBoolean(vm->dataStack, flag);
 }
@@ -2566,19 +2583,123 @@ N_FUNC_ONE_ARG(clog10, clog10, Complex);
 N_FUNC_ONE_ARG(csin, csin, Complex);
 N_FUNC_ONE_ARG(ccos, ccos, Complex);
 N_FUNC_ONE_ARG(ctan, ctan, Complex);
-N_FUNC_ONE_ARG(casin, casin, Complex);
-N_FUNC_ONE_ARG(cacos, cacos, Complex);
 N_FUNC_ONE_ARG(catan, catan, Complex);
 N_FUNC_TWO_ARGS(catan2, catan2, Complex);
 N_FUNC_ONE_ARG(csinh, csinh, Complex);
 N_FUNC_ONE_ARG(ccosh, ccosh, Complex);
 N_FUNC_ONE_ARG(ctanh, ctanh, Complex);
 N_FUNC_ONE_ARG(casinh, casinh, Complex);
-N_FUNC_ONE_ARG(cacosh, cacosh, Complex);
-N_FUNC_ONE_ARG(catanh, catanh, Complex);
+
+static void
+ficl_casin(ficlVm *vm)
+{
+#define h_casin "( x -- y ) y = casin(x)"
+	ficlComplex	cp;
+	ficlComplex	z;
+	ficlFloat	f;
+	ficlFloat	r;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	cp = ficlStackPopComplex(vm->dataStack);
+
+	/* complex */
+	if (cimag(cp) != 0.0) {
+		ficlStackPushComplex(vm->dataStack, casin(cp));
+		return;
+	}
+
+	/* float */
+	f = fabs(creal(cp));
+	r = 1.0 / f;
+
+	if (f <= 1.0) {
+		ficlStackPushFloat(vm->dataStack, asin(creal(cp)));
+		return;
+	} else {
+		z = M_PI_2 - (_Complex_I *
+		    clog(f * (1.0 + (sqrt(1.0 + r) * csqrt(1.0 - r)))));
+
+		if (creal(cp) < 0.0)
+			z = -z;
+
+		ficlStackPushComplex(vm->dataStack, z);
+	}
+
+}
+
+static void
+ficl_cacos(ficlVm *vm)
+{
+#define h_cacos "( x -- y ) y = cacos(x)"
+	ficlComplex	cp;
+	ficlComplex	z;
+	ficlFloat	f;
+	ficlFloat	r;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	cp = ficlStackPopComplex(vm->dataStack);
+
+	/* complex */
+	if (cimag(cp) != 0.0) {
+		ficlStackPushComplex(vm->dataStack, cacos(cp));
+		return;
+	}
+
+	/* float */
+	f = fabs(creal(cp));
+	r = 1.0 / f;
+
+	if (f <= 1.0) {
+		ficlStackPushFloat(vm->dataStack, acos(creal(cp)));
+		return;
+	} else {
+		z = _Complex_I *
+		    clog(f * (1.0 + (sqrt(1.0 + r) * csqrt(1.0 - r))));
+
+		if (creal(cp) <= 0.0)
+			z = M_PI - z;
+
+		ficlStackPushComplex(vm->dataStack, z);
+	}
+}
+
+static void
+ficl_cacosh(ficlVm *vm)
+{
+#define h_cacosh "( x -- y ) y = cacosh(x)"
+	ficlComplex	cp;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	cp = ficlStackPopComplex(vm->dataStack);
+
+	/* complex */
+	if (cimag(cp) != 0.0 || creal(cp) < 1.0)
+		ficlStackPushComplex(vm->dataStack, cacosh(cp));
+	else
+		ficlStackPushFloat(vm->dataStack, acosh(creal(cp)));
+}
+
+static void
+ficl_catanh(ficlVm *vm)
+{
+#define h_catanh "( x -- y ) y = catanh(x)"
+	ficlComplex	cp;
+
+	FTH_STACK_CHECK(vm, 1, 1);
+	cp = ficlStackPopComplex(vm->dataStack);
+
+	/* complex */
+	if (cimag(cp) != 0.0 || fabs(creal(cp)) >= 1.0)
+		ficlStackPushComplex(vm->dataStack, catanh(cp));
+	else
+		ficlStackPushFloat(vm->dataStack, atanh(creal(cp)));
+}
 
 /*
  * Parse ficlComplex (1i, 1-i, -1+1i, 1.0+1.0i, etc).
+ *	1i	==> 0.0+1.0i
+ *      1+i	==> 1.0+1.0i
+ *      1-i	==> 1.0-1.0i
  */
 int
 ficl_parse_complex(ficlVm *vm, ficlString s)
@@ -2600,6 +2721,8 @@ ficl_parse_complex(ficlVm *vm, ficlString s)
 	if (s.length >= FICL_PAD_SIZE)
 		return (FICL_FALSE);
 
+	re = 0.0;
+	im = 0.0;
 	sreal = re_buf;
 	simag = vm->pad;
 	strncpy(simag, s.text, s.length);
@@ -2635,10 +2758,27 @@ ficl_parse_complex(ficlVm *vm, ficlString s)
 		if (*test != '\0' || errno == ERANGE)
 			return (FICL_FALSE);
 	} else {
-		if (loc[0] == '+' || tolower((int) loc[0]) == 'i')
+		switch(loc[0]) {
+		case '+':
 			im = 1.0;
-		else
+			break;
+		case '-':
 			im = -1.0;
+			break;
+		case 'I':
+		case 'i':
+			/*
+			 * changed on Sat Dec 28 14:17:46 CET 2019
+			 * before: 3i ==> 3.0+1.0i
+			 *    now: 3i ==> 0.0+3.0i
+			 */
+			im = re;
+			re = 0.0;
+			break;
+		default:
+			return (FICL_FALSE);
+			break;
+		}
 	}
 	ficlStackPushFTH(vm->dataStack, fth_make_rectangular(re, im));
 
@@ -4460,6 +4600,8 @@ init_number(void)
 	FTH_PRI1("imag-ref", ficl_cimage, h_cimage);
 	FTH_PRI1("image-ref", ficl_cimage, h_cimage);
 #if HAVE_COMPLEX
+	FTH_PRI1("Complex-I", ficl_complex_i, h_complex_i);
+	FTH_PRI1("cnegate", ficl_cnegate, h_cnegate);
 	FTH_PRI1("make-rectangular", ficl_make_complex_rectangular,
 	    h_make_complex_rectangular);
 	FTH_PRI1(">complex", ficl_make_complex_rectangular,

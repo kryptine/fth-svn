@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.154 12/8/19
+.\" @(#)fth.1	1.156 12/28/19
 .\"
-.Dd 2019/12/08
+.Dd 2019/12/28
 .Dt FTH 1
 .Os
 .\"
@@ -4599,7 +4599,7 @@ to an inexact number.
 .\" imag-ref
 .\"
 .It Cm imag-ref No (\ x -- r\ )
-Return the image part of Ar x .
+Return image part of Ar x .
 .\"
 .\" image-ref
 .\"
@@ -4677,7 +4677,7 @@ of
 .\" real-ref
 .\"
 .It Cm real-ref No (\ x -- r\ )
-Return the real part of
+Return real part of
 .Ar x .
 .El
 .Pp
@@ -4739,7 +4739,7 @@ characters.
 Print complex number
 .Ar c .
 .Bd -literal -offset indent -compact
-17.0+1.0i c. \(rA \(ba17.000000+1.000000i \(ba
+17.0+1.0i c. \(rA \(ba17.0+1.0i \(ba
 .Ed
 .\"
 .\" d.
@@ -4962,7 +4962,7 @@ and
 .Ar c2
 can be any type of number but should fit in ficlComplex.
 .Bd -literal -offset indent -compact
-1.0+1.0i 1i c= \(rA #t
+1.0+1.0i 1+i c= \(rA #t
 1+0i 2.0 c<> \(rA #t
 1 1+0i c= \(rA #t
 .Ed
@@ -5199,10 +5199,12 @@ and probable second argument
 .Ar r2
 can be any type of number but should fit in ficlFloat.
 .\"
+.\" cnegate Complex-I
 .\" 1/c c* c** c+ c- c/ cabs cabs2 cacos cacosh carg casin casinh
 .\" catan catan2 catanh ccos ccosh cexp clog clog10 conj conjugate
 .\" cpow csin csinh csqrt ctan ctanh magnitude
 .\"
+.It Cm Complex-I No (\ -- I\ )
 .It Cm 1/c No (\ c1 -- c2\ )
 .It Cm c* No (\ c1 c2 -- c3\ )
 .It Cm c** No (\ c1 c2 -- c3\ )
@@ -5224,6 +5226,7 @@ can be any type of number but should fit in ficlFloat.
 .It Cm cexp No (\ c1 -- c2\ )
 .It Cm clog No (\ c1 -- c2\ )
 .It Cm clog10 No (\ c1 -- c2\ )
+.It Cm cnegate No (\ c1 -- c1\ )
 .It Cm conj No (\ c1 -- c2\ )
 .It Cm conjugate No (\ c1 -- c2\ ) alias for Sx conj
 .It Cm cpow No (\ c1 c2 -- c3\ ) alias for Sx c**
