@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	2.2 1/29/19";
+const char fth_sccsid[] = "@(#)fth.c	2.3 1/8/20";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -36,7 +36,7 @@ const char fth_sccsid[] = "@(#)fth.c	2.2 1/29/19";
 #include "utils.h"
 #include <getopt.h>
 
-#define FTH_COPYRIGHT	"(c) 2004-2019 Michael Scholz"
+#define FTH_COPYRIGHT	"(c) 2004-2020 Michael Scholz"
 
 static FTH 	eval_with_error_exit(void *, int);
 static void 	repl_in_place(char *, FTH, ficlWord *, int, int, int);
@@ -191,6 +191,7 @@ repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, 
 
 		if (chomp_p) {
 			len = fth_strlen(buf);
+
 			if (buf[len - 1] == '\n')
 				buf[len - 1] = '\0';
 		}
@@ -218,9 +219,9 @@ repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, 
 #define LIBSLEN		48
 #define WARN_STR	"#<warning: too much calls for -%c, ignoring \"%s\">\n"
 #define FTH_USAGE	"\
-usage: fth [-DdQqrv] [-C so-lib-path] [-Ee pattern] [-F fs] [-f init-file]\n\
+usage: fth [-DdQqrv] [-C so-lib-path] [-E eval] [-e eval] [-f init-file]\n\
            [-I fs-path] [-S \"lib init\"] [-s file] [file ...]\n\
-       fth [-al] [-i [suffix]] [-n | -p] -e pattern [file | -]\n\
+       fth [-alnp] [-e eval] [-F fs] [-i [suffix]] [file | -]\n\
        fth -V\n"
 
 extern char    *optarg;
@@ -291,7 +292,7 @@ main(int argc, char **argv)
 	 *			 1 -r (ficl-repl)
 	 */
 	stay_in_repl = -1;	/* -Er 1 || -es 0 */
-	bufs_len = 0;		/* -Ee pattern */
+	bufs_len = 0;		/* -Ee eval */
 	field_separator = NULL;	/* -F fs */
 	lp_len = 0;		/* -I path */
 	no_init_file = 0;	/* -Q */
@@ -330,7 +331,7 @@ main(int argc, char **argv)
 		case 'D':	/* -D */
 			die = 1;
 			break;
-		case 'E':	/* -E PATTERN */
+		case 'E':	/* -E EVAL */
 			stay_in_repl = 1;
 			if (bufs_len < LIBSLEN)
 				buffers[bufs_len++] = optarg;
@@ -367,7 +368,7 @@ main(int argc, char **argv)
 		case 'd':	/* -d */
 			debug = 1;
 			break;
-		case 'e':	/* -e PATTERN */
+		case 'e':	/* -e EVAL */
 			stay_in_repl = 0;
 			if (bufs_len < LIBSLEN)
 				buffers[bufs_len++] = optarg;
@@ -461,7 +462,9 @@ main(int argc, char **argv)
 		fth_variable_set("*fs*", fth_make_string(field_separator));
 
 	if (libs_len > 0) {	/* -S "LIB FUNC" */
-		char           *lib, *name, *fnc;
+		char           *lib;
+		char           *name;
+		char           *fnc;
 
 		for (i = 0; i < libs_len; i++) {
 			lib = libraries[i];
@@ -493,15 +496,8 @@ main(int argc, char **argv)
 		FTH 		out;
 
 		if (bufs_len < 1) {
-			fth_errorf("#<%s: in-place requires -e PATTERN!>\n",
-			    fth_exception_ref(FTH_FORTH_ERROR));
-			fth_exit(EXIT_FAILURE);
-			/*
-			 * To silence ccc-analyzer (uninitialized
-			 * 'buffer[i]' after for-loop below).
-			 */
-			/* NOTREACHED */
-			return (EXIT_FAILURE);
+			bufs_len = 1;
+			buffers[0] = "";
 		}
 
 		/*
@@ -552,7 +548,8 @@ main(int argc, char **argv)
 	}
 
 	/*
-	 * Load remaining args as fth source files.
+	 * If FILE is '-', read and eval from stdin,
+	 * otherwise load remaining args as fth source files.
 	 */
 	for (i = 0; argv[i]; i++) {
 		/* read words from stdin and exit */
@@ -579,6 +576,9 @@ main(int argc, char **argv)
 
 			fth_exit(EXIT_SUCCESS);
 		} else {
+			/*
+			 * Load remaining args as fth source files.
+			 */
 			ret = fth_load_file(argv[i]);
 
 			if (FTH_STRING_P(ret))
@@ -599,7 +599,7 @@ main(int argc, char **argv)
 	/*
 	 * Eval strings from command line.
 	 */
-	if (bufs_len > 0) {	/* -Ee PATTERN */
+	if (bufs_len > 0) {	/* -Ee EVAL */
 		/*
 		 * If multiple -e, eval all but last.
 		 */

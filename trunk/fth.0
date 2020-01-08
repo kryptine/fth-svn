@@ -4,9 +4,9 @@ NNAAMMEE
      fftthh – Forth script and extension language
 
 SSYYNNOOPPSSIISS
-     fftthh [--DDddQQqqrrvv] [--CC _s_o_‐_l_i_b_‐_p_a_t_h] [--EEee _p_a_t_t_e_r_n] [--FF _f_s] [--ff _i_n_i_t_‐_f_i_l_e]
+     fftthh [--DDddQQqqrrvv] [--CC _s_o_‐_l_i_b_‐_p_a_t_h] [--EE _e_v_a_l] [--ee _e_v_a_l] [--ff _i_n_i_t_‐_f_i_l_e]
          [--II _f_s_‐_p_a_t_h] [--SS "_l_i_b _i_n_i_t"] [--ss _f_i_l_e] [_f_i_l_e _._._.]
-     fftthh [--aall] [--ii [_s_u_f_f_i_x]] [--nn | --pp] --ee _p_a_t_t_e_r_n [_f_i_l_e | _‐]
+     fftthh [--aallnnpp] [--ee _e_v_a_l] [--FF _f_s] [--ii [_s_u_f_f_i_x]] [_f_i_l_e | _‐]
      fftthh [--VV]
 
 DDEESSCCRRIIPPTTIIOONN
@@ -19,32 +19,32 @@ DDEESSCCRRIIPPTTIIOONN
      --aa   Split every line to array *farray* before evaluation.  The split
           string is field separator *fs*.  Used with --nn or --pp option.
      --CC _p_a_t_h
-          Prepend _p_a_t_h to *load‐lib‐path*, multiple calls possible.
+          Prepend _p_a_t_h to *load‐lib‐path*, multiple calls are possible.
      --DD   Show backtrace and exit with return code 1 if an exception was found
           evaluating the initialization file, running a script, loading
           additional source files, or evaluating strings from the command
           line.
      --dd   Set global variable *fth‐debug* to #t.
-     --EE _p_a_t_t_e_r_n
-     --ee _p_a_t_t_e_r_n
-          Evaluate _p_a_t_t_e_r_n.  After evaluation, if options --ee was specified,
-          exit, if option --EE was specified, start read‐eval‐print‐loop.
-          Multiple calls possible.  If --DD was given and evaluation was not
+     --EE _e_v_a_l
+     --ee _e_v_a_l
+          Evaluate _e_v_a_l.  After evaluation, if options --ee was specified, exit,
+          if option --EE was specified, start read‐eval‐print‐loop.  Multiple
+          calls are possible.  If --DD was given and evaluation was not
           successful, show backtrace and exit with return code 1, otherwise
-          exit with return code 0.  The last or only --ee _p_a_t_t_e_r_n can be
-          considered between
-                lambda: <{}> pattern ;
-          and is in compile state!  If multiple --ee _p_a_t_t_e_r_n appear, all but the
+          exit with return code 0.  The last or only --ee _e_v_a_l can be considered
+          between
+                lambda: <{}> eval ;
+          and is in compile state!  If multiple --ee _e_v_a_l appear, all but the
           last are in interpret state.
      --FF _f_s
-          Set global variable *fs* to field separator _f_s.
+          Set global variable *fs* to field separator _f_s for the --aa option.
      --ff _f_i_l_e
           Take initialization file _f_i_l_e instead of _~_/_._f_t_h_r_c.  Use --QQ to
           prevent loading initialization files.
      --II _p_a_t_h
-          Prepend _p_a_t_h to *load‐path*, multiple calls possible.
+          Prepend _p_a_t_h to *load‐path*, multiple calls are possible.
      --ii [_s_u_f_f_i_x]
-          The --ee _p_a_t_t_e_r_n will be applied to files or stdin.  If _s_u_f_f_i_x is
+          The --ee _e_v_a_l will be applied to files or stdin.  If _s_u_f_f_i_x is
           specified, a backup file will be created with that suffix.
      --ll   Remove line ending \n when used with --nn or --pp option.
      --nn   Suppress output of current *line*.  If not in‐place --ii, start an
@@ -63,7 +63,7 @@ DDEESSCCRRIIPPTTIIOONN
           Load C extension library _l_i_b and call the initialization function
           _i_n_i_t.  _l_i_b and _i_n_i_t must be enclosed in quotations
                 -S "dbm Init_dbm"
-          Multiple calls possible.
+          Multiple calls are possible.
      --ss _f_i_l_e
           Evaluate _f_i_l_e as a Forth script and exit.  It doesn't read the
           initialization file.  The global Forth variables *argc* and *argv*
@@ -72,24 +72,25 @@ DDEESSCCRRIIPPTTIIOONN
           interpreter.  Options after that are taken as script options.  If --DD
           was given and evaluation was not successful, show a backtrace and
           exit with return code 1, otherwise exit with return code 0.
-     --VV   Display version info and exit.
-     --vv   Set global variable *fth‐verbose* to #t (default).
+     --VV   Display version information and exit.
+     --vv   Set global variable *fth‐verbose* to #t.
 
    FFoorrtthh vvaarriiaabblleess
      *0*  Entire current input line, read-only.
      *1* ... *9*
-          Corresponding single element of *farray*, read-only.
+          If --aa was given, these are the corresponding single elements of
+          *farray*, read-only.
      .*0*
           Print entire current input line.
      .*1* ... .*9*
-          Print corresponding single element of *farray* with *ofs* attached,
-          normally a single space.
+          If --aa was given, print corresponding single elements of *farray*
+          with *ofs* attached, normally a single space.
      *argc*
           Number of arguments in *argv*.
      *argv*
           Array of command line arguments.  Return array of all exceptions.
      *farray*
-          Auto‐splitted array of strings of current line.
+          If --aa was given, auto‐splitted array of strings of current line.
      *features*
           Return array of all features.
      *filename*
@@ -641,7 +642,7 @@ DDEESSCCRRIIPPTTIIOONN
      Assoc lists:
      >>aalliisstt ( vals len -- alst )
           Return assoc list object with _l_e_n / 2 key-value pairs found on
-          parameter stack. Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
+          parameter stack.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n < 0 or not
           even.
      aaccoonnss ( key val alst1 -- alst2 )
           Return new Lisp-like associated list from _k_e_y_-_v_a_l pair and _a_l_s_t_1.
@@ -1399,9 +1400,9 @@ DDEESSCCRRIIPPTTIIOONN
                   ⇒ reraise last exception
      fftthh--tthhrrooww ( exc args -- )
           Throw exception _e_x_c with text built from _a_r_g_s.  If _a_r_g_s is not an
-          array, its string representation is used. If _a_r_g_s is NIL or an empty
-          array, a default string is used.  If _a_r_g_s is an array with one
-          element, this string is used. If _a_r_g_s is an array and its first
+          array, its string representation is used.  If _a_r_g_s is NIL or an
+          empty array, a default string is used.  If _a_r_g_s is an array with one
+          element, this string is used.  If _a_r_g_s is an array and its first
           element is a format string with N %s-format signs, _a_r_g_s should have
           N more elements with corresponding values.
                 \
@@ -2640,6 +2641,7 @@ DDEESSCCRRIIPPTTIIOONN
           required in documentation.  It is not necessary to repeat the stack
           effect if it already exist in the word definition.  This word is
           immediate and compile only and can only be used in word definitions.
+
                 : new-word ( -- )
                         doc" our documentation may contain \
                 \"double quotes\".  \
@@ -2647,7 +2649,8 @@ DDEESSCCRRIIPPTTIIOONN
                         \ we do nothing
                 ;
                 help new-word ⇒ new-word  ( -- )  our documentation may
-                contain qdouble quotes".  Escape them with a backslash.
+                contain qdouble quotes".
+                Escape them with a backslash.
      ddooccuummeennttaattiioonn--rreeff ( obj -- str )
           Return documentation string of _o_b_j (Forth word, object or topic) or
           #f.
@@ -2987,10 +2990,10 @@ DDEESSCCRRIIPPTTIIOONN
      fftthh--ddiiee ( fmt :optional args -- )
           Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<ddiiee::
           ......>> to current stderr and exit interpreter with return code 1; _a_r_g_s
-          is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
+          is optional.  See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
      fftthh--eerrrroorr ( fmt :optional args -- )
           Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<eerrrroorr::
-          ......>> to current stderr and throw exception; _a_r_g_s is optional.   See
+          ......>> to current stderr and throw exception; _a_r_g_s is optional.  See
           _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
      fftthh--ffoorrmmaatt ( fmt :optional args -- str  )
           Return string object from printf(3) _f_m_t string and _a_r_g_s array
@@ -2998,11 +3001,11 @@ DDEESSCCRRIIPPTTIIOONN
           _f_o_r_m_a_t for _f_m_t description.
      fftthh--pprriinntt ( fmt :optional args -- )
           Print _f_m_t string with corresponding _a_r_g_s array to current stdout;
-          _a_r_g_s is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
+          _a_r_g_s is optional.  See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t description.
      fftthh--wwaarrnniinngg ( fmt :optional args -- )
           Print _f_m_t string with corresponding _a_r_g_s array wrapped in ##<<wwaarrnniinngg::
-          ......>> to current stderr; _a_r_g_s is optional.   See _s_t_r_i_n_g_-_f_o_r_m_a_t for
-          _f_m_t description.
+          ......>> to current stderr; _a_r_g_s is optional.  See _s_t_r_i_n_g_-_f_o_r_m_a_t for _f_m_t
+          description.
      mmaakkee--ssttrriinngg ( len :key initial-element ' ' -- str )
           Return a new string of length _l_e_n filled with _i_n_i_t_i_a_l_-_e_l_e_m_e_n_t
           characters, default space.  Raise an _o_u_t_-_o_f_-_r_a_n_g_e exception if _l_e_n <
@@ -3310,10 +3313,10 @@ EEXXAAMMPPLLEESS
            /* #undef HAVE_COMPLEX_DOUBLE */
      otherwise write original to _c_o_n_f_i_g_._h.  The first --ee set the global Forth
      variable reg to a regexp object, the second --ee uses this variable for
-     testing.  The _p_a_t_t_e_r_n of the first --ee is evaluated in interpret state
-     before reading file while the _p_a_t_t_e_r_n of the second --ee is evaluated in
-     compile state in a nameless llaammbbddaa:: <<{{}}>> ppaatttteerrnn  ;; word during reading
-     file line by line.
+     testing.  The _e_v_a_l of the first --ee is evaluated in interpret state before
+     reading file while the _e_v_a_l of the second --ee is evaluated in compile
+     state in a nameless llaammbbddaa:: <<{{}}>> eevvaall  ;; word during reading file line by
+     line.
 
      % fth -ni.orig -e '/#define HAVE_COMPLEX_DOUBLE/ value reg' \
                     -e 'reg *line* re= if \
@@ -3447,4 +3450,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.30                    2019/12/28                    NetBSD 9.99.30
+NetBSD 9.99.33                    2020/01/08                    NetBSD 9.99.33

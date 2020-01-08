@@ -1,4 +1,4 @@
-.\" Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+.\" Copyright (c) 2004-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.156 12/28/19
+.\" @(#)fth.1	1.158 1/8/20
 .\"
-.Dd 2019/12/28
+.Dd 2020/01/08
 .Dt FTH 1
 .Os
 .\"
@@ -40,17 +40,18 @@
 .Nm
 .Op Fl DdQqrv
 .Op Fl C Ar so\(hylib\(hypath
-.Op Fl Ee Ar pattern
-.Op Fl F Ar fs
+.Op Fl E Ar eval 
+.Op Fl e Ar eval
 .Op Fl f Ar init\(hyfile
 .Op Fl I Ar fs\(hypath
 .Op Fl S Qq Ar lib init
 .Op Fl s Ar file
 .Op Ar
 .Nm
-.Oo Fl al Oc Op Fl i Op Ar suffix
-.Op Fl n No \(ba Fl p
-.Fl e Ar pattern
+.Op Fl alnp
+.Op Fl e Ar eval
+.Op Fl F Ar fs
+.Op Fl i Op Ar suffix
 .Op Ar file No \(ba Ar \(hy
 .Nm
 .Op Fl V
@@ -67,7 +68,8 @@ This manual page provides information for running
 .Nm
 in a
 .Ux
-command line environment.  See
+command line environment.
+See
 .Xr libfth 3
 for Forth as an extension language.
 .\"
@@ -81,7 +83,8 @@ for Forth as an extension language.
 .It Fl a
 Split every line to array
 .Ev *farray*
-before evaluation.  The split string is field separator
+before evaluation.
+The split string is field separator
 .Ev *fs* .
 Used with
 .Fl n
@@ -96,7 +99,7 @@ Prepend
 .Ar path
 to
 .Ev *load\(hylib\(hypath* ,
-multiple calls possible.
+multiple calls are possible.
 .\"
 .\" -D
 .\"
@@ -114,25 +117,27 @@ to #t.
 .\"
 .\" -Ee
 .\"
-.It Fl E Ar pattern
-.It Fl e Ar pattern
+.It Fl E Ar eval
+.It Fl e Ar eval
 Evaluate
-.Ar pattern .
+.Ar eval .
 After evaluation, if options
 .Fl e
 was specified, exit, if option
 .Fl E
-was specified, start read\(hyeval\(hyprint\(hyloop.  Multiple calls possible.
+was specified, start read\(hyeval\(hyprint\(hyloop.
+Multiple calls are possible.
 If
 .Fl D
 was given and evaluation was not successful, show backtrace and exit
-with return code 1, otherwise exit with return code 0.  The last or
-only
-.Fl e Ar pattern
+with return code 1, otherwise exit with return code 0.
+The last or only
+.Fl e Ar eval
 can be considered between
-.Dl lambda: <{}> pattern\ ;
-and is in compile state!  If multiple
-.Fl e Ar pattern
+.Dl lambda: <{}> eval\ ;
+and is in compile state!
+If multiple
+.Fl e Ar eval
 appear, all but the last are in interpret state.
 .\"
 .\" -F
@@ -141,7 +146,10 @@ appear, all but the last are in interpret state.
 Set global variable
 .Ev *fs*
 to field separator
-.Ar fs .
+.Ar fs
+for the
+.Fl a
+option.
 .\"
 .\" -f
 .\"
@@ -161,14 +169,15 @@ Prepend
 .Ar path
 to
 .Ev *load\(hypath* ,
-multiple calls possible.
+multiple calls are possible.
 .\"
 .\" -i
 .\"
 .It Fl i Op Ar suffix
 The
-.Fl e Ar pattern
-will be applied to files or stdin.  If
+.Fl e Ar eval
+will be applied to files or stdin.
+If
 .Ar suffix
 is specified, a backup file will be created with that suffix.
 .\"
@@ -195,7 +204,8 @@ start an implicit loop.
 .It Fl p
 Print current
 .Ev *line*
-to stdout.  If not in\(hyplace
+to stdout.
+If not in\(hyplace
 .Fl i ,
 start an implicit loop.
 .\"
@@ -241,14 +251,15 @@ and
 .Ar init
 must be enclosed in quotations
 .Dl -S Qq dbm Init_dbm
-Multiple calls possible.
+Multiple calls are possible.
 .\"
 .\" -s
 .\"
 .It Fl s Ar file
 Evaluate
 .Ar file
-as a Forth script and exit.  It doesn't read the initialization file.
+as a Forth script and exit.
+It doesn't read the initialization file.
 The global Forth variables
 .Ev *argc*
 and
@@ -256,10 +267,11 @@ and
 are set and filled with the count and command line options appearing
 after
 .Fl s Ar file .
-This must be the last option given
-to the
+This must be the last option given to the
 .Nm
-interpreter.  Options after that are taken as script options.  If
+interpreter.
+Options after that are taken as script options.
+If
 .Fl D
 was given and evaluation was not successful, show a backtrace and
 exit with return code 1, otherwise exit with return code 0.
@@ -267,14 +279,14 @@ exit with return code 1, otherwise exit with return code 0.
 .\" -V
 .\"
 .It Fl V
-Display version info and exit.
+Display version information and exit.
 .\"
 .\" -v
 .\"
 .It Fl v
 Set global variable
 .Ev *fth\(hyverbose*
-to #t (default).
+to #t.
 .El
 .\"
 .\" Forth variables
@@ -290,7 +302,9 @@ Entire current input line, read-only.
 .\" *1* ... *9*
 .\"
 .It Ev *1* ... *9*
-Corresponding single element of 
+If
+.Fl a
+was given, these are the corresponding single elements of 
 .Ev *farray* ,
 read-only.
 .\"
@@ -302,7 +316,9 @@ Print entire current input line.
 .\" .*1* ... .*9*
 .\"
 .It Ev .*1* ... .*9*
-Print corresponding single element of 
+If
+.Fl a
+was given, print corresponding single elements of 
 .Ev *farray*
 with
 .Ev *ofs*
@@ -326,7 +342,9 @@ Return array of all exceptions.
 .\" *farray*
 .\"
 .It Ev *farray*
-Auto\(hysplitted array of strings of current line.
+If
+.Fl a
+was given, auto\(hysplitted array of strings of current line.
 .\"
 .\" *features*
 .\"
@@ -503,8 +521,8 @@ after-load-hook lambda: <{ fname -- }>
 .It Cm before-repl-hook No (\ --\ )
 Called after initializing the
 .Xr tecla 7
-command-line editing library but before starting the repl.  A
-predefined hook showing some help lines can be replaced by your own
+command-line editing library but before starting the repl.
+A predefined hook showing some help lines can be replaced by your own
 message.
 .Bd -literal -offset indent -compact
 before-repl-hook reset-hook!
@@ -519,10 +537,11 @@ before-repl-hook lambda: <{ -- }>
 .\"
 .It Cm after-repl-hook No (\ history-file --\ )
 Called after leaving the repl and writing the history file but
-before leaving the program.  Its only argument is the history
-filename.  You may manipulate the history data entries.  One history
-entry consists of two lines: a time stamp preceded by a Forth comment
-backslash and the actual history line.
+before leaving the program.
+Its only argument is the history filename.
+You may manipulate the history data entries.
+One history entry consists of two lines: a time stamp preceded by a
+Forth comment backslash and the actual history line.
 .Bd -literal -offset indent -compact
 after-repl-hook lambda: <{ history -- }>
 	\e Remove duplicates from history file.
@@ -547,8 +566,8 @@ Called before printing a new prompt to customize the output of it.
 .Ar prompt
 is the old prompt and 
 .Ar pos
-the current history position.  The return value, preferable a string,
-is the
+the current history position.
+The return value, preferable a string, is the
 .Ar prompt
 argument for the next hook procedure if any.
 .Bd -literal -offset indent -compact
@@ -576,13 +595,13 @@ Command-line editing similar to
 .Xr tcsh 1
 is handled by the
 .Xr tecla 7
-library if installed.  Predefined key bindings exist for those
-similar to
+library if installed.
+Predefined key bindings exist for those similar to
 .Xr vi 1
 and
 .Xr emacs 1 .
-The default editing mode is emacs-mode.  You can switch from
-emacs-mode to vi-mode via
+The default editing mode is emacs-mode.
+You can switch from emacs-mode to vi-mode via
 .Cm M-^V
 and from vi-mode to emacs-mode via
 .Cm M-^E .
@@ -590,18 +609,20 @@ To start in vi-mode, put a line like
 .Dl edit-mode vi
 in your
 .Pa ~/.teclarc
-file.  A history of the last command-lines can be listed with
+file.
+A history of the last command-lines can be listed with
 .Cm ^Xh ,
 the last 10 history entries can be listed with
 .Cm M-10^Xh .
 The Tab-key or
 .Cm ^I
-initiates word completion.  If the Forth dictionary has more than
-one entry starting with characters before the cursor, show all, if
-only one definition exists, complete it and add a space after the
-completed word.  If the Forth dictionary has no entries starting with
-the characters before the cursor, try filename completion.  For
-complete key listings and function descriptions, see
+initiates word completion.
+If the Forth dictionary has more than one entry starting with characters
+before the cursor, show all, if only one definition exists, complete it
+and add a space after the completed word.
+If the Forth dictionary has no entries starting with the characters
+before the cursor, try filename completion.
+For complete key listings and function descriptions, see
 .Xr tecla 7 .
 .Pp
 If the first character of the command-line is an exclamation point
@@ -653,18 +674,19 @@ is optional
 .It Ev *histdup*
 If set to
 .Cm gl-all ,
-only unique history events are entered in the history list.  If
-set to
+only unique history events are entered in the history list.
+If set to
 .Cm gl-prev
 and the last history event is the same as the current, the current
-command is not entered.  If not defined (undef, the default), all
-history events are entered.
+command is not entered.
+If not defined (undef, the default), all history events are entered.
 .\"
 .\" *histfile*
 .\"
 .It Ev *histfile*
 Can be set to the pathname where history is going to be saved and
-restored.  If not set, use
+restored.
+If not set, use
 .Ev $FTH_HISTORY
 or
 .Pa ~/.fth-history .
@@ -676,7 +698,8 @@ Default is undef.
 Can be given a numeric value to control the size of the history list.
 If not set, use
 .Ev $FTH_HISTORY_LENGTH
-or 100.  Default is undef.
+or 100.
+Default is undef.
 .\"
 .\" *savehist*
 .\"
@@ -710,7 +733,8 @@ Show user-defined key-bindings set for example in
 .It one argument
 If
 .Ar key
-is a string, take it as configure string.  If
+is a string, take it as configure string.
+If
 .Ar key
 is a predefined constant, set specific value as configure string.
 Valid constants:
@@ -743,7 +767,8 @@ is a string and
 .Ar action
 is anything else, unbind
 .Ar key
-from last bind.  See
+from last bind.
+See
 .Xr tecla 7
 for key-bindings and actions.
 .Bd -literal -offset indent -compact
@@ -863,9 +888,9 @@ a1 .$ \(rA #( 0 2 4 )
 .Ed
 .El
 Interpret state loops for use outside word definitions in scripts or in
-the repl work like their compile state cousins above.  The body of the
-following [do]\(em[loop], [each]\(em[end-each] and [map]\(em[end-map] is
-in compile state, loop indexes
+the repl work like their compile state cousins above.
+The body of the following [do]\(em[loop], [each]\(em[end-each] and
+[map]\(em[end-map] is in compile state, loop indexes
 .Cm i ,
 .Cm j ,
 .Cm k
@@ -931,7 +956,8 @@ to current output.
 .It Cm >array No (\ vals len -- ary\ )
 Return array object with
 .Ar len
-objects found on parameter stack.  Raise an
+objects found on parameter stack.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -976,7 +1002,8 @@ ary \(rA #( 0 #{ \(aqfoo 30 } 2 )
 .\" array-append
 .\"
 .It Cm array-append No (\ ary1 ary2 -- ary1+ary2\ )
-Append two arrays and return new one.  If
+Append two arrays and return new one.
+If
 .Ar ary2
 is not an array, append it as a single element.
 .Bd -literal -offset indent -compact
@@ -1025,7 +1052,8 @@ Delete and return one element from
 .Ar ary
 at position
 .Ar idx .
-Negative index counts from backward.  Raise an
+Negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1080,9 +1108,11 @@ at position
 .Ar idx
 and return new array.
 .Ar val
-can be an array or any other object.  Negative
+can be an array or any other object.
+Negative
 .Ar idx
-counts from backward.  Raise an
+counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1098,9 +1128,11 @@ at position
 .Ar idx
 and return changed array.
 .Ar val
-can be a single object or an array.  Negative
+can be a single object or an array.
+Negative
 .Ar idx
-counts from backward.  Raise an
+counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1165,7 +1197,8 @@ to
 .It Cm array-ref No (\ ary idx -- val\ )
 Return value at position
 .Ar idx .
-Negative index counts from backward.  Raise an
+Negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in
 .Ar ary's
@@ -1181,15 +1214,18 @@ will be called with
 an array of zero or more proc arguments, and the current array element
 set as first arg in
 .Ar args
-array.  The length of
+array.
+The length of
 .Ar args
 + 1 is the required arity of
 .Ar prc .
 If
 .Ar prc
 returns neither #f nor nil nor 0, this element will be pushed in a new
-array object.  The new array object will be returned.  In the example n1
-corresponds to the current array element and n2 comes from args, here 2.
+array object.
+The new array object will be returned.
+In the example n1 corresponds to the current array element and n2 comes
+from args, here 2.
 .Bd -literal -offset indent -compact
 #( 0 1 2 ) lambda: <{ n1 n2 -- f }>
 	n1 n2 >
@@ -1206,15 +1242,16 @@ will be called with
 an array of zero or more proc arguments, and the current array element
 set as first arg in
 .Ar args
-array.  The length of
+array.
+The length of
 .Ar args
 + 1 is the required arity of
 .Ar prc .
 If
 .Ar prc
-returns neither #f nor nil nor 0, the element will be removed.  In the
-example n1 corresponds to the current array element and n2 comes from
-args, here 2.
+returns neither #f nor nil nor 0, the element will be removed.
+In the example n1 corresponds to the current array element and n2 comes
+from args, here 2.
 .\"
 .\" array-reverse
 .\" array-reverse!
@@ -1233,7 +1270,8 @@ Store
 .Ar val
 at position
 .Ar idx .
-Negative index counts from backward.  Raise an
+Negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in
 .Ar ary's
@@ -1255,7 +1293,8 @@ is empty, return #f.
 Return new sorted array.
 .Ar prc
 compares two elements A and B and should return a negative integer if A
-< B, 0 if A == B, and a positive integer if A > B.  Raise a
+< B, 0 if A == B, and a positive integer if A > B.
+Raise a
 .Ar bad-arity
 exception if
 .Ar prc
@@ -1278,7 +1317,8 @@ Return the sorted
 .Ar ary .
 .Ar prc
 compares two elements A and B and should return a negative integer if A
-< B, 0 if A == B, and a positive integer if A > B.  Raise a
+< B, 0 if A == B, and a positive integer if A > B.
+Raise a
 .Ar bad-arity
 exception if
 .Ar prc
@@ -1295,8 +1335,9 @@ up to but excluding index
 .Ar end .
 If
 .Ar end
-is nil, up to end of array will be returned.  Negative index counts from
-backward.  Raise an
+is nil, up to end of array will be returned.
+Negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar start
@@ -1354,7 +1395,8 @@ Return array of length
 .Ar len
 filled with keyword INITIAL-ELEMENT values.
 .Ar initial-element
-defaults to nil if not specified.  Raise an
+defaults to nil if not specified.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1369,7 +1411,8 @@ Assoc arrays:
 .It Cm >assoc No (\ vals len -- ary\ )
 Return assoc array object with
 .Ar len
-/ 2 key-value pairs found on parameter stack.  Raise an
+/ 2 key-value pairs found on parameter stack.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1444,7 +1487,8 @@ to current output.
 .It Cm >list No (\ vals len -- lst\ )
 Return list object with
 .Ar len
-objects found on parameter stack.  Raise an
+objects found on parameter stack.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1550,7 +1594,8 @@ ary2 \(rA #( 0 #{ \(aqfoo 30 } 2 )
 .It Cm list-append No (\ arg0 arg1 ... argn n -- lst\ )
 Return list object with
 .Ar n
-objects found on parameter stack.  Raise an
+objects found on parameter stack.
+Raise an
 .Ar out-of-range
 exception if
 .Ar n
@@ -1620,9 +1665,11 @@ at position
 .Ar idx
 and return new list.
 .Ar val
-can be a list or any other object.  Negative
+can be a list or any other object.
+Negative
 .Ar idx
-counts from backward.  Raise an
+counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1657,7 +1704,8 @@ of
 .Ar lst .
 Negative
 .Ar idx
-counts from backward.  Raise an
+counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1681,7 +1729,8 @@ in
 .Ar lst .
 Negative
 .Ar idx
-counts from backward.  Raise an
+counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1697,7 +1746,8 @@ Return new list without
 .Ar count
 elements from
 .Ar idx
-on.  Raise an
+on.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1714,7 +1764,8 @@ without
 .Ar count
 elements from
 .Ar idx
-on.  Raise an
+on.
+Raise an
 .Ar out-of-range
 exception if
 .Ar idx
@@ -1756,7 +1807,8 @@ filled with keyword
 .Ar initial-element
 values.
 .Ar initial-element
-defaults to nil if not specified.  Raise an
+defaults to nil if not specified.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1805,7 +1857,8 @@ Assoc lists:
 .It Cm >alist No (\ vals len -- alst\ )
 Return assoc list object with
 .Ar len
-/ 2 key-value pairs found on parameter stack. Raise an
+/ 2 key-value pairs found on parameter stack.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -1880,8 +1933,8 @@ FP close-pipe throw
 .It Cm file-atime No (\ name -- time\ )
 If
 .Ar name
-is a file, return its last access time, otherwise #f.  One can convert
-the number in a readable string with
+is a file, return its last access time, otherwise #f.
+One can convert the number in a readable string with
 .Cm time->string .
 .\"
 .\" file-basename
@@ -1892,9 +1945,11 @@ Return basename of file
 depending on
 .Ar ext .
 .Ar ext
-may be #f, nil/undef, a string or a regexp.  If
+may be #f, nil/undef, a string or a regexp.
+If
 .Ar ext
-is #f, return filename without pathname.  If
+is #f, return filename without pathname.
+If
 .Ar ext
 is nil or undef, discard the part from the last dot to the end of
 basename
@@ -1917,7 +1972,8 @@ from basename
 .It Cm file-chdir No (\ path --\ )
 Change working directory to
 .Ar path
-and, if in a repl, print result to current standard output.  If
+and, if in a repl, print result to current standard output.
+If
 .Ar path
 is nil, change working directory to
 .Ev $HOME .
@@ -1950,8 +2006,8 @@ for hexadecimal numbers.
 .It Cm file-chroot No (\ path --\ )
 Change root directory to
 .Ar path
-and, if in a repl, print result to current standard output.  This
-function is restricted to the super-user.
+and, if in a repl, print result to current standard output.
+This function is restricted to the super-user.
 .\"
 .\" file-copy
 .\"
@@ -1977,8 +2033,8 @@ fails on any of the two files.
 .It Cm file-ctime No (\ name -- time\ )
 If
 .Ar name
-is a file, return its status change time, otherwise #f.  One can convert
-the number in a readable string with
+is a file, return its status change time, otherwise #f.
+One can convert the number in a readable string with
 .Cm time->string .
 .\"
 .\" file-delete
@@ -2012,13 +2068,16 @@ and add
 .Ar name
 to
 .Ev *loaded-files*
-if it wasn't there.  It's similar to
+if it wasn't there.
+It's similar to
 .Cm include
 except that
 .Ar name
-must be on stack (include is a parse word).  With
+must be on stack (include is a parse word).
+With
 .Cm file-eval
-one can load files from within word definitions.  Raise a
+one can load files from within word definitions.
+Raise a
 .Ar load-error
 exception if
 .Cm file-eval
@@ -2056,7 +2115,8 @@ to
 .Ar dst/src .
 Return #t if
 .Ar src
-could be installed, otherwise #f.  You can write
+could be installed, otherwise #f.
+You can write
 .Ar mode
 with octal numbers: prepend the number with
 .Sq 0o ,
@@ -2136,8 +2196,8 @@ for hexadecimal numbers.
 .It Cm file-mtime No (\ name -- time\ )
 If
 .Ar name
-is a file, return its last modification time, otherwise #f.  One can
-convert the number in a readable string with
+is a file, return its last modification time, otherwise #f.
+One can convert the number in a readable string with
 .Cm time->string .
 .\"
 .\" file-pwd
@@ -2187,8 +2247,8 @@ Remove empty directory
 .It Cm file-shell No (\ cmd -- str\ )
 Open pipe for reading, feed it with
 .Ar cmd
-and collect string output as long as pipe is open.  Afterwards close
-pipe, set read-only variable
+and collect string output as long as pipe is open.
+Afterwards close pipe, set read-only variable
 .Dv exit-status
 and return collected string (with trailing cr).
 .\"
@@ -2216,10 +2276,11 @@ named
 .It Cm file-system No (\ cmd -- f\ )
 Execute
 .Ar cmd
-as a shell command.  Set read-only variable
+as a shell command.
+Set read-only variable
 .Dv exit-status
-and return #t for success, #f otherwise.  In the latter case you can
-check
+and return #t for success, #f otherwise.
+In the latter case you can check
 .Dv exit-status .
 .\"
 .\" file-touch
@@ -2536,7 +2597,8 @@ Return empty hash object.
 .It Cm make-hash-with-len No (\ size -- hash\ )
 Return hash object with
 .Ar size
-key-value pairs.  Keys are 0, 1, 2, ... and values are nil.
+key-value pairs.
+Keys are 0, 1, 2, ... and values are nil.
 .El
 .Pp
 Property functions:
@@ -2572,7 +2634,8 @@ property object.
 .It Cm properties No (\ obj -- props\ )
 Return
 .Ar obj's
-global properties or #f if empty.  If
+global properties or #f if empty.
+If
 .Ar obj
 is #f, return entire global property object.
 .\"
@@ -2685,7 +2748,8 @@ Run all hook procedures with
 .Ar args ,
 an array of arguments.
 .Ar args
-can be an array of arguments or a single argument.  Raise a
+can be an array of arguments or a single argument.
+Raise a
 .Ar bad-arity
 exception if
 .Ar args's
@@ -2846,7 +2910,8 @@ to current standard output and return old IO object.
 .\" set-version-control
 .\"
 .It Cm set-version-control No (\ val --\ )
-Set current version control style.  Accepted values:
+Set current version control style.
+Accepted values:
 .Bl -tag -offset ident -width MMMMM -compact
 .It #t
 numbered backups
@@ -2917,7 +2982,8 @@ file-system, etc.
 .It Cm io-fdopen No (\ fd :key fam r/o -- io\ )
 Connect file descriptor
 .Ar fd
-to new IO object.  If keyword
+to new IO object.
+If keyword
 .Ar fam
 was not given, open file read-only, otherwise use
 .Ar fam .
@@ -2976,7 +3042,8 @@ object.
 .It Cm io-open No (\ name :key fam r/o if-exists overwrite -- io\ )
 Open file
 .Ar name
-and return new IO object.  If keyword
+and return new IO object.
+If keyword
 .Ar fam
 was not specified, open file read-only, otherwise take
 .Ar fam .
@@ -2998,7 +3065,8 @@ write-only \(dqw\(dq
 If keyword
 .Sy if-exists
 was not specified, overwrite possible existing file before open it for
-writing or appending.  Possible
+writing or appending.
+Possible
 .Sy if-exists
 values:
 .Bl -tag -offset ident -width MMM -compact
@@ -3038,7 +3106,8 @@ for reading and return new IO object.
 .It Cm io-open-write No (\ name :key if-exists overwrite -- io\ )
 Open file
 .Ar name
-for writing and return new IO object.  For keyword if-exists see
+for writing and return new IO object.
+For keyword if-exists see
 .Sx io-open .
 .\"
 .\" io-output?
@@ -3132,7 +3201,8 @@ Add
 .Ar offset
 to the file position in
 .Ar io
-object and return new position.  Keyword
+object and return new position.
+Keyword
 .Ar whence
 can have the following values:
 .Bl -tag -offset indent -width MMM -compact
@@ -3217,8 +3287,10 @@ File functions:
 .\" io-open-file
 .\"
 .It Cm io-open-file No (\ :key fam r/o args -- io\ )
-General IO open function.  Open and return any IO object for
-io-read/io-write etc.  Keyword argument :fam defaults to r/o.  See
+General IO open function.
+Open and return any IO object for io-read/io-write etc.
+Keyword argument :fam defaults to r/o.
+See
 .Sx make-soft-port
 for keyword arguments.
 .Bd -literal -offset indent -compact
@@ -3234,7 +3306,9 @@ for keyword arguments.
 .\" io-open-input-file
 .\"
 .It Cm io-open-input-file No (\ :key args -- io\ )
-General IO open function.  Return IO object for reading.  See
+General IO open function.
+Return IO object for reading.
+See
 .Sx make-soft-input-port
 for keyword arguments.
 .Bd -literal -offset indent -compact
@@ -3248,7 +3322,9 @@ for keyword arguments.
 .\" io-open-output-file
 .\"
 .It Cm io-open-output-file No (\ :key args -- io\ )
-General IO open function.  Return IO object for writing.  See
+General IO open function.
+Return IO object for writing.
+See
 .Sx make-soft-output-port
 for keyword arguments.
 .Bd -literal -offset indent -compact
@@ -3282,8 +3358,8 @@ Open pipe for command
 .Ar cmd
 and return new IO object.
 .Ar cmd
-may be a string (with shell expansion) or an array of strings.  If
-keyword
+may be a string (with shell expansion) or an array of strings.
+If keyword
 .Ar fam
 was not given, open pipe read-only, otherwise use
 .Ar fam .
@@ -3339,7 +3415,8 @@ String functions:
 .It Cm io-sopen No (\ str :key fam r/o -- io\ )
 Open string with content
 .Ar string
-and return new IO object.  If keyword
+and return new IO object.
+If keyword
 .Ar fam
 was not given, opens string read-only, otherwise takes
 .Ar fam .
@@ -3397,7 +3474,8 @@ Raise an a
 .Ar socket-error
 exception if an error occured.
 .Ar host
-is a host name (AF_INET) or a path name (AF_UNIX).  If
+is a host name (AF_INET) or a path name (AF_UNIX).
+If
 .Ar host
 is not a string, \(dqlocalhost\(dq will be used.
 .Ar port
@@ -3405,7 +3483,8 @@ is the connection port (default 1024) if
 .Ar domain
 is AF_INET, otherwise unused, and
 .Ar domain
-can be one of AF_INET (default) or AF_UNIX.  The socket is opened with
+can be one of AF_INET (default) or AF_UNIX.
+The socket is opened with
 .Ar domain ,
 hardcoded second argument SOCK_STREAM, and hardcoded third argument of
 0, see
@@ -3440,8 +3519,9 @@ is the socket descriptor,
 .Ar host
 can be an arbitrary name, its only use is the name for the IO object,
 .Ar domain
-is one of AF_INET or AF_UNIX.  This is used on the server side of a
-socket connection.  Raise a
+is one of AF_INET or AF_UNIX.
+This is used on the server side of a socket connection.
+Raise a
 .Ar socket-error
 exception if
 .Xr accept 2
@@ -3460,8 +3540,9 @@ is the port if
 .Ar domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  This is used on the server side of a
-socket connection.  Raise a
+is one of AF_INET or AF_UNIX.
+This is used on the server side of a socket connection.
+Raise a
 .Ar socket-error
 exception if
 .Xr bind 2
@@ -3481,8 +3562,9 @@ is the port if
 .Ar domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  This is used on the client side of a
-socket connection.  Raise a
+is one of AF_INET or AF_UNIX.
+This is used on the client side of a socket connection.
+Raise a
 .Ar socket-error
 exception if
 .Xr connect 2
@@ -3494,8 +3576,9 @@ fails.
 Inform the operating system that connection requests should be
 delivered.
 .Ar fd
-is the previously opened socket descriptor.  This is used on the server
-side of a socket connection.  Raise a
+is the previously opened socket descriptor.
+This is used on the server side of a socket connection.
+Raise a
 .Ar socket-error
 exception if
 .Xr listen 2
@@ -3508,7 +3591,8 @@ Receive data via a socket and return it.
 .Ar fd
 is the socket descriptor and
 .Ar flags
-can be 0, MSG_PEEK, or MSG_OOB.  Raise a
+can be 0, MSG_PEEK, or MSG_OOB.
+Raise a
 .Ar socket-error
 exception if
 .Xr recv 2
@@ -3529,7 +3613,8 @@ is the port if
 .AR domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  Raise a
+is one of AF_INET or AF_UNIX.
+Raise a
 .Ar socket-error
 exception if
 .Xr recvfrom 2
@@ -3544,7 +3629,8 @@ is the socket descriptor,
 .Ar msg
 is the data to send and
 .Ar flags
-can be 0, MSG_PEEK or MSG_OOB.  Raise a
+can be 0, MSG_PEEK or MSG_OOB.
+Raise a
 .Ar socket-error
 exception if
 .Xr send 2
@@ -3567,7 +3653,8 @@ is the port if
 .Ar domain
 is AF_INET, otherwise unused, and
 .Ar domain
-is one of AF_INET or AF_UNIX.  Raise a
+is one of AF_INET or AF_UNIX.
+Raise a
 .Ar socket-error
 exception if
 .Xr sendto 2
@@ -3580,7 +3667,8 @@ Close socket connection.
 .Ar fd
 is the socket descriptor and
 .Ar how
-is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  Raise a
+is one of SHUT_RD, SHUT_WR or SHUT_RDWR.
+Raise a
 .Ar socket-error
 exception if
 .Xr shutdown 2
@@ -3593,9 +3681,11 @@ Return socket descriptor.
 .Ar domain
 can be AF_INET or AF_UNIX,
 .Ar type
-can be SOCK_STREAM or SOCK_DGRAM.  The third argument to
+can be SOCK_STREAM or SOCK_DGRAM.
+The third argument to
 .Xr socket 2
-is 0 and cannot be set by the user.  Raise a
+is 0 and cannot be set by the user.
+Raise a
 .Ar socket-error
 exception if
 .Xr socket 2
@@ -3714,7 +3804,8 @@ and add
 .Ar name
 to
 .Ev *loaded-files*
-if it wasn't already there.  If file extension wasn't specified, use
+if it wasn't already there.
+If file extension wasn't specified, use
 .Sq .fs .
 If
 .Ar name
@@ -3724,7 +3815,8 @@ with
 .Ar name .
 With
 .Cm include
-one can load a file more than once.  Before loading
+one can load a file more than once.
+Before loading
 .Ar name ,
 run hook
 .Sx before-load-hook .
@@ -3824,7 +3916,8 @@ with
 .Ar name .
 With
 .Cm require
-one can load a file only one time.  Before loading
+one can load a file only one time.
+Before loading
 .Ar name ,
 run hook
 .Sx before-load-hook .
@@ -3874,18 +3967,23 @@ Catch errors:
 .It Cm fth-catch No (\ ?? obj exc arg -- ?? res\ )
 Run proc or xt
 .Ar obj
-in save environment.  If
+in save environment.
+If
 .Ar obj
 fails with an exception, data and return stack environments are
-recovered to the state before execution.  If
+recovered to the state before execution.
+If
 .Ar obj
-is #f, finishs immediately and returns #f.  The second argument
+is #f, finishs immediately and returns #f.
+The second argument
 .Ar exc
-may be a symbol, an exception, or #t.  If it's a symbol or an exception,
-this will be catched, if it's #t, all exceptions will be catched.  The
-third argument
+may be a symbol, an exception, or #t.
+If it's a symbol or an exception, this will be catched, if it's #t, all
+exceptions will be catched.
+The third argument
 .Ar arg
-may be nil or a return value.  If
+may be nil or a return value.
+If
 .Ar arg
 is nil, the catched exception or #f will be returned, if
 .Ar arg
@@ -3893,8 +3991,8 @@ is any other than nil,
 .Ar arg
 will be returned instead of the catched exception; if
 .Ar arg
-is a proc or xt, this will be executed instead of simply returned.  The
-stack effect must be ( retval -- val ).
+is a proc or xt, this will be executed instead of simply returned.
+The stack effect must be ( retval -- val ).
 .Bd -literal -offset indent -compact
 3 :initial-element 0.3 make-array value ary
 ary .array \(rA #( 0.3 0.3 0.3 )
@@ -3928,7 +4026,8 @@ If
 .Ar fmt
 is a format string with N %s-format signs,
 .Ar args
-should have N elements with corresponding values.  If
+should have N elements with corresponding values.
+If
 .Ar exc
 is #f, reraise last exception.
 .Bd -literal -offset indent -compact
@@ -3948,11 +4047,14 @@ with text built from
 .Ar args .
 If
 .Ar args
-is not an array, its string representation is used. If
+is not an array, its string representation is used.
+If
 .Ar args
-is NIL or an empty array, a default string is used.  If
+is NIL or an empty array, a default string is used.
+If
 .Ar args
-is an array with one element, this string is used. If
+is an array with one element, this string is used.
+If
 .Ar args
 is an array and its first element is a format string with N %s-format
 signs,
@@ -3996,7 +4098,8 @@ Time functions:
 .\" current-time
 .\"
 .It Cm current-time No (\ -- secs\ )
-Return time in seconds since 1970/01/01 as ficl2Unsigned.  See
+Return time in seconds since 1970/01/01 as ficl2Unsigned.
+See
 .Xr time 3
 for more information.
 .\"
@@ -4102,7 +4205,8 @@ Set global timeval struct variable to current time.
 .\" utime
 .\"
 .It Cm utime No (\ -- utime stime\ )
-Return user and system time as ficlFloats.  Raise a
+Return user and system time as ficlFloats.
+Raise a
 .Ar not-implemented
 exception if
 .Xr times 3
@@ -4132,7 +4236,8 @@ Return hash of all shell environment variables and their values.
 .It Cm exec No (\ cmd --\ )
 Replace current process by running
 .Ar cmd
-as shell command.  If
+as shell command.
+If
 .Ar cmd
 is a string, shell expansion takes place and
 .Ev $SHELL
@@ -4157,8 +4262,8 @@ lambda: <{}> \(dqls -lAF [A-Z]*\(dq exec ; fork
 .It Cm fork No (\ xt -- pid\ )
 Create child process and execute
 .Ar xt
-in the child.  The child process returns nothing, parent returns child's
-process id.
+in the child.
+The child process returns nothing, parent returns child's process id.
 .Bd -literal -offset indent -compact
 lambda: <{}> \(dqls -lAF\(dq exec ; fork value pid
 pid SIGKILL kill
@@ -4210,7 +4315,8 @@ Return parent process id.
 .\"
 .It Cm getservbyname No (\ str -- ary\ )
 Return array containing the service, an array of aliases, the port
-number and the protocol.  Raise a
+number and the protocol.
+Raise a
 .Ar not-implemented
 exception if
 .Xr getservbyname 3
@@ -4223,7 +4329,8 @@ is not available.
 .\"
 .It Cm getservbyport No (\ port -- ary\ )
 Return array containing the service, an array of aliases, the port
-number and the protocol.  Raise a
+number and the protocol.
+Raise a
 .Ar not-implemented
 exception if
 .Xr getservbyport 3
@@ -4300,7 +4407,8 @@ super user.
 .It Cm sethostname No (\ str --\ )
 Set name of current host to
 .Ar str .
-This call is restricted to the super-user.  Raise a
+This call is restricted to the super-user.
+Raise a
 .Ar not-implemented
 exception if
 .Xr sethostname 3
@@ -4326,8 +4434,8 @@ for signal
 as an signal handler and return old handler.
 .Ar XT
 must take one value from the stack, the signal, and must not return any
-value; its stack effect is ( sig -- ).  The old xt handler can be
-preserved for later use.
+value; its stack effect is ( sig -- ).
+The old xt handler can be preserved for later use.
 .Bd -literal -offset indent -compact
 SIGINT lambda: { sig -- }
 	.\(dq SIGINT received\(dq cr
@@ -4344,8 +4452,8 @@ seconds.
 .\" wait
 .\"
 .It Cm wait No (\ -- pid\ )
-Wait for child process and return its process ID.  Set global read only
-variable
+Wait for child process and return its process ID.
+Set global read only variable
 .Dv exit-status
 to wait status.
 .\"
@@ -4388,7 +4496,8 @@ stores that option in this variable.
 Getopt functions:
 .Bl -tag -width MMM -compact
 .It Cm getopt No (\ argv opts -- c\ )
-Return next option character from command line options.  See
+Return next option character from command line options.
+See
 .Sx EXAMPLES
 for an getopt example.
 .It Cm getopt-long No (\ argv opts longopts -- c\ )
@@ -4464,8 +4573,9 @@ Print package version number.
 .\"
 .It Cm at-exit No (\ obj --\ )
 .Ar obj ,
-an proc or xt, will be called by Fth's exit function.  More than one
-calls to at-exit are possible, all procs or xts will be called in order.
+an proc or xt, will be called by Fth's exit function.
+More than one calls to at-exit are possible, all procs or xts will be
+called in order.
 The stack effect of
 .Ar obj
 must be ( -- ).
@@ -5444,13 +5554,15 @@ Print last word list from stack frame to error output.
 .\" frame-depth
 .\"
 .It Cm frame-depth No (\ -- n\ )
-Internal global variable.  Return the current frame depth.
+Internal global variable.
+Return the current frame depth.
 .\"
 .\" object-print-length
 .\"
 .It Cm object-print-length No (\ -- n\ )
 Return the number of objects to print for objects like array, list,
-hash.  Default value is 12.
+hash.
+Default value is 12.
 .\"
 .\" set-object-print-length
 .\"
@@ -5481,18 +5593,20 @@ to protect it from garbage collection on next gc-run.
 .It Cm gc-marked? No (\ obj -- f\ )
 Return #t if
 .Ar obj
-is an instance and mark flag is set.  All new created objects have mark
-flag set.
+is an instance and mark flag is set.
+All new created objects have mark flag set.
 .\"
 .\" gc-off
 .\"
 .It Cm gc-off No (\ --\ )
-Turn off garbage collection.  The return code is meaningless in Forth.
+Turn off garbage collection.
+The return code is meaningless in Forth.
 .\"
 .\" gc-on
 .\"
 .It Cm gc-on No (\ --\ )
-Turn on garbage collection.  The return code is meaningless in Forth.
+Turn on garbage collection.
+The return code is meaningless in Forth.
 .\"
 .\" gc-permanent-objects
 .\"
@@ -5795,7 +5909,8 @@ to current stdout.
 .It Cm cycle-ref No (\ obj -- val\ )
 Return value at current cycle-index of
 .Ar obj
-and increment cycle-index.  Cycle through content of
+and increment cycle-index.
+Cycle through content of
 .Ar obj
 from first to last entry and start again at the beginning etc.
 .\"
@@ -5806,7 +5921,8 @@ Store
 .Ar value
 at current cycle-index of
 .Ar obj
-and increment cycle-index.  Cycle through content of
+and increment cycle-index.
+Cycle through content of
 .Ar obj
 from first to last entry and start again at the beginning etc.
 .\"
@@ -5932,10 +6048,11 @@ with
 .Ar args
 as arguments.
 .Ar args
-can be an array of arguments or a single argument.  The number of
+can be an array of arguments or a single argument.
+The number of
 .Ar args
-must fit apply's definition.  The next two examples require each 1
-argument:
+must fit apply's definition.
+The next two examples require each 1 argument:
 .Bd -literal -offset indent -compact
 fth_set_object_apply(vct_tag, vct_ref, 1, 0, 0); /* C */
 <\(aq> enved-ref fth-enved 1 set-object-apply \e Forth
@@ -5955,11 +6072,13 @@ is an instance.
 .It Cm object-debug-hook No (\ obj -- hook\ )
 Return debug-hook member of
 .Ar obj
-if there is any, otherwise #f.  The hook has the stack effect (
-inspect-string obj -- new-str ).  Every object can set this hook.  If
-set, it will be called on inspecting the object with the inspect string
-as first argument.  If there are more than one hook procedures, all of
-them will be called feeded with the new string previously returned.
+if there is any, otherwise #f.
+The hook has the stack effect ( inspect-string obj -- new-str ).
+Every object can set this hook.
+If set, it will be called on inspecting the object with the inspect
+string as first argument.
+If there are more than one hook procedures, all of them will be called
+feeded with the new string previously returned.
 .Bd -literal -offset indent -compact
 #( 0 1 ) value ary
 ary .inspect \(rA #<array[2]:  #<fixnum: 0> #<fixnum: 1>>
@@ -6052,7 +6171,8 @@ Return #t if
 .Ar index
 is in range of
 .Ar obj ,
-otherwise #f.  If
+otherwise #f.
+If
 .Ar index
 is negative, return #f.
 .\"
@@ -6230,7 +6350,8 @@ is less than 3.
 .It Cm xmobj? No (\ obj -- f\ )
 Return #t if
 .Ar obj
-is an XmObj (xm.c), otherwise #f.  It is a very special Snd XM test.
+is an XmObj (xm.c), otherwise #f.
+It is a very special Snd XM test.
 See
 .Xr snd 1
 for more information.
@@ -6283,8 +6404,9 @@ is undef, otherwise #f.
 .\" make-soft-input-port
 .\"
 .It Cm make-soft-input-port No (\ :key args -- prt\ )
-Return new input soft port IO object with corresponding procs.  Not all
-procs are required.  Recognized keyword options:
+Return new input soft port IO object with corresponding procs.
+Not all procs are required.
+Recognized keyword options:
 .Bl -tag -offset indent -width MMM -compact
 .It Sy :close No (\ --\ )
 Proc for closing soft port.
@@ -6308,8 +6430,9 @@ make-soft-port set-*stdin* value stdin-io
 .\" make-soft-output-port
 .\"
 .It Cm make-soft-output-port No (\ :key args -- prt\ )
-Return new output soft port IO object with corresponding procs.  Not all
-procs are required.  Recognized keyword options:
+Return new output soft port IO object with corresponding procs.
+Not all procs are required.
+Recognized keyword options:
 .Bl -tag -offset indent -width MMM -compact
 .It Sy :close No (\ --\ )
 Proc for closing soft port.
@@ -6333,8 +6456,9 @@ make-soft-port set-*stdout* value stdout-io
 .\" make-soft-port
 .\"
 .It Cm make-soft-port No (\ :key args -- prt\ )
-Return new soft port IO object with corresponding procs.  Not all procs
-are required.  Recognized keyword options:
+Return new soft port IO object with corresponding procs.
+Not all procs are required.
+Recognized keyword options:
 .Bl -tag -offset indent -width MMM -compact
 .It Sy :close No (\ --\ )
 Proc for closing soft port.
@@ -6399,7 +6523,8 @@ Write the string representation of
 .Ar obj
 to
 .Ar prt
-object.  If
+object.
+If
 .Ar prt
 is #f, write to current output port (stout).
 .\"
@@ -6413,7 +6538,8 @@ File and IO ports flush their streams, other kind of ports do nothing.
 .It Cm port-getc No (\ prt -- c\ )
 Return next character from
 .Ar prt
-IO object.  If
+IO object.
+If
 .Ar prt
 is #f, read from current input port (stdin).
 .\"
@@ -6422,7 +6548,8 @@ is #f, read from current input port (stdin).
 .It Cm port-gets No (\ prt -- str\ )
 Return one line from
 .Ar prt
-IO object.  If
+IO object.
+If
 .Ar prt
 is #f, read from current input port (stdin).
 .\"
@@ -6447,7 +6574,8 @@ Write character
 .Ar c
 to
 .Ar prt
-IO object.  If
+IO object.
+If
 .Ar prt
 is #f, write to current output port (stout).
 .\"
@@ -6458,7 +6586,8 @@ Write
 .Ar str
 to
 .Ar prt
-IO object.  If
+IO object.
+If
 .Ar prt
 is #f, write to current output port (stout).
 .\"
@@ -6471,10 +6600,11 @@ and array
 .Ar fmt-args
 to
 .Ar prt
-IO object.  If
+IO object.
+If
 .Ar prt
-is #f, write to current output port (stdout).  For example, write
-\(dqhello, world\(dq to stdout (#f) port:
+is #f, write to current output port (stdout).
+For example, write \(dqhello, world\(dq to stdout (#f) port:
 .Bd -literal -offset indent -compact
 #f \(dqhello, %s\(dq #( \(dqworld\(dq ) port-puts-format
   \(rA hello, world
@@ -6563,7 +6693,8 @@ If
 .Ar obj
 is a string, write string to IO object, otherwise execute
 .Ar obj
-as proc or xt with stack effect (\ --\ ).  Close IO object.
+as proc or xt with stack effect (\ --\ ).
+Close IO object.
 .Ar *stderr*
 will be reset to its previous value.
 .Bd -literal -offset indent -compact
@@ -6596,8 +6727,8 @@ is
 .Ar nil ,
 read first line from IO object, otherwise execute
 .Ar obj
-as proc or xt with stack effect (\ -- str\ ).  Close IO object and
-return resulting string.
+as proc or xt with stack effect (\ -- str\ ).
+Close IO object and return resulting string.
 .Ar *stdin*
 will be reset to its previous value.
 .Bd -literal -offset indent -compact
@@ -6617,13 +6748,14 @@ nil :filename \(dqfile.test\(dq with-input-from-port \(rA \(dqhello\(dq
 .\" with-input-port
 .\"
 .It Cm with-input-port No (\ obj :key args -- str\ )
-Open IO object for input.  If
+Open IO object for input.
+If
 .Ar obj is
 .Ar nil ,
 read first line from IO object, otherwise execute
 .Ar obj
-as a proc or xt with stack effect (\ io -- str\ ).  Close IO object and
-return resulting string.
+as a proc or xt with stack effect (\ io -- str\ ).
+Close IO object and return resulting string.
 .Bd -literal -offset indent -compact
 % cat file.test
 hello
@@ -6641,11 +6773,13 @@ nil :filename \(dqfile.test\(dq with-input-port \(rA \(dqhello\en\(dq
 .\" with-output-port
 .\"
 .It Cm with-output-port No (\ obj :key args --\ )
-Open IO object for output.  If
+Open IO object for output.
+If
 .Ar obj
 is a string, write string to IO object, otherwise execute
 .Ar obj
-as proc or xt with stack effect (\ io --\ ).  Close IO object.
+as proc or xt with stack effect (\ io --\ ).
+Close IO object.
 .Bd -literal -offset indent -compact
 lambda: <{ io -- }>
 	io \(dqhello\en\(dq io-write
@@ -6674,7 +6808,8 @@ If
 .Ar obj
 is a string, write string to IO object, otherwise execute
 .Ar obj
-as proc or xt with stack effect (\ --\ ).  Close IO object.
+as proc or xt with stack effect (\ --\ ).
+Close IO object.
 .Ar *stdout*
 will be reset to its previous value.
 .Bd -literal -offset indent -compact
@@ -6736,10 +6871,10 @@ or #f if not found.
 .\" <{
 .\"
 .It Cm <{ No (\ --\ )
-Turn current colon definition in a proc object.  Takes tokens up to
-closing \(oq}>\(cq as local variables, \(oq--\(cq start a comment
-ignoring rest to closing \(oq}>\(cq.  In addition to other local
-variable words like
+Turn current colon definition in a proc object.
+Takes tokens up to closing \(oq}>\(cq as local variables, \(oq--\(cq
+start a comment ignoring rest to closing \(oq}>\(cq.
+In addition to other local variable words like
 .Cm { }
 and
 .Cm {{ }}
@@ -6747,11 +6882,13 @@ this form handles two keywords,
 .Sy :key
 and
 .Sy :optional .
-Variable names are taken from keyword and optional names.  This word can
-span over more than one lines but without empty lines or comments in
-between.  If :key and :optional is used together, :key must come first.
-All keyword and optional variables must have default values.  This word
-is immediate and compile only and can only be used in word definitions.
+Variable names are taken from keyword and optional names.
+This word can span over more than one lines but without empty lines or
+comments in between.
+If :key and :optional is used together, :key must come first.
+All keyword and optional variables must have default values.
+This word is immediate and compile only and can only be used in word
+definitions.
 .Bd -literal -offset indent -compact
 : optkey-test <{ a b c
   :key d 10 e 20 :optional f 30 g 40 -- ary }>
@@ -6764,8 +6901,9 @@ is immediate and compile only and can only be used in word definitions.
 .\" <{}>
 .\"
 .It Cm <{}> No (\ --\ )
-Turn current colon definition in a proc object.  This word is immediate
-and compile only and can only be used in word definitions.
+Turn current colon definition in a proc object.
+This word is immediate and compile only and can only be used in word
+definitions.
 .Bd -literal -offset indent -compact
 : we-dont-need-args <{}> ;
 <\(aq> we-dont-need-args proc? \(rA #t
@@ -6787,10 +6925,14 @@ defined?   + \(rA #t
 .\"
 .It Cm doc\(dq No (\ <ccc>\(dq --\ )
 Add input buffer to next double quote character \(oq\(dq\(cq to
-documentation of current word.  Escape double quote character with
-backslash if required in documentation.  It is not necessary to repeat
-the stack effect if it already exist in the word definition.  This word
-is immediate and compile only and can only be used in word definitions.
+documentation of current word.
+Escape double quote character with backslash if required in
+documentation.
+It is not necessary to repeat the stack effect if it already exist in
+the word definition.
+This word is immediate and compile only and can only be used in word
+definitions.
+
 .Bd -literal -offset indent -compact
 : new-word ( -- )
 	doc\(dq our documentation may contain \e
@@ -6799,7 +6941,8 @@ Escape them with a backslash.\(dq
 	\e we do nothing
 ;
 help new-word \(rA new-word  ( -- )  our documentation may
-contain \dqdouble quotes\(dq.  Escape them with a backslash.
+contain \dqdouble quotes\(dq.
+Escape them with a backslash.
 .Ed
 .\"
 .\" documentation-ref
@@ -6820,8 +6963,9 @@ Set documentation of
 .\" get-func-name
 .\"
 .It Cm get-func-name No (\ -- name\ )
-Return name of current xt in word definition as string.  This word is
-immediate and compile only and can only be used in word definitions.
+Return name of current xt in word definition as string.
+This word is immediate and compile only and can only be used in word
+definitions.
 .Bd -literal -offset indent -compact
 : new-word
 	get-func-name .$
@@ -6838,8 +6982,8 @@ Return either default value
 .Ar def
 or a value found on stack.
 .Ar req
-is the sum of required and following optional arguments.  It simulates
-the :optional keyword in Lisp/Scheme.
+is the sum of required and following optional arguments.
+It simulates the :optional keyword in Lisp/Scheme.
 .Bd -literal -offset indent -compact
 : optarg-test ( a b c=33 d=44 e=55 -- ary )
 	4 55 get-optarg { e }
@@ -6860,7 +7004,8 @@ The plural form of get-optarg.
 .Ar args
 is an array with default values,
 .Ar req
-is number of required arguments.  Return
+is number of required arguments.
+Return
 .Ar req
 +
 .Ar args
@@ -6901,7 +7046,8 @@ The plural form of get-optkey.
 .Ar ary
 is an array of key-value pairs,
 .Ar req
-is number of required arguments.  Return
+is number of required arguments.
+Return
 .Ar req
 +
 .Ar ary
@@ -6961,9 +7107,10 @@ hosts help-ref \(rA \(dqlocal-net hostnames\(dq
 .It Cm lambda: No (\ -- xt\ )
 Start nameless word definition and set variable
 .Ev latestxt
-to word.  Stack-effect or normal comment immediately at the beginning
-will be used as documentation.  Return xt after closing semicolon
-\(oq;\(cq.
+to word.
+Stack-effect or normal comment immediately at the beginning will be used
+as documentation.
+Return xt after closing semicolon \(oq;\(cq.
 .Bd -literal -offset indent -compact
 lambda: ( a b -- c ) + ; value plus
 plus help-ref \(rA lambda-009  ( a b -- c )
@@ -6980,8 +7127,9 @@ Return latest defined xt.
 .\"
 .It Cm local-variables No (\ -- vars\ )
 Return a hash of local variable name-value pairs up to the location
-in definition.  This word is immediate and compile only and can
-only be used in word definitions.
+in definition.
+This word is immediate and compile only and can only be used in word
+definitions.
 .Bd -literal -offset indent -compact
 : word-with-locals { foo -- }
 	10 { bar }
@@ -7020,8 +7168,8 @@ with arguments
 .Ar args
 and return result or #f.
 .Ar args
-can be an array of arguments or a single argument.  If execution fails,
-raise an
+can be an array of arguments or a single argument.
+If execution fails, raise an
 .Ar eval-error
 exception, if length of
 .Ar args
@@ -7109,8 +7257,9 @@ is a proc object.
 .\" running-word
 .\"
 .It Cm running-word No (\ -- xt\ )
-Return current xt in word definition.  This word is immediate and
-compile only and can only be used in word definitions.
+Return current xt in word definition.
+This word is immediate and compile only and can only be used in word
+definitions.
 .Bd -literal -offset indent -compact
 : new-word
 	running-word xt->name .$
@@ -7134,7 +7283,8 @@ and execute word
 .Ar set-name
 if found, otherwise raise an
 .Ar undefined-word
-exception.  The following two lines do the same:
+exception.
+The following two lines do the same:
 .Bd -literal -offset indent -compact
 128 set! object-print-length
 128 set-object-print-length
@@ -7147,7 +7297,8 @@ Execute
 .Ar set-xt
 if found, otherwise raise an
 .Ar undefined-word
-exception.  The following two lines do the same:
+exception.
+The following two lines do the same:
 .Bd -literal -offset indent -compact
 128 <\(aq> object-print-length set-execute
 128 set-object-print-length
@@ -7201,8 +7352,8 @@ a proc or xt, to
 .It Cm thunk? No (\ obj -- f\ )
 Return #t if
 .Ar obj
-is a proc object with no required, optional and rest arguments.  If its
-arity is not #(\ 0 0 #f\ ), return #f.
+is a proc object with no required, optional and rest arguments.
+If its arity is not #(\ 0 0 #f\ ), return #f.
 .\"
 .\" trace-var
 .\"
@@ -7274,7 +7425,8 @@ if found, otherwise an empty string.
 .It Cm xt->origin No (\ xt -- str\ )
 Return name, source file and source line number where
 .Ar xt
-was defined (name:file:line).  If
+was defined (name:file:line).
+If
 .Ar xt
 is a C-primitive, return (name:primitive), if not defined, return an
 empty string.
@@ -7295,8 +7447,8 @@ is an xt (execution token, address of a Ficl word), otherwise #f.
 .\" *re-syntax-options*
 .\"
 .It Ev *re-syntax-options*
-This regexp variable can be set with the following constants.  If more
-than one constant is used, combine them with
+This regexp variable can be set with the following constants.
+If more than one constant is used, combine them with
 .Cm or ,
 see
 .Xr regex 3 .
@@ -7356,7 +7508,8 @@ Return index of match or -1 for no match.
 Parse regexp
 .Ar ccc
 delimited by \(oq/\(cq at compile time and at interpret time return
-parsed regexp.  See
+parsed regexp.
+See
 .Sx /
 for an alternative.
 .Bd -literal -offset indent -compact
@@ -7367,8 +7520,8 @@ re/ (B\(bab)+/ \(rA /(B\(bab)+/
 .\"
 .It Cm re= No (\ reg str -- len\(ba#f\ ) alias for Sx regexp-match
 .It Cm regexp-match No (\ reg str -- len\(ba#f\ )
-Return count of matched characters or #f.  Possible matched group
-results or #f can be found in regexp object
+Return count of matched characters or #f.
+Possible matched group results or #f can be found in regexp object
 .Ar reg ,
 in read-only variables
 .Ev *re1*
@@ -7394,10 +7547,11 @@ in
 .Ar str1
 with
 .Ar replace
-if found.  References \e1 to \e9 in
+if found.
+References \e1 to \e9 in
 .Ar replace
-will be replaced by corresponding subexpressions.  If no corresponding
-subexpression exist, raise a
+will be replaced by corresponding subexpressions.
+If no corresponding subexpression exist, raise a
 .Ar regexp-error
 exception.
 .Bd -literal -offset indent -compact
@@ -7409,13 +7563,13 @@ Note the double quotes on back reference characters .
 .\" regexp-search
 .\"
 .It Cm regexp-search No (\ reg str :key start 0 range -1 -- pos\(baf\ )
-Return index of match or #f.  If index is zero, return #t to fool
-Forth\(aq
+Return index of match or #f.
+If index is zero, return #t to fool Forth\(aq
 .Cm if .
 If keyword
 .Ar range
-is -1 (default), the entire string will be searched.  Possible matched
-group results or #f can be found in regexp object
+is -1 (default), the entire string will be searched.
+Possible matched group results or #f can be found in regexp object
 .Ar reg ,
 in read-only variables
 .Ev *re1*
@@ -7469,7 +7623,8 @@ Return empty string object (\(dq\(dq).
 Parse string
 .Ar ccc
 delimited by \(oq\(dq\(cq at compile time and at interpret time return
-parsed string.  See
+parsed string.
+See
 .Sx \(dq
 for an alternative.
 .Bd -literal -offset indent -compact
@@ -7485,7 +7640,8 @@ $\(dq pumpkin\(dq \(rA \(dqpumpkin\(dq
 .It Cm $>string No (\ addr len -- str\ )
 Return Forth string
 .Ar addr len
-as string object.  Standard words like
+as string object.
+Standard words like
 .Cm type
 and
 .Cm evaluate
@@ -7506,7 +7662,8 @@ Return string of one space (\(dq\ \(dq).
 .It Cm $spaces No (\ len -- str\ )
 Return string of
 .Ar len
-spaces.  Raise an
+spaces.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -7604,7 +7761,8 @@ array wrapped in
 .Ic #<die: ...>
 to current stderr and exit interpreter with return code 1;
 .Ar args
-is optional.   See
+is optional.
+See
 .Sx string-format
 for
 .Ar fmt
@@ -7621,7 +7779,8 @@ array wrapped in
 .Ic #<error: ...>
 to current stderr and throw exception;
 .Ar args
-is optional.   See
+is optional.
+See
 .Sx string-format
 for
 .Ar fmt
@@ -7637,7 +7796,8 @@ string and
 .Ar args
 array containing corresponding arguments;
 .Ar args
-is optional.  See
+is optional.
+See
 .Sx string-format
 for
 .Ar fmt
@@ -7652,7 +7812,8 @@ string with corresponding
 .Ar args
 array to current stdout;
 .Ar args
-is optional.   See
+is optional.
+See
 .Sx string-format
 for
 .Ar fmt
@@ -7669,7 +7830,8 @@ array wrapped in
 .Ic #<warning: ...>
 to current stderr;
 .Ar args
-is optional.   See
+is optional.
+See
 .Sx string-format
 for
 .Ar fmt
@@ -7682,7 +7844,8 @@ Return a new string of length
 .Ar len
 filled with
 .Ar initial-element
-characters, default space.  Raise an
+characters, default space.
+Raise an
 .Ar out-of-range
 exception if
 .Ar len
@@ -7755,7 +7918,8 @@ Delete and return character at position
 .Ar idx
 from
 .Ar str ;
-negative index counts from backward.  Raise an
+negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7786,8 +7950,8 @@ stack.
 Evaluate
 .Ar str
 and return eval-status on top of stack; values already on stack can be
-accessed, resulting values remain on stack.  Eval-status can be one of
-the following constants:
+accessed, resulting values remain on stack.
+Eval-status can be one of the following constants:
 .Bl -tag -offset MMMMM -width MMMMMMMMMMMM -compact
 .It Er BREAK
 Ficl Break.
@@ -7842,7 +8006,8 @@ the needed arguments which may be an array, a single argument or #f.
 The format string can have zero or more of the following flags:
 .Bl -tag -offset indent -width MMMMMMMM -compact
 .It Sq Cm #
-The value will be converted to an alternate form.  For
+The value will be converted to an alternate form.
+For
 .Cm b ,
 .Cm B ,
 .Cm o
@@ -7856,7 +8021,8 @@ conversions prepend a
 .Sq 0x
 respective
 .Sq 0X
-before output.  For
+before output.
+For
 .Cm a ,
 .Cm A ,
 .Cm e ,
@@ -7919,7 +8085,8 @@ to
 .Ar str
 at position
 .Ar idx ;
-negative index counts from backward.  Raise an
+negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -7945,7 +8112,8 @@ otherwise #f.
 .\" string-pop
 .\"
 .It Cm string-pop No (\ str -- char\ )
-Remove and return last character.  If
+Remove and return last character.
+If
 .Ar str
 is empty, return #f.
 .\"
@@ -7963,7 +8131,8 @@ and return changed string object.
 .It Cm string-ref No (\ str idx -- val\ )
 Return character at position
 .Ar idx ;
-negative index counts from backward.  Raise an
+negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
@@ -8014,14 +8183,16 @@ Store character
 .Ar char
 at index
 .Ar idx ;
-negative index counts from backward.  Raise an
+negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if index is not in range of string.
 .\"
 .\" string-shift
 .\"
 .It Cm string-shift No (\ str -- char\ )
-Remove and return first character.  If
+Remove and return first character.
+If
 .Ar str
 is empty, return #f.
 .\"
@@ -8032,7 +8203,8 @@ Split
 .Ar str
 using
 .Ar sep
-as delimiter and return result as array of strings.  If
+as delimiter and return result as array of strings.
+If
 .Ar sep
 is not a string or regexp, delimiter is space.
 .Bd -literal -offset indent -compact
@@ -8055,7 +8227,8 @@ is not an integer,
 .Ar end
 will be set to length of
 .Ar str1 ;
-negative index counts from backward.  Raise an
+negative index counts from backward.
+Raise an
 .Ar out-of-range
 exception if
 .Ar start
@@ -8181,8 +8354,8 @@ to current output.
 .It Cm create-symbol No (\ \(dqname\(dq --\ )
 Create symbol
 .Ar name
-prepended by \(oq\(aq\(cq.  Symbols are actually values (variables)
-named
+prepended by \(oq\(aq\(cq.
+Symbols are actually values (variables) named
 .Ar \(aqname .
 .Bd -literal -offset indent -compact
 create-symbol new-symbol \(rA create symbol \(aqnew-symbol
@@ -8193,8 +8366,8 @@ create-symbol new-symbol \(rA create symbol \(aqnew-symbol
 .It Cm make-symbol No (\ name -- sym\ )
 Return symbol
 .Ar name
-prepended by \(oq\(aq\(cq.  Symbols are actually values (variables)
-named
+prepended by \(oq\(aq\(cq.
+Symbols are actually values (variables) named
 .Ar \(aqname .
 .Bd -literal -offset indent -compact
 \(dqnew-symbol\(dq make-symbol \(rA \(aqnew-symbol
@@ -8243,7 +8416,8 @@ to current output.
 .It Cm create-keyword No (\ \(dqname\(dq --\ )
 Create keyword
 .Ar name
-prepended by \(oq:\(cq.  Keywords are actually values (variables) named
+prepended by \(oq:\(cq.
+Keywords are actually values (variables) named
 .Ar :name .
 .Bd -literal -offset indent -compact
 create-keyword new-keyword \(rA create keyword :new-keyword
@@ -8279,7 +8453,8 @@ is a keyword, otherwise #f.
 .It Cm make-keyword No (\ name -- kw\ )
 Return keyword
 .Ar name
-prepended by \(oq:\(cq.  Keywords are actually values (variables) named
+prepended by \(oq:\(cq.
+Keywords are actually values (variables) named
 .Ar :name .
 .Bd -literal -offset indent -compact
 \(dqnew-keyword\(dq make-keyword \(rA :new-keyword
@@ -8311,8 +8486,9 @@ Create exception named
 with message
 .Ar msg ,
 .Ar msg
-can be #f.  The exception has a symbol name, that means it has prefix
-\(oq\(aq\(cq before
+can be #f.
+The exception has a symbol name, that means it has prefix \(oq\(aq\(cq
+before
 .Ar name .
 .Bd -literal -offset indent -compact
 \(dqNew test exception\(dq create-exception new-exception
@@ -8388,8 +8564,9 @@ Return exception named
 with message
 .Ar msg ,
 .Ar msg
-can be #f.  The exception has a symbol name, that means it has prefix
-\(oq\(aq\(cq before
+can be #f.
+The exception has a symbol name, that means it has prefix \(oq\(aq\(cq
+before
 .Ar name .
 .Bd -literal -offset indent -compact
 \(dqNew test exception\(dq create-exception new-exception
@@ -8417,8 +8594,8 @@ Overwrite default size of return stack (1024).
 .It Ev FTH_STACK_SIZE
 Overwrite default size of parameter stack (8192).
 .It Ev FTH_FTHPATH
-A colon separated list of paths pointing to Forth script files.  These
-paths will be prepended to
+A colon separated list of paths pointing to Forth script files.
+These paths will be prepended to
 .Ev *load-path* .
 .It Ev FTH_HISTORY
 Overwrite default history filename
@@ -8441,11 +8618,12 @@ These paths will be prepended to
 .It Pa /usr/local/etc/fthrc
 Global initialization file for system wide configuration.
 .It Pa ~/.fthrc
-Local initialization file for user configuration.  The name can be
-changed with
+Local initialization file for user configuration.
+The name can be changed with
 .Ev FTH_INIT_FILE .
 .It Pa ~/.fth-history
-Local history file.  The name can be changed with
+Local history file.
+The name can be changed with
 .Ev FTH_HISTORY .
 .El
 .\"
@@ -8485,7 +8663,8 @@ to
 .Ev *load-path* ,
 load Forth source file
 .Ar sound-script.fs
-and start the repl showing a prompt.  Initialization files
+and start the repl showing a prompt.
+Initialization files
 .Pa /usr/local/etc/fthrc
 and
 .Pa ~/.fthrc
@@ -8505,7 +8684,8 @@ Rename
 .Pa config.h
 to
 .Pa config.h.orig
-and read it line by line.  If a line with
+and read it line by line.
+If a line with
 .Dl #define HAVE_COMPLEX_DOUBLE
 occures, replace it with
 .Dl /* #undef HAVE_COMPLEX_DOUBLE */
@@ -8517,16 +8697,17 @@ set the global Forth variable
 .Dv reg
 to a regexp object, the second
 .Fl e
-uses this variable for testing.  The
-.Ar pattern
+uses this variable for testing.
+The
+.Ar eval
 of the first
 .Fl e
 is evaluated in interpret state before reading file while the
-.Ar pattern
+.Ar eval
 of the second
 .Fl e
 is evaluated in compile state in a nameless
-.Ic lambda: <{}> pattern\ ;
+.Ic lambda: <{}> eval\ ;
 word during reading file line by line.
 .Bd -literal
 % fth -ni.orig -e \(aq/#define HAVE_COMPLEX_DOUBLE/ value reg\(aq \e
@@ -8545,8 +8726,8 @@ The same with output file separator set to \(dq == \(dq:
 .Pp
 Stand-alone executable Forth scripts have a first line of at least
 .Dl #! /usr/local/bin/fth -s
-but may have more options; adjust the path to the interpreter.  Note the
-space after
+but may have more options; adjust the path to the interpreter.
+Note the space after
 .Cm #! .
 It's a Forth word starting a comment and must be separated by at least
 one space.
