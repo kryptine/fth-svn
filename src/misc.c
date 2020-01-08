@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	2.60 12/29/19";
+const char libfth_sccsid[] = "@(#)misc.c	3.1 1/9/20";
 #endif /* not lint */
 
-#define FTH_DATE		"2019/12/29"
+#define FTH_DATE		"2020/01/09"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
