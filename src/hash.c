@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	2.3 1/31/19
+ * @(#)hash.c	2.4 1/11/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -134,11 +134,13 @@ fth_hash_each(FTH hash,
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++)
-		for (entry = FTH_HASH_DATA(hash)[i]; entry; entry = entry->next)
+	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++) {
+		entry = FTH_HASH_DATA(hash)[i];
+
+		for (; entry; entry = entry->next)
 			if (entry->key)
 				data = (*func) (entry->key, entry->value, data);
-
+	}
 	return (data);
 }
 
@@ -157,12 +159,14 @@ fth_hash_map(FTH hash,
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
 	hs = fth_make_hash_len(FTH_HASH_HASH_SIZE(hash));
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++)
-		for (entry = FTH_HASH_DATA(hash)[i]; entry; entry = entry->next)
+	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++) {
+		entry = FTH_HASH_DATA(hash)[i];
+
+		for (; entry; entry = entry->next)
 			if (entry->key)
 				fth_hash_set(hs, entry->key,
 				    (*func) (entry->key, entry->value, data));
-
+	}
 	return (hs);
 }
 
@@ -192,6 +196,7 @@ hs_to_string(FTH self)
 	ficlInteger 	i;
 	ficlInteger 	n;
 	ficlInteger 	len;
+	FItem          *entry;
 	FTH 		fs;
 
 	if (FTH_HASH_LENGTH(self) == 0)
@@ -204,17 +209,15 @@ hs_to_string(FTH self)
 	if (fth_print_length >= 0 && len > fth_print_length)
 		len = fth_print_length;
 
-	for (i = 0, n = 0; n < FTH_HASH_HASH_SIZE(self); n++) {
-		FItem          *entry;
+	for (i = 0, n = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
+		entry = FTH_HASH_DATA(self)[i];
 
-		entry = FTH_HASH_DATA(self)[n];
-
-		for (; entry && i < len; entry = entry->next)
+		for (; entry && n < len; entry = entry->next)
 			if (entry->key) {
 				fth_string_sformat(fs, " %M", entry->key);
 				fth_string_scat(fs, " => ");
 				fth_string_sformat(fs, "%M ", entry->value);
-				i++;
+				n++;
 			}
 	}
 
@@ -259,6 +262,7 @@ static FTH
 hs_copy(FTH self)
 {
 	ficlInteger 	i;
+	FItem          *entry;
 	FTH 		new;
 
 	new = fth_make_hash_len(FTH_HASH_HASH_SIZE(self));
@@ -267,9 +271,9 @@ hs_copy(FTH self)
 		return (new);
 
 	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		FItem          *entry;
+		entry = FTH_HASH_DATA(self)[i];
 
-		for (entry = FTH_HASH_DATA(self)[i]; entry; entry = entry->next)
+		for (; entry; entry = entry->next)
 			if (entry->key)
 				fth_hash_set(new,
 				    fth_object_copy(entry->key),
@@ -318,7 +322,9 @@ hs_equal_p(FTH self, FTH obj)
 		return (FTH_FALSE);
 
 	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		for (entry = FTH_HASH_DATA(self)[i]; entry; entry = entry->next)
+		entry = FTH_HASH_DATA(self)[i];
+
+		for (; entry; entry = entry->next)
 			if (entry->key) {
 				tmp = fth_hash_find(obj, entry->key);
 
@@ -354,7 +360,8 @@ hs_mark(FTH self)
 static void
 hs_free(FTH self)
 {
-	FItem          *p, *entry;
+	FItem          *entry;
+	FItem          *p;
 	int 		i;
 
 	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
@@ -835,20 +842,6 @@ See also hash-each."
 
 /* === PROPERTIES === */
 
-#define PROPERTY_IS_HASH_P	1
-
-#if PROPERTY_IS_HASH_P
-#define PROPERTY_P(Obj)		FTH_HASH_P(Obj)
-#define MAKE_PROPERTY()		fth_make_hash()
-#define PROPERTY_REF(Obj, Key)	fth_hash_ref(Obj, Key)
-#define PROPERTY_SET(Obj, Key, Value)	fth_hash_set(Obj, Key, Value)
-#else
-#define PROPERTY_P(Obj)		FTH_ARRAY_P(Obj)
-#define MAKE_PROPERTY()		fth_make_empty_array()
-#define PROPERTY_REF(Obj, Key)	fth_array_assoc_ref(Obj, Key)
-#define PROPERTY_SET(Obj, Key, Value)	fth_array_assoc_set(Obj, Key, Value)
-#endif
-
 static FTH	properties;
 
 #define h_properties_help "\
@@ -882,10 +875,10 @@ Return OBJ's global property VALUE associated with KEY or #f if not found.\n\
 See also object-property-ref and word-property-ref."
 	FTH 		props;
 
-	props = PROPERTY_REF(properties, obj);
+	props = fth_hash_ref(properties, obj);
 
-	if (PROPERTY_P(props))
-		return (PROPERTY_REF(props, key));
+	if (FTH_HASH_P(props))
+		return (fth_hash_ref(props, key));
 
 	return (FTH_FALSE);
 }
@@ -899,14 +892,14 @@ Set KEY-VALUE pair to OBJ'S global property object.\n\
 See also object-property-set! and word-property-set!."
 	FTH 		props;
 
-	props = PROPERTY_REF(properties, obj);
+	props = fth_hash_ref(properties, obj);
 
-	if (PROPERTY_P(props))
-		PROPERTY_SET(props, key, value);
+	if (FTH_HASH_P(props))
+		fth_hash_set(props, key, value);
 	else {
-		props = MAKE_PROPERTY();
-		PROPERTY_SET(props, key, value);
-		PROPERTY_SET(properties, obj, props);
+		props = fth_make_hash();
+		fth_hash_set(props, key, value);
+		fth_hash_set(properties, obj, props);
 	}
 }
 
@@ -937,8 +930,8 @@ fth_word_property_ref(FTH obj, FTH key)
 " h_word_properties_help "\n\
 Return XT's property VALUE associated with KEY or #f if not found.\n\
 See also property-ref and object-property-ref."
-	if (FICL_WORD_DEFINED_P(obj) && PROPERTY_P(FICL_WORD_PROPERTIES(obj)))
-		return (PROPERTY_REF(FICL_WORD_PROPERTIES(obj), key));
+	if (FICL_WORD_DEFINED_P(obj) && FTH_HASH_P(FICL_WORD_PROPERTIES(obj)))
+		return (fth_hash_ref(FICL_WORD_PROPERTIES(obj), key));
 
 	return (FTH_FALSE);
 }
@@ -953,13 +946,13 @@ See also property-set! and object-property-set!."
 	if (!FICL_WORD_DEFINED_P(obj))
 		return;
 
-	if (!PROPERTY_P(FICL_WORD_PROPERTIES(obj))) {
+	if (!FTH_HASH_P(FICL_WORD_PROPERTIES(obj))) {
 		FTH 		prop;
 
-		prop = MAKE_PROPERTY();
+		prop = fth_make_hash();
 		FICL_WORD_PROPERTIES(obj) = fth_gc_permanent(prop);
 	}
-	PROPERTY_SET(FICL_WORD_PROPERTIES(obj), key, value);
+	fth_hash_set(FICL_WORD_PROPERTIES(obj), key, value);
 }
 
 #define h_object_properties_help "\
@@ -989,8 +982,8 @@ fth_object_property_ref(FTH obj, FTH key)
 " h_object_properties_help "\n\
 Return OBJ's property VALUE associated with KEY or #f if not found.\n\
 See also property-ref and word-property-ref."
-	if (fth_instance_p(obj) && PROPERTY_P(FTH_INSTANCE_PROPERTIES(obj)))
-		return (PROPERTY_REF(FTH_INSTANCE_PROPERTIES(obj), key));
+	if (fth_instance_p(obj) && FTH_HASH_P(FTH_INSTANCE_PROPERTIES(obj)))
+		return (fth_hash_ref(FTH_INSTANCE_PROPERTIES(obj), key));
 
 	return (FTH_FALSE);
 }
@@ -1005,10 +998,10 @@ See also property-set! and word-property-set!."
 	if (!fth_instance_p(obj))
 		return;
 
-	if (!PROPERTY_P(FTH_INSTANCE_PROPERTIES(obj)))
-		FTH_INSTANCE_PROPERTIES(obj) = MAKE_PROPERTY();
+	if (!FTH_HASH_P(FTH_INSTANCE_PROPERTIES(obj)))
+		FTH_INSTANCE_PROPERTIES(obj) = fth_make_hash();
 
-	PROPERTY_SET(FTH_INSTANCE_PROPERTIES(obj), key, value);
+	fth_hash_set(FTH_INSTANCE_PROPERTIES(obj), key, value);
 }
 
 void
@@ -1031,9 +1024,9 @@ init_hash_type(void)
 void
 init_hash(void)
 {
-#define FTH_VPROC FTH_VOID_PROC
+#define FTH_VPROC	FTH_VOID_PROC
 	fth_set_object_apply(hash_tag, (void *) hs_ref, 1, 0, 0);
-	properties = fth_gc_permanent(MAKE_PROPERTY());
+	properties = fth_gc_permanent(fth_make_hash());
 	/* hash */
 	FTH_PRI1("hash?", ficl_hash_p, h_hash_p);
 	FTH_PROC("make-hash", fth_make_hash, 0, 0, 0, h_make_hash);
