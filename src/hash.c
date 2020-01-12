@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)hash.c	2.4 1/11/20
+ * @(#)hash.c	2.5 1/12/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -45,7 +45,7 @@ typedef struct FItem {
 } FItem;
 
 typedef struct {
-	int 		hash_size;
+	unsigned	hash_size;
 	ficlInteger 	length;
 	FItem         **data;
 } FHash;
@@ -129,13 +129,13 @@ fth_hash_each(FTH hash,
     FTH (*func) (FTH key, FTH value, FTH data),
     FTH data)
 {
-	ficlInteger 	i;
+	unsigned	n;
 	FItem          *entry;
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++) {
-		entry = FTH_HASH_DATA(hash)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(hash); n++) {
+		entry = FTH_HASH_DATA(hash)[n];
 
 		for (; entry; entry = entry->next)
 			if (entry->key)
@@ -152,15 +152,15 @@ fth_hash_map(FTH hash,
     FTH (*func) (FTH key, FTH value, FTH data),
     FTH data)
 {
-	ficlInteger 	i;
+	unsigned	n;
 	FTH 		hs;
 	FItem          *entry;
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
 	hs = fth_make_hash_len(FTH_HASH_HASH_SIZE(hash));
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++) {
-		entry = FTH_HASH_DATA(hash)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(hash); n++) {
+		entry = FTH_HASH_DATA(hash)[n];
 
 		for (; entry; entry = entry->next)
 			if (entry->key)
@@ -193,8 +193,8 @@ hs_inspect(FTH self)
 static FTH
 hs_to_string(FTH self)
 {
+	unsigned	n;
 	ficlInteger 	i;
-	ficlInteger 	n;
 	ficlInteger 	len;
 	FItem          *entry;
 	FTH 		fs;
@@ -209,15 +209,15 @@ hs_to_string(FTH self)
 	if (fth_print_length >= 0 && len > fth_print_length)
 		len = fth_print_length;
 
-	for (i = 0, n = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		entry = FTH_HASH_DATA(self)[i];
+	for (n = 0, i = 0; n < FTH_HASH_HASH_SIZE(self); n++) {
+		entry = FTH_HASH_DATA(self)[n];
 
-		for (; entry && n < len; entry = entry->next)
+		for (; entry && i < len; entry = entry->next)
 			if (entry->key) {
 				fth_string_sformat(fs, " %M", entry->key);
 				fth_string_scat(fs, " => ");
 				fth_string_sformat(fs, "%M ", entry->value);
-				n++;
+				i++;
 			}
 	}
 
@@ -261,7 +261,7 @@ hs_to_array(FTH self)
 static FTH
 hs_copy(FTH self)
 {
-	ficlInteger 	i;
+	unsigned	n;
 	FItem          *entry;
 	FTH 		new;
 
@@ -270,8 +270,8 @@ hs_copy(FTH self)
 	if (FTH_HASH_LENGTH(self) == 0)
 		return (new);
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		entry = FTH_HASH_DATA(self)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(self); n++) {
+		entry = FTH_HASH_DATA(self)[n];
 
 		for (; entry; entry = entry->next)
 			if (entry->key)
@@ -313,7 +313,7 @@ hs_set(FTH self, FTH idx, FTH value)
 static FTH
 hs_equal_p(FTH self, FTH obj)
 {
-	int 		i;
+	unsigned	n;
 	FItem          *entry;
 	FTH 		tmp;
 
@@ -321,8 +321,8 @@ hs_equal_p(FTH self, FTH obj)
 	    FTH_HASH_LENGTH(self) != FTH_HASH_LENGTH(obj))
 		return (FTH_FALSE);
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		entry = FTH_HASH_DATA(self)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(self); n++) {
+		entry = FTH_HASH_DATA(self)[n];
 
 		for (; entry; entry = entry->next)
 			if (entry->key) {
@@ -360,12 +360,12 @@ hs_mark(FTH self)
 static void
 hs_free(FTH self)
 {
+	unsigned	n;
 	FItem          *entry;
 	FItem          *p;
-	int 		i;
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(self); i++) {
-		entry = FTH_HASH_DATA(self)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(self); n++) {
+		entry = FTH_HASH_DATA(self)[n];
 
 		while (entry != NULL) {
 			p = entry;
@@ -373,7 +373,6 @@ hs_free(FTH self)
 			FTH_FREE(p);
 		}
 	}
-
 	FTH_FREE(FTH_HASH_DATA(self));
 	FTH_FREE(FTH_HASH_OBJECT(self));
 }
@@ -560,12 +559,13 @@ h1 'bar hash-ref => 1\n\
 h1 'baz hash-ref => #f\n\
 Return associated value or #f if not found."
 	FItem          *entry;
-	unsigned 	hval;
+	unsigned 	n;
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
-	hval = hash_key_to_val(hash, key);
+	n = hash_key_to_val(hash, key);
+	entry = FTH_HASH_DATA(hash)[n];
 
-	for (entry = FTH_HASH_DATA(hash)[hval]; entry; entry = entry->next)
+	for (; entry; entry = entry->next)
 		if (entry->key && fth_object_equal_p(key, entry->key))
 			return (entry->value);
 
@@ -583,19 +583,20 @@ Set KEY-VALUE pair of HASH.  \
 If key exists, overwrite existing value, \
 otherwise create new key-value entry."
 	FItem          *entry;
-	unsigned 	hval;
+	unsigned 	n;
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
-	hval = hash_key_to_val(hash, key);
 	FTH_INSTANCE_CHANGED(hash);
+	n = hash_key_to_val(hash, key);
+	entry = FTH_HASH_DATA(hash)[n];
 
-	for (entry = FTH_HASH_DATA(hash)[hval]; entry; entry = entry->next)
+	for (; entry; entry = entry->next) {
 		if (entry->key && fth_object_equal_p(key, entry->key)) {
 			entry->value = value;
 			return;
 		}
-	FTH_HASH_DATA(hash)[hval] = make_item(FTH_HASH_DATA(hash)[hval],
-	    key, value);
+	}
+	FTH_HASH_DATA(hash)[n] = make_item(FTH_HASH_DATA(hash)[n], key, value);
 	FTH_HASH_OBJECT(hash)->length++;
 }
 
@@ -608,7 +609,7 @@ h1 'baz hash-delete => #f\n\
 h1 'bar hash-delete => #( 'bar 1 )\n\
 Delete key-value pair associated with KEY \
 and return key-value array or #f if not found."
-	unsigned 	hval;
+	unsigned 	n;
 	FItem          *entry;
 	FItem          *prev;
 
@@ -617,8 +618,8 @@ and return key-value array or #f if not found."
 	if (FTH_HASH_LENGTH(hash) == 0)
 		return (FTH_FALSE);
 
-	hval = hash_key_to_val(hash, key);
-	prev = entry = FTH_HASH_DATA(hash)[hval];
+	n = hash_key_to_val(hash, key);
+	prev = entry = FTH_HASH_DATA(hash)[n];
 
 	for (; entry; entry = entry->next) {
 		if (entry->key && fth_object_equal_p(key, entry->key)) {
@@ -627,7 +628,7 @@ and return key-value array or #f if not found."
 			vals = FTH_LIST_2(entry->key, entry->value);
 
 			if (entry == prev)
-				FTH_HASH_DATA(hash)[hval] = entry->next;
+				FTH_HASH_DATA(hash)[n] = entry->next;
 			else
 				prev->next = entry->next;
 
@@ -644,15 +645,16 @@ and return key-value array or #f if not found."
 int
 fth_hash_member_p(FTH hash, FTH key)
 {
-	unsigned 	hval;
+	unsigned 	n;
 	FItem          *entry;
 
 	if (!FTH_HASH_P(hash) || FTH_HASH_LENGTH(hash) == 0)
 		return (0);
 
-	hval = hash_key_to_val(hash, key);
+	n = hash_key_to_val(hash, key);
+	entry = FTH_HASH_DATA(hash)[n];
 
-	for (entry = FTH_HASH_DATA(hash)[hval]; entry; entry = entry->next)
+	for (; entry; entry = entry->next)
 		if (entry->key && fth_object_equal_p(key, entry->key))
 			return (1);
 
@@ -684,7 +686,7 @@ fth_hash_find(FTH hash, FTH key)
 h1 'baz hash-find => #f\n\
 h1 'bar hash-find => #( 'bar 1 )\n\
 Return key-value array if KEY exist or #f if not found."
-	unsigned 	hval;
+	unsigned 	n;
 	FItem          *entry;
 
 	FTH_ASSERT_ARGS(FTH_HASH_P(hash), hash, FTH_ARG1, "a hash");
@@ -692,9 +694,10 @@ Return key-value array if KEY exist or #f if not found."
 	if (FTH_HASH_LENGTH(hash) == 0)
 		return (FTH_FALSE);
 
-	hval = hash_key_to_val(hash, key);
+	n = hash_key_to_val(hash, key);
+	entry = FTH_HASH_DATA(hash)[n];
 
-	for (entry = FTH_HASH_DATA(hash)[hval]; entry; entry = entry->next)
+	for (; entry; entry = entry->next)
 		if (entry->key && fth_object_equal_p(key, entry->key))
 			return (FTH_LIST_2(entry->key, entry->value));
 
@@ -758,7 +761,7 @@ fth_hash_clear(FTH hash)
 h1 hash-clear\n\
 h1 .$ => #{}\n\
 Remove all entries from HASH, HASH's length is zero."
-	int 		i;
+	unsigned	n;
 	FItem          *entry;
 	FItem          *p;
 
@@ -767,15 +770,15 @@ Remove all entries from HASH, HASH's length is zero."
 	if (FTH_HASH_LENGTH(hash) == 0)
 		return;
 
-	for (i = 0; i < FTH_HASH_HASH_SIZE(hash); i++) {
-		entry = FTH_HASH_DATA(hash)[i];
+	for (n = 0; n < FTH_HASH_HASH_SIZE(hash); n++) {
+		entry = FTH_HASH_DATA(hash)[n];
 
 		while (entry != NULL) {
 			p = entry;
 			entry = entry->next;
 			FTH_FREE(p);
 		}
-		FTH_HASH_DATA(hash)[i] = NULL;
+		FTH_HASH_DATA(hash)[n] = NULL;
 	}
 	FTH_HASH_LENGTH(hash) = 0;
 	FTH_INSTANCE_CHANGED(hash);
