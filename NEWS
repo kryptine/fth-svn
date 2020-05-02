@@ -1,3 +1,9 @@
+version 1.4.2
+=============
+
+* src/regexp.c new function added:
+	int fth_regexp_find_flags(const char *reg, const char *str, int flags);
+
 version 1.4.1
 =============
 
