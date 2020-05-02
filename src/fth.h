@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	2.4 11/20/19
+ * @(#)fth.h	2.5 5/2/20
  */
 
 #if !defined(_FTH_H_)
@@ -59,6 +59,9 @@
 #endif
 #if defined(HAVE_STDARG_H)
 #include <stdarg.h>
+#endif
+#if defined(HAVE_REGEX_H)
+#include <regex.h>
 #endif
 
 #include "ficllocal.h"
@@ -941,6 +944,7 @@ FTH		fth_variable_set(const char *, FTH);
 /* === regexp.c === */
 /* regexp */
 FTH		fth_make_regexp(const char *);
+int		fth_regexp_find_flags(const char *, const char *, int);
 int		fth_regexp_find(const char *, const char *);
 ficlInteger	fth_regexp_match(FTH, FTH);
 FTH		fth_regexp_replace(FTH, FTH, FTH);

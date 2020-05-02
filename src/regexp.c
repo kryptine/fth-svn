@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.2 1/31/19
+ * @(#)regexp.c	2.3 5/2/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -32,9 +32,6 @@
 
 #include "fth.h"
 #include "utils.h"
-#if defined(HAVE_REGEX_H)
-#include <regex.h>
-#endif
 
 #if defined(HAVE_POSIX_REGEX)
 
@@ -198,8 +195,9 @@ Return #t if OBJ is a regexp object, otherwise #f."
 FTH
 fth_make_regexp(const char *reg)
 {
+	int 		ret;
+	int 		flags;
 	FRegexp        *r;
-	int 		ret, flags;
 
 	if (reg == NULL)
 		reg = "";
@@ -256,12 +254,15 @@ enum {
 static ficlInteger
 regexp_search(FTH regexp, char *str, int kind)
 {
-	regmatch_t     *pmatch;
-	regoff_t 	beg, end;
-	regex_t        *re_buf;
-	ficlInteger 	i, pos, slen;
-	size_t 		nmatch;
 	int 		ret;
+	ficlInteger 	i;
+	ficlInteger 	pos;
+	ficlInteger 	slen;
+	size_t 		nmatch;
+	regmatch_t     *pmatch;
+	regoff_t 	beg;
+	regoff_t 	end;
+	regex_t        *re_buf;
 	FTH 		fs;
 
 	pos = -1;
@@ -297,14 +298,17 @@ regexp_search(FTH regexp, char *str, int kind)
 	/*
 	 * Fill global regexp_results and results with subexpressions if any.
 	 */
-	for (i = 0; i < (int) nmatch; i++) {
+	for (i = 0; i < (int)nmatch; i++) {
 		beg = pmatch[i].rm_so;
 		end = pmatch[i].rm_eo;
-		slen = (ficlInteger) (end - beg);
+		slen = (ficlInteger)(end - beg);
+
 		if (slen < 0)
 			break;
+
 		fs = fth_make_string_len(str + beg, slen);
 		fth_array_set(FTH_REGEXP_RESULTS(regexp), i, fs);
+
 		if (i < REGEXP_REGS)
 			fth_array_set(regexp_results, i, fs);
 	}
@@ -317,9 +321,10 @@ regexp_search(FTH regexp, char *str, int kind)
  * Return match-index or -1.
  */
 int
-fth_regexp_find(const char *reg, const char *str)
+fth_regexp_find_flags(const char *reg, const char *str, int flags)
 {
-	int 		ret, found;
+	int 		ret;
+	int 		found;
 	char 		errbuf[128];
 	regmatch_t 	match[REGEXP_REGS];
 	regex_t 	re;
@@ -329,7 +334,7 @@ fth_regexp_find(const char *reg, const char *str)
 	if (str == NULL || reg == NULL)
 		return (found);
 
-	ret = regcomp(&re, reg, REG_EXTENDED);
+	ret = regcomp(&re, reg, flags);
 
 	if (ret != 0) {
 		regerror(ret, &re, errbuf, sizeof(errbuf));
@@ -353,6 +358,15 @@ fth_regexp_find(const char *reg, const char *str)
 
 	regfree(&re);
 	return (found);
+}
+
+/*
+ * Return match-index or -1.
+ */
+int
+fth_regexp_find(const char *reg, const char *str)
+{
+	return (fth_regexp_find_flags(reg, str, REG_EXTENDED));
 }
 
 /*-
@@ -408,7 +422,8 @@ Return count of matched characters or #f.  \
 Possible matched group results or #f can be found in regexp object REG, \
 in read-only variables *RE1* to *RE9* and in read-only array *RE*.\n\
 See regex(3) for more information."
-	FTH 		reg, str;
+	FTH 		reg;
+	FTH 		str;
 	ficlInteger 	result;
 
 	FTH_STACK_CHECK(vm, 2, 1);
@@ -445,7 +460,8 @@ ficlInteger
 fth_regexp_search(FTH regexp, FTH string, ficlInteger start, ficlInteger range)
 {
 	char           *s;
-	ficlInteger 	len, pos;
+	ficlInteger 	len;
+	ficlInteger 	pos;
 	size_t 		size;
 	int 		allocated;
 
@@ -519,8 +535,11 @@ If keyword RANGE is -1 (default), the entire string will be searched.  \
 Possible matched group results or #f can be found in regexp object REG, \
 in read-only variables *RE1* to *RE9* and in read-only array *RE*.\n\
 See regex(3) for more information."
-	FTH 		reg, str;
-	ficlInteger 	start, range, result;
+	FTH 		reg;
+	FTH 		str;
+	ficlInteger 	start;
+	ficlInteger 	range;
+	ficlInteger 	result;
 
 	range = fth_get_optkey_int(FTH_KEYWORD_RANGE, -1L);
 	start = fth_get_optkey_int(FTH_KEYWORD_START, 0L);
@@ -560,8 +579,13 @@ References \\1 to \\9 in REPLACE will be replaced by \
 corresponding subexpressions.  \
 If no corresponding subexpression exist, raise a REGEXP-ERROR exception.  \
 Return a new string in any case, with or without replacement."
-	ficlInteger 	pos, fs_len, rpl_len, reg_len, found_len;
-	char           *str, *rpl;
+	ficlInteger 	pos;
+	ficlInteger 	fs_len;
+	ficlInteger 	rpl_len;
+	ficlInteger 	reg_len;
+	ficlInteger 	found_len;
+	char           *str;
+	char           *rpl;
 	FTH 		res_ary;
 
 	FTH_ASSERT_ARGS(FTH_REGSTR_P(regexp), regexp, FTH_ARG1, "a regexp");
@@ -590,7 +614,8 @@ Return a new string in any case, with or without replacement."
 	if (reg_len > 1 && strchr(rpl, '\\')) {
 		int 		i;
 		ficlInteger 	digit;
-		FTH 		fs, ds;
+		FTH 		fs;
+		FTH 		ds;
 
 		fs = fth_make_empty_string();
 
@@ -599,6 +624,7 @@ Return a new string in any case, with or without replacement."
 				fth_string_sformat(fs, "%c", rpl[i]);
 				continue;
 			}
+
 			if (++i < rpl_len && isdigit((int) rpl[i])) {
 				digit = rpl[i] - 0x30;
 
@@ -611,9 +637,11 @@ Return a new string in any case, with or without replacement."
 			}
 			FTH_REGEXP_THROW("backward ref without number");
 		}
+
 		rpl = fth_string_ref(fs);
 		rpl_len = (ficlInteger) fth_strlen(rpl);
 	}
+
 	return (fth_make_string_format("%.*s%.*s%.*s",
 		pos, str,
 		rpl_len, rpl,
@@ -629,8 +657,11 @@ ficl_re_match(ficlVm *vm)
 /a*/ \"aaaaab\" 5 re-match => 0\n\
 /a*/ \"aaaaab\" 6 re-match => 0\n\
 Return count of matched characters or -1 for no match."
-	FTH 		reg, str;
-	ficlInteger 	start, len, res;
+	FTH 		reg;
+	FTH 		str;
+	ficlInteger 	start;
+	ficlInteger 	len;
+	ficlInteger 	res;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	start = ficlStackPopInteger(vm->dataStack);
@@ -669,8 +700,12 @@ ficl_re_search(ficlVm *vm)
 /a*/ \"aaaaab\" 2 4 re-search => 2\n\
 Return index of match or -1 for no match."
 	char           *s;
-	FTH 		reg, str;
-	ficlInteger 	start, range, pos, len;
+	FTH 		reg;
+	FTH 		str;
+	ficlInteger 	start;
+	ficlInteger 	range;
+	ficlInteger 	pos;
+	ficlInteger 	len;
 	size_t 		size;
 	int 		allocated;
 

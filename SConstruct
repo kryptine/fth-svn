@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConstruct	1.28 12/8/19
+# @(#)SConstruct	1.29 5/2/20
 
 version		= '1.4.2'
 
@@ -446,7 +446,6 @@ def src_conf_test(env):
 		'ndbm.h',
 		'netdb.h',
 		'netinet/in.h',
-		'regex.h',
 		'signal.h',
 		'stdlib.h',
 		'sys/socket.h',
@@ -585,6 +584,7 @@ def fth_conf_test(env):
 		'memory.h',
 		'missing/complex.h',
 		'missing/math.h',
+		'regex.h',
 		'setjmp.h',
 		'stdarg.h',
 		'strings.h',
