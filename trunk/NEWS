@@ -1,24 +1,32 @@
 version 1.4.2
 =============
 
+* examples/site-lib/*.fs gtk removed from:
+
+        effects.fs
+        snd-forth-init.fs
+        snd-xm.fs
+        xm-enved.fs
+
 * src/regexp.c new function added:
-	int fth_regexp_find_flags(const char *reg, const char *str, int flags);
+
+        int fth_regexp_find_flags(const char *reg, const char *str, int flags);
 
 version 1.4.1
 =============
 
 * log1p for log(x + 1) and expm1 for exp(x) - 1 (thanks to Sanjay Jain!)
-	
+
         alias flog1p added for flogp1
 
 * new fenv(3) words and corresponding constants:
 
-	fegetround ( -- n )
-	fesetround ( n -- )
-	FE_TONEAREST
-	FE_DOWNWARD
-	FE_UPWARD
-	FE_TOWARDZERO
+        fegetround ( -- n )
+        fesetround ( n -- )
+        FE_TONEAREST
+        FE_DOWNWARD
+        FE_UPWARD
+        FE_TOWARDZERO
 
 version 1.4.0
 =============
@@ -27,9 +35,9 @@ version 1.4.0
 
 * bignum and ratio
 
-	multi-precision library added from
-	/usr/xsrc/external/mit/xedit/dist/lisp/mp/mp*.[ch] to ./lib/ for
-	bignum and ratio numbers
+        multi-precision library added from
+        /usr/xsrc/external/mit/xedit/dist/lisp/mp/mp*.[ch] to ./lib/ for
+        bignum and ratio numbers
 
 * new bignum words in src/numbers.c and tests/numbers.fs
 
