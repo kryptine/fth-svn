@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+# Copyright (c) 2016-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# @(#)SConscript	1.12 11/18/19
+# @(#)SConscript	1.13 9/29/20
 
 import os
 
@@ -53,8 +53,6 @@ mp_env = env.Clone()
 
 if warnings:
 	env.Append(CFLAGS = [
-		'-ansi',
-		'-std=c99',	# otherwise va_copy() is hidden
 		'-Wall',
 		'-Wextra',
 		'-Wmissing-declarations',

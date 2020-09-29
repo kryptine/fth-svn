@@ -1,12 +1,14 @@
 version 1.4.2
 =============
 
-* examples/site-lib/*.fs gtk removed from:
+* src/fth.c:
 
-        effects.fs
-        snd-forth-init.fs
-        snd-xm.fs
-        xm-enved.fs
+	Evaluation from standard input prints stack result if any to
+	standard output:
+
+        echo "80 f2c" | tee foo | fth -    => 26.6667
+        cat foo | fth -                    => 26.6667
+        fth - < foo                        => 26.6667
 
 * src/regexp.c new function added:
 
@@ -35,16 +37,16 @@ version 1.4.0
 
 * bignum and ratio
 
-        multi-precision library added from
-        /usr/xsrc/external/mit/xedit/dist/lisp/mp/mp*.[ch] to ./lib/ for
-        bignum and ratio numbers
+	multi-precision library added from
+	/usr/xsrc/external/mit/xedit/dist/lisp/mp/mp*.[ch] to ./lib/ for
+	bignum and ratio numbers
 
 * new bignum words in src/numbers.c and tests/numbers.fs
 
-        bgcd  ( x y -- z )	z = gcd(x, y)
-        blcm  ( x y -- z )	z = lcm(x, y)
-        broot ( b1 u -- b2 n )	b2 = root(b1, u); n=1 if exact, n=0 otherwise
-        bsqrt ( b1 -- b2 n )	b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
-        bmod  ( b1 b2 -- b3 )	b3 = b1 % b2
+        bgcd  ( x y -- z )       z = gcd(x, y)
+        blcm  ( x y -- z )       z = lcm(x, y)
+        broot ( b1 u -- b2 n )   b2 = root(b1, u); n=1 if exact, n=0 otherwise
+        bsqrt ( b1 -- b2 n )     b2 = sqrt(b1);  n=1 if exact, n=0 otherwise
+        bmod  ( b1 b2 -- b3 )    b3 = b1 % b2
         b/mod ( b1 b2 -- b3 b4 ) b1 / b2;  b3 = reminder;  b4 = quotient 
 

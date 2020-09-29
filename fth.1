@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.158 1/8/20
+.\" @(#)fth.1	1.159 9/30/20
 .\"
-.Dd 2020/01/08
+.Dd 2020/09/30
 .Dt FTH 1
 .Os
 .\"
@@ -54,7 +54,7 @@
 .Op Fl i Op Ar suffix
 .Op Ar file No \(ba Ar \(hy
 .Nm
-.Op Fl V
+.Fl V
 .\"
 .\" DESCRIPTION
 .\"
@@ -134,7 +134,7 @@ with return code 1, otherwise exit with return code 0.
 The last or only
 .Fl e Ar eval
 can be considered between
-.Dl lambda: <{}> eval\ ;
+.Dl "lambda: <{}> eval ;"
 and is in compile state!
 If multiple
 .Fl e Ar eval
@@ -250,7 +250,7 @@ function
 and
 .Ar init
 must be enclosed in quotations
-.Dl -S Qq dbm Init_dbm
+.Dl "-S \(dqdbm Init_dbm\(dq"
 Multiple calls are possible.
 .\"
 .\" -s
@@ -287,6 +287,18 @@ Display version information and exit.
 Set global variable
 .Ev *fth\(hyverbose*
 to #t.
+.\"
+.\" file | -
+.\"
+.It Ar file
+.Ar file
+will be loaded as source file.
+More than one file can be present.
+If
+.Ar file
+is \(dq-\(dq, eval from standard input through a pipe or with
+redirection, see
+.Sx EXAMPLES .
 .El
 .\"
 .\" Forth variables
@@ -606,7 +618,7 @@ You can switch from emacs-mode to vi-mode via
 and from vi-mode to emacs-mode via
 .Cm M-^E .
 To start in vi-mode, put a line like
-.Dl edit-mode vi
+.Dl "edit-mode vi"
 in your
 .Pa ~/.teclarc
 file.
@@ -8615,7 +8627,7 @@ These paths will be prepended to
 .\"
 .Sh FILES
 .Bl -tag -width MMM -compact
-.It Pa /usr/local/etc/fthrc
+.It Pa /usr/pkg/etc/fthrc
 Global initialization file for system wide configuration.
 .It Pa ~/.fthrc
 Local initialization file for user configuration.
@@ -8641,7 +8653,7 @@ command:
 .Pp
 Print 32 Fahrenheit as Celsius (0.0)
 .Pp
-.Dl % fth -e Qq 32 f2c\ . cr
+.Dl "% fth -e \(dq32 f2c . cr\(dq"
 .Pp
 Load C extension library
 .Ar libxm
@@ -8655,7 +8667,7 @@ defined in it, execute word
 .Cm main
 and exit if finished
 .Pp
-.Dl % fth -S Qo libxm Init_libxm Qc -e Qo main Qc motif-script.fs
+.Dl "% fth -S \(dqlibxm Init_libxm\(dq -e \(dqmain\(dq motif-script.fs"
 .Pp
 Prepend path
 .Ar ~/share/forth
@@ -8665,12 +8677,12 @@ load Forth source file
 .Ar sound-script.fs
 and start the repl showing a prompt.
 Initialization files
-.Pa /usr/local/etc/fthrc
+.Pa /usr/pkg/etc/fthrc
 and
 .Pa ~/.fthrc
 are loaded if they exist
 .Pp
-.Dl % fth -I ~/share/forth sound-script.fs
+.Dl "% fth -I ~/share/forth sound-script.fs"
 .Pp
 Run Forth script
 .Ar check.fth
@@ -8678,7 +8690,7 @@ and provide options
 .Fl ab Ar 10
 to the script which should handle at least these two; exit if finished
 .Pp
-.Dl % fth -s check.fth -ab 10
+.Dl "% fth -s check.fth -ab 10"
 .Pp
 Rename
 .Pa config.h
@@ -8686,9 +8698,9 @@ to
 .Pa config.h.orig
 and read it line by line.
 If a line with
-.Dl #define HAVE_COMPLEX_DOUBLE
+.Dl "#define HAVE_COMPLEX_DOUBLE"
 occures, replace it with
-.Dl /* #undef HAVE_COMPLEX_DOUBLE */
+.Dl "/* #undef HAVE_COMPLEX_DOUBLE */"
 otherwise write original to
 .Pa config.h .
 The first
@@ -8719,13 +8731,27 @@ word during reading file line by line.
 .Ed
 .Pp
 Print name and login time from the who command:
-.Dl who | fth -ane \(aq.*1* .*5* cr\(aq
+.Dl "who | fth -ane \(aq.*1* .*5* cr\(aq"
 .Pp
 The same with output file separator set to \(dq == \(dq:
-.Dl who | fth -ane \(aq\(dq == \(dq to *ofs* .*1* .*5* cr\(aq
+.Dl "who | fth -ane \(aq\(dq == \(dq to *ofs* .*1* .*5* cr\(aq"
+.Pp
+If the only option is a dash \(dq-\(dq,
+.Nm
+reads from standard input and prints the result, if any, to standard
+output.
+The following examples print the same result (26.6667):
+.Dl "% echo \(dq80 f2c\(dq | tee foo | fth -"
+.Dl "% cat foo | fth -"
+.Dl "% fth - < foo"
+.Dl "% fth -"
+.Dl "80 f2c <enter>"
+.Dl "26.6667"
+.Dl "bye"
+.Dl "%"
 .Pp
 Stand-alone executable Forth scripts have a first line of at least
-.Dl #! /usr/local/bin/fth -s
+.Dl "#! /usr/pkg/bin/fth -s"
 but may have more options; adjust the path to the interpreter.
 Note the space after
 .Cm #! .
@@ -8733,7 +8759,7 @@ It's a Forth word starting a comment and must be separated by at least
 one space.
 .Bd -literal
 % cat hello-world.fth
-#! /usr/local/bin/fth -s
+#! /usr/pkg/bin/fth -s
 \(pc\(dq Hello, World!\(dq cr
 .Ed
 .Pp
@@ -8753,7 +8779,7 @@ word
 see below.
 .Bd -literal
 % cat hello-world.fth
-#! /usr/local/bin/fth -Ds
+#! /usr/pkg/bin/fth -Ds
 \(pc\(dq Hello, World!\(dq cr
 .Ed
 .Pp
@@ -8762,7 +8788,7 @@ The
 example in Forth:
 .Bd -literal
 % cat getopt-test.fth
-#! /usr/local/bin/fth -Ds
+#! /usr/pkg/bin/fth -Ds
 : main ( -- )
 	#f #f { bflag ffile }
 	#t to opterr	\e getopt prints error messages

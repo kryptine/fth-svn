@@ -7,7 +7,7 @@ SSYYNNOOPPSSIISS
      fftthh [--DDddQQqqrrvv] [--CC _s_o_‐_l_i_b_‐_p_a_t_h] [--EE _e_v_a_l] [--ee _e_v_a_l] [--ff _i_n_i_t_‐_f_i_l_e]
          [--II _f_s_‐_p_a_t_h] [--SS "_l_i_b _i_n_i_t"] [--ss _f_i_l_e] [_f_i_l_e _._._.]
      fftthh [--aallnnpp] [--ee _e_v_a_l] [--FF _f_s] [--ii [_s_u_f_f_i_x]] [_f_i_l_e | _‐]
-     fftthh [--VV]
+     fftthh --VV
 
 DDEESSCCRRIIPPTTIIOONN
      This is the manual page for the interactive and script processing Forth
@@ -33,7 +33,7 @@ DDEESSCCRRIIPPTTIIOONN
           successful, show backtrace and exit with return code 1, otherwise
           exit with return code 0.  The last or only --ee _e_v_a_l can be considered
           between
-                lambda: <{}> eval ;
+                lambda: <{}> eval ;
           and is in compile state!  If multiple --ee _e_v_a_l appear, all but the
           last are in interpret state.
      --FF _f_s
@@ -74,6 +74,10 @@ DDEESSCCRRIIPPTTIIOONN
           exit with return code 1, otherwise exit with return code 0.
      --VV   Display version information and exit.
      --vv   Set global variable *fth‐verbose* to #t.
+     _f_i_l_e
+          _f_i_l_e will be loaded as source file.  More than one file can be
+          present.  If _f_i_l_e is "-", eval from standard input through a pipe or
+          with redirection, see _E_X_A_M_P_L_E_S.
 
    FFoorrtthh vvaarriiaabblleess
      *0*  Entire current input line, read-only.
@@ -3271,7 +3275,7 @@ EENNVVIIRROONNMMEENNTT
           These paths will be prepended to *load-lib-path*.
 
 FFIILLEESS
-     _/_u_s_r_/_l_o_c_a_l_/_e_t_c_/_f_t_h_r_c
+     _/_u_s_r_/_p_k_g_/_e_t_c_/_f_t_h_r_c
           Global initialization file for system wide configuration.
      _~_/_._f_t_h_r_c
           Local initialization file for user configuration.  The name can be
@@ -3287,7 +3291,7 @@ EEXXAAMMPPLLEESS
 
      Print 32 Fahrenheit as Celsius (0.0)
 
-           % fth -e "32 f2c . cr"
+           % fth -e "32 f2c . cr"
 
      Load C extension library _l_i_b_x_m with initialization function IInniitt__lliibbxxmm()
      and Forth source file _m_o_t_i_f_-_s_c_r_i_p_t_._f_s with at least one word mmaaiinn defined
@@ -3297,7 +3301,7 @@ EEXXAAMMPPLLEESS
 
      Prepend path _~_/_s_h_a_r_e_/_f_o_r_t_h to *load-path*, load Forth source file
      _s_o_u_n_d_-_s_c_r_i_p_t_._f_s and start the repl showing a prompt.  Initialization
-     files _/_u_s_r_/_l_o_c_a_l_/_e_t_c_/_f_t_h_r_c and _~_/_._f_t_h_r_c are loaded if they exist
+     files _/_u_s_r_/_p_k_g_/_e_t_c_/_f_t_h_r_c and _~_/_._f_t_h_r_c are loaded if they exist
 
            % fth -I ~/share/forth sound-script.fs
 
@@ -3331,14 +3335,26 @@ EEXXAAMMPPLLEESS
      The same with output file separator set to " == ":
            who | fth -ane '" == " to *ofs* .*1* .*5* cr'
 
+     If the only option is a dash "-", fftthh reads from standard input and
+     prints the result, if any, to standard output.  The following examples
+     print the same result (26.6667):
+           % echo "80 f2c" | tee foo | fth -
+           % cat foo | fth -
+           % fth - < foo
+           % fth -
+           80 f2c <enter>
+           26.6667
+           bye
+           %
+
      Stand-alone executable Forth scripts have a first line of at least
-           #! /usr/local/bin/fth -s
+           #! /usr/pkg/bin/fth -s
      but may have more options; adjust the path to the interpreter.  Note the
      space after ##!!.  It's a Forth word starting a comment and must be
      separated by at least one space.
 
      % cat hello-world.fth
-     #! /usr/local/bin/fth -s
+     #! /usr/pkg/bin/fth -s
      ·" Hello, World!" cr
 
      Add option --vv to turn on verbose mode.  _N_o_t_e_: Option --ss must be the last;
@@ -3346,13 +3362,13 @@ EEXXAAMMPPLLEESS
      and can be processed there with Forth word ggeettoopptt, see below.
 
      % cat hello-world.fth
-     #! /usr/local/bin/fth -Ds
+     #! /usr/pkg/bin/fth -Ds
      ·" Hello, World!" cr
 
      The getopt(3) example in Forth:
 
      % cat getopt-test.fth
-     #! /usr/local/bin/fth -Ds
+     #! /usr/pkg/bin/fth -Ds
      : main ( -- )
              #f #f { bflag ffile }
              #t to opterr    \ getopt prints error messages
@@ -3450,4 +3466,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.33                    2020/01/08                    NetBSD 9.99.33
+NetBSD 9.99.73                    2020/09/30                    NetBSD 9.99.73
