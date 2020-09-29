@@ -25,7 +25,7 @@
  */
 
 #if !defined(lint)
-const char fth_sccsid[] = "@(#)fth.c	2.3 1/8/20";
+const char fth_sccsid[] = "@(#)fth.c	2.4 9/30/20";
 #endif /* not lint */
 
 #if defined(HAVE_CONFIG_H)
@@ -38,10 +38,11 @@ const char fth_sccsid[] = "@(#)fth.c	2.3 1/8/20";
 
 #define FTH_COPYRIGHT	"(c) 2004-2020 Michael Scholz"
 
-static FTH 	eval_with_error_exit(void *, int);
-static void 	repl_in_place(char *, FTH, ficlWord *, int, int, int);
 static ficlWord *source_to_word(const char *);
-static FTH 	string_split(char *, char *);
+static FTH	eval_with_error_exit(void *, int);
+static FTH	string_split(char *, char *);
+static void	repl_in_place(char *, FTH, ficlWord *, int, int, int);
+static void	eval_puts(FTH);
 
 enum {
 	REPL_COMPILE,
@@ -158,15 +159,13 @@ string_split(char *str, char *delim)
 	return (result);
 }
 
-static char 	fth_scratch[BUFSIZ];
-
 static void
 repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, int chomp_p)
 {
 	size_t 		len;
 	ficlInteger 	line_no;
+	char		buf[BUFSIZ];
 	char           *delim;
-	char           *buf;
 	FILE           *ifp;
 	FTH 		line;
 
@@ -183,7 +182,6 @@ repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, 
 	gc_push(FTH_FICL_VM()->runningWord);
 	delim = fth_string_ref(fth_variable_ref("*fs*"));
 	line_no = 0;
-	buf = fth_scratch;
 
 	while (fgets(buf, BUFSIZ, ifp) != NULL) {
 		if (print_p)
@@ -214,6 +212,12 @@ repl_in_place(char *in, FTH out, ficlWord *word, int auto_split_p, int print_p, 
 
 	if (in != NULL)
 		fclose(ifp);
+}
+
+static void
+eval_puts(FTH obj)
+{
+	FTH_UNDEF != obj && fth_printf("%S\n", obj);
 }
 
 #define LIBSLEN		48
@@ -548,42 +552,34 @@ main(int argc, char **argv)
 	}
 
 	/*
-	 * If FILE is '-', read and eval from stdin,
-	 * otherwise load remaining args as fth source files.
+	 * If FILE is '-', eval stdin and print stack (result) to stdout.
+	 */
+	if (*argv != NULL && strcmp(*argv, "-") == 0) {
+		/*-
+		 * % echo "80 f2c" | tee foo | fth -	==> 26.6667
+		 * % fth - < foo			==> 26.6667
+		 * % cat foo | fth -			==> 26.6667
+		 * % fth -
+		 * 80 f2c <enter>			==> 26.6667
+		 * bye <enter>
+		 * %
+		 */
+		char		buf[BUFSIZ];
+
+		while (fgets(buf, BUFSIZ, stdin) != NULL)
+			eval_puts(eval_with_error_exit(buf, REPL_INTERPRET));
+
+		fth_exit(EXIT_SUCCESS);
+	}
+
+	/*
+	 * Load remaining args as fth source files.
 	 */
 	for (i = 0; argv[i]; i++) {
-		/* read words from stdin and exit */
-		if (strcmp(argv[i], "-") == 0) {
-			/*-
-			 * % echo "80 .f2c cr" | fth -	==> 26.67
-			 *
-			 * % cat foo
-			 * 80 .f2c cr
-			 *
-			 * % fth - < foo		==> 26.67
-			 *
-			 * % fth -
-			 * 80 .f2c cr <enter>		==> 26.67
-			 * bye <enter>
-			 * %
-			 */
-			char           *buf;
+		ret = fth_load_file(argv[i]);
 
-			buf = fth_scratch;
-
-			while (fgets(buf, BUFSIZ, stdin) != NULL)
-				eval_with_error_exit(buf, REPL_INTERPRET);
-
-			fth_exit(EXIT_SUCCESS);
-		} else {
-			/*
-			 * Load remaining args as fth source files.
-			 */
-			ret = fth_load_file(argv[i]);
-
-			if (FTH_STRING_P(ret))
-				fth_throw(FTH_LOAD_ERROR, "%S", ret);
-		}
+		if (FTH_STRING_P(ret))
+			fth_throw(FTH_LOAD_ERROR, "%S", ret);
 	}
 
 	/*

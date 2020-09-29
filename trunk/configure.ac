@@ -1,4 +1,4 @@
-dnl Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+dnl Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
 dnl All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -22,12 +22,12 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 dnl
-dnl @(#)configure.ac	1.206 12/8/19
+dnl @(#)configure.ac	1.207 9/29/20
 dnl
 dnl Process this file with autoconf to produce configure.
 
 AC_COPYRIGHT(
-[Copyright (c) 2004-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+[Copyright (c) 2004-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -309,8 +309,7 @@ AC_SEARCH_LIBS([dbm_open], [c dbm ndbm],
     [SO_DBM_LIB="dbm.so"
      AC_DEFINE([HAVE_DBM], [1], [Define to 1 if you have `dbm_open'.])])
 
-CWARNFLAGS="-ansi -std=c99"
-CWARNFLAGS="${CWARNFLAGS} -Wall -Wextra -Wunused"
+CWARNFLAGS="-Wall -Wextra -Wunused"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-declarations"
 CWARNFLAGS="${CWARNFLAGS} -Wmissing-prototypes"
 CWARNFLAGS="${CWARNFLAGS} -Wundef"
