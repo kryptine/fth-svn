@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)fth.h	2.5 5/2/20
+ * @(#)fth.h	2.6 10/2/20
  */
 
 #if !defined(_FTH_H_)
@@ -369,6 +369,7 @@ enum {
 #define FTH_CADDDR(Obj)		fth_cadddr(Obj)
 #define FTH_CDDR(Obj)		fth_cddr(Obj)
 
+#define FTH_LIST_0()		fth_make_empty_list()
 #define FTH_LIST_1(A)		fth_make_list_var(1, A)
 #define FTH_LIST_2(A, B)	fth_make_list_var(2, A, B)
 #define FTH_LIST_3(A, B, C)	fth_make_list_var(3, A, B, C)
