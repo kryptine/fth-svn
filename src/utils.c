@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)utils.c	2.10 11/18/19
+ * @(#)utils.c	2.12 10/2/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -906,7 +906,7 @@ fth_set_argv(int from, int to, char **argv)
 
 	if (from >= to || argv == NULL) {
 		fth_variable_set("*argc*", FTH_ZERO);
-		return (fth_variable_set("*argv*", FTH_NIL));
+		return (fth_variable_set("*argv*", FTH_LIST_0()));
 	}
 	args = FTH_LIST_1(fth_make_string(fth_basename(argv[from++])));
 
@@ -1712,18 +1712,21 @@ fth_repl(int argc, char **argv)
 	char           *line;
 	char           *volatile prompt;
 	char           *volatile err_line;
+	int 		i;
+	int 		len;
 	volatile int 	compile_p;
 	volatile int 	status;
 #if !defined(_WIN32)
 	volatile int 	sig;
 #endif
-	int 		i, len;
 #if defined(HAVE_LIBTECLA)
 	GetLine        *gl;
 	GlHistoryRange 	range;
 	GlReturnStatus 	rs;
 #endif
 
+	(void) argc;
+	(void) argv;
 	vm = FTH_FICL_VM();
 	prompt = NULL;
 	err_line = NULL;
@@ -1793,8 +1796,6 @@ fth_repl(int argc, char **argv)
 #else
 	lineno = 1;
 #endif
-	fth_set_argv(0, argc, argv);
-
 	/*
 	 * Call hook before starting repl.
 	 */

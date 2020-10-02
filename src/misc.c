@@ -25,10 +25,10 @@
  */
 
 #if !defined(lint)
-const char libfth_sccsid[] = "@(#)misc.c	3.6 9/30/20";
+const char libfth_sccsid[] = "@(#)misc.c	3.7 10/2/20";
 #endif /* not lint */
 
-#define FTH_DATE		"2020/09/30"
+#define FTH_DATE		"2020/10/02"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
