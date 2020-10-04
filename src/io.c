@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2005-2019 Michael Scholz <mi-scholz@users.sourceforge.net>
+ * Copyright (c) 2005-2020 Michael Scholz <mi-scholz@users.sourceforge.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	2.2 1/29/19
+ * @(#)io.c	2.3 10/5/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -321,7 +321,40 @@ io_inspect(FTH self)
 static FTH
 io_to_string(FTH self)
 {
-	return (fth_make_string_format("#<%S>", io_inspect(self)));
+	return (FTH_IO_FILENAME(self));
+}
+
+static FTH
+io_dump(FTH self)
+{
+	char *s;
+	FTH		fs;
+
+	fs = FTH_IO_FILENAME(self);
+
+	if (!FTH_STRING_P(fs))
+		return (io_inspect(self));
+
+	s = fth_string_ref(FTH_IO_FILENAME(self));
+	
+	if (s == NULL || *s == '\0')
+		return (io_inspect(self));
+
+	if (strcmp(s, "*stdin*") == 0 ||
+	    strcmp(s, "*stdout*") == 0 ||
+	    strcmp(s, "*stderr*") == 0)
+		return (FTH_IO_FILENAME(self));
+
+	if (FTH_IO_INPUT_P(self) && FTH_IO_OUTPUT_P(self))
+		return (fth_make_string_format("\"%S\" :fam r/w io-open", fs));
+
+	if (FTH_IO_INPUT_P(self))
+		return (fth_make_string_format("\"%S\" io-open-read", fs));
+
+	if (FTH_IO_OUTPUT_P(self))
+		return (fth_make_string_format("\"%S\" io-open-write", fs));
+
+	return (io_inspect(self));
 }
 
 static FTH 	string_empty;
@@ -2975,6 +3008,7 @@ init_io_type(void)
 	io_tag = make_object_type(FTH_STR_IO, FTH_IO_T);
 	fth_set_object_inspect(io_tag, io_inspect);
 	fth_set_object_to_string(io_tag, io_to_string);
+	fth_set_object_dump(io_tag, io_dump);
 	fth_set_object_to_array(io_tag, io_to_array);
 	fth_set_object_value_ref(io_tag, io_ref);
 	fth_set_object_equal_p(io_tag, io_equal_p);
