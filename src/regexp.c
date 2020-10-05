@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.3 5/2/20
+ * @(#)regexp.c	2.4 10/6/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -195,6 +195,7 @@ Return #t if OBJ is a regexp object, otherwise #f."
 FTH
 fth_make_regexp(const char *reg)
 {
+	char 		errbuf[128];
 	int 		ret;
 	int 		flags;
 	FRegexp        *r;
@@ -207,8 +208,6 @@ fth_make_regexp(const char *reg)
 	ret = regcomp(&r->re_buf, reg, flags);
 
 	if (ret != 0) {
-		char 		errbuf[128];
-
 		regerror(ret, &r->re_buf, errbuf, sizeof(errbuf));
 		regfree(&r->re_buf);
 		FTH_FREE(r);
@@ -254,6 +253,7 @@ enum {
 static ficlInteger
 regexp_search(FTH regexp, char *str, int kind)
 {
+	char 		errbuf[128];
 	int 		ret;
 	ficlInteger 	i;
 	ficlInteger 	pos;
@@ -272,14 +272,12 @@ regexp_search(FTH regexp, char *str, int kind)
 	ret = regexec(re_buf, str, nmatch, pmatch, 0);
 
 	if (ret != 0) {
-		if (ret != REG_NOMATCH) {
-			char 		errbuf[128];
+		FTH_FREE(pmatch);
 
-			FTH_FREE(pmatch);
+		if (ret != REG_NOMATCH) {
 			regerror(ret, re_buf, errbuf, sizeof(errbuf));
 			FTH_REGEXP_THROW(errbuf);
 		}
-		FTH_FREE(pmatch);
 		return (pos);
 	}
 	beg = pmatch[0].rm_so;
@@ -323,11 +321,11 @@ regexp_search(FTH regexp, char *str, int kind)
 int
 fth_regexp_find_flags(const char *reg, const char *str, int flags)
 {
-	int 		ret;
-	int 		found;
-	char 		errbuf[128];
-	regmatch_t 	match[REGEXP_REGS];
-	regex_t 	re;
+	int		ret;
+	int		found;
+	char		errbuf[128];
+	regmatch_t	match[REGEXP_REGS];
+	regex_t		re;
 
 	found = -1;
 
@@ -345,17 +343,15 @@ fth_regexp_find_flags(const char *reg, const char *str, int flags)
 	}
 	ret = regexec(&re, str, 1L, match, 0);
 
-	if (ret != 0) {
-		if (ret != REG_NOMATCH) {
-			regerror(ret, &re, errbuf, sizeof(errbuf));
-			regfree(&re);
-			FTH_REGEXP_THROW(errbuf);
-			/* NOTREACHED */
-			return (found);
-		}
-	} else
-		found = (int) match[0].rm_so;
-
+	if (ret == 0)
+		found = (int)match[0].rm_so;
+	else if (ret != REG_NOMATCH) {
+		regerror(ret, &re, errbuf, sizeof(errbuf));
+		regfree(&re);
+		FTH_REGEXP_THROW(errbuf);
+		/* NOTREACHED */
+		return (found);
+	}
 	regfree(&re);
 	return (found);
 }
@@ -789,10 +785,13 @@ and at interpret time return parsed regexp."
 #define h_syntax_options "\
 REG_EXTENDED REG_ICASE or  to *re-syntax-options*\n\
 The following constants exist for oring to *re-syntax-options*:\n\
+REG_BASIC\n\
 REG_EXTENDED (default)\n\
 REG_ICASE\n\
 REG_NOSUB\n\
 REG_NEWLINE\n\
+REG_NOSPEC\n\
+REG_PEND\n\
 See regex(3) for more information."
 
 /*
@@ -886,10 +885,13 @@ init_regexp(void)
 	FTH_PRI1("*re9*", ficl_re_9, NULL);
 	fth_define_variable("*re-syntax-options*",
 	    INT_TO_FIX(REG_EXTENDED), h_syntax_options);
+	FTH_SET_CONSTANT(REG_BASIC);
 	FTH_SET_CONSTANT(REG_EXTENDED);
 	FTH_SET_CONSTANT(REG_ICASE);
 	FTH_SET_CONSTANT(REG_NOSUB);
 	FTH_SET_CONSTANT(REG_NEWLINE);
+	FTH_SET_CONSTANT(REG_NOSPEC);
+	FTH_SET_CONSTANT(REG_PEND);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_REGEXP, h_list_of_regexp_functions);
 }
 
