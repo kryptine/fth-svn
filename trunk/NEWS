@@ -10,9 +10,12 @@ version 1.4.2
         cat foo | fth -                    => 26.6667
         fth - < foo                        => 26.6667
 
-* src/regexp.c new function added:
+* src/regexp.c new function and constants added:
 
         int fth_regexp_find_flags(const char *reg, const char *str, int flags);
+        REG_BASIC
+        REG_NOSPEC
+        REG_PEND
 
 version 1.4.1
 =============
