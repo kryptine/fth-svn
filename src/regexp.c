@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.4 10/6/20
+ * @(#)regexp.c	2.5 10/7/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -94,8 +94,8 @@ regexp?             ( obj -- f )\n\
 ...\n\
 *re9*               ( -- $9 )\n\
 global read-only array *re* with last results\n\
-*re-syntax-options* and a set of regexp \
-constants (see *re-syntax-options* and regex(3))."
+*re-syntax-options*,  *re-exec-options* and a set of regexp \
+constants (see *re-syntax-options*, *re-exec-options* and regex(3))."
 
 static FTH
 reg_inspect(FTH self)
@@ -197,15 +197,15 @@ fth_make_regexp(const char *reg)
 {
 	char 		errbuf[128];
 	int 		ret;
-	int 		flags;
+	int 		cflags;
 	FRegexp        *r;
 
 	if (reg == NULL)
 		reg = "";
 
 	r = FTH_CALLOC(1, sizeof(FRegexp));
-	flags = FIX_TO_INT32(fth_variable_ref("*re-syntax-options*"));
-	ret = regcomp(&r->re_buf, reg, flags);
+	cflags = FIX_TO_INT32(fth_variable_ref("*re-syntax-options*"));
+	ret = regcomp(&r->re_buf, reg, cflags);
 
 	if (ret != 0) {
 		regerror(ret, &r->re_buf, errbuf, sizeof(errbuf));
@@ -254,6 +254,7 @@ static ficlInteger
 regexp_search(FTH regexp, char *str, int kind)
 {
 	char 		errbuf[128];
+	int		eflags;
 	int 		ret;
 	ficlInteger 	i;
 	ficlInteger 	pos;
@@ -269,7 +270,8 @@ regexp_search(FTH regexp, char *str, int kind)
 	re_buf = &FTH_REGEXP_RE_BUF(regexp);
 	nmatch = re_buf->re_nsub + 1;
 	pmatch = FTH_MALLOC(nmatch * sizeof(regmatch_t));
-	ret = regexec(re_buf, str, nmatch, pmatch, 0);
+	eflags = FIX_TO_INT32(fth_variable_ref("*re-exec-options*"));
+	ret = regexec(re_buf, str, nmatch, pmatch, eflags);
 
 	if (ret != 0) {
 		FTH_FREE(pmatch);
@@ -319,7 +321,7 @@ regexp_search(FTH regexp, char *str, int kind)
  * Return match-index or -1.
  */
 int
-fth_regexp_find_flags(const char *reg, const char *str, int flags)
+fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 {
 	int		ret;
 	int		found;
@@ -332,7 +334,7 @@ fth_regexp_find_flags(const char *reg, const char *str, int flags)
 	if (str == NULL || reg == NULL)
 		return (found);
 
-	ret = regcomp(&re, reg, flags);
+	ret = regcomp(&re, reg, cflags);
 
 	if (ret != 0) {
 		regerror(ret, &re, errbuf, sizeof(errbuf));
@@ -794,6 +796,14 @@ REG_NOSPEC\n\
 REG_PEND\n\
 See regex(3) for more information."
 
+#define h_exec_options "\
+REG_STARTEND to *re-exec-options*\n\
+The following constants exist for oring to *re-exec-options*:\n\
+REG_NOTBOL\n\
+REG_NOTEOL\n\
+REG_STARTEND\n\
+See regex(3) for more information."
+
 /*
  * Global read-only variables *RE* and *RE0* ... *RE9* are actually
  * functions.
@@ -885,6 +895,8 @@ init_regexp(void)
 	FTH_PRI1("*re9*", ficl_re_9, NULL);
 	fth_define_variable("*re-syntax-options*",
 	    INT_TO_FIX(REG_EXTENDED), h_syntax_options);
+	fth_define_variable("*re-exec-options*", FTH_ZERO, h_exec_options);
+	/* syntax constants */
 	FTH_SET_CONSTANT(REG_BASIC);
 	FTH_SET_CONSTANT(REG_EXTENDED);
 	FTH_SET_CONSTANT(REG_ICASE);
@@ -892,6 +904,10 @@ init_regexp(void)
 	FTH_SET_CONSTANT(REG_NEWLINE);
 	FTH_SET_CONSTANT(REG_NOSPEC);
 	FTH_SET_CONSTANT(REG_PEND);
+	/* exec constants */
+	FTH_SET_CONSTANT(REG_NOTBOL);
+	FTH_SET_CONSTANT(REG_NOTEOL);
+	FTH_SET_CONSTANT(REG_STARTEND);
 	FTH_ADD_FEATURE_AND_INFO(FTH_STR_REGEXP, h_list_of_regexp_functions);
 }
 
