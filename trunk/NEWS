@@ -13,9 +13,19 @@ version 1.4.2
 * src/regexp.c new function and constants added:
 
         int fth_regexp_find_flags(const char *reg, const char *str, int flags);
+
+* src/regexp.c more constants for regcomp() cflags added:
+
         REG_BASIC
         REG_NOSPEC
         REG_PEND
+
+* src/regexp.c variable and constants for regexec() eflags added:
+
+        *re-exec-options*
+        REG_NOTBOL
+        REG_NOTEOL
+        REG_STARTEND
 
 version 1.4.1
 =============
