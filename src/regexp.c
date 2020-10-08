@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.5 10/7/20
+ * @(#)regexp.c	2.6 10/8/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -183,6 +183,8 @@ Return #t if OBJ is a regexp object, otherwise #f."
 	ficlStackPushBoolean(vm->dataStack, FTH_REGEXP_P(obj));
 }
 
+static char	errbuf[512];
+
 /*-
  * FTH fs = fth_make_string("foobar");
  * FTH re = fth_make_regexp("bar");
@@ -195,7 +197,6 @@ Return #t if OBJ is a regexp object, otherwise #f."
 FTH
 fth_make_regexp(const char *reg)
 {
-	char 		errbuf[128];
 	int 		ret;
 	int 		cflags;
 	FRegexp        *r;
@@ -253,37 +254,35 @@ enum {
 static ficlInteger
 regexp_search(FTH regexp, char *str, int kind)
 {
-	char 		errbuf[128];
 	int		eflags;
 	int 		ret;
 	ficlInteger 	i;
 	ficlInteger 	pos;
 	ficlInteger 	slen;
 	size_t 		nmatch;
-	regmatch_t     *pmatch;
 	regoff_t 	beg;
 	regoff_t 	end;
-	regex_t        *re_buf;
+	regex_t        *re;
 	FTH 		fs;
+	regmatch_t	match[REGEXP_REGS] = {};
 
 	pos = -1;
-	re_buf = &FTH_REGEXP_RE_BUF(regexp);
-	nmatch = re_buf->re_nsub + 1;
-	pmatch = FTH_MALLOC(nmatch * sizeof(regmatch_t));
+	re = &FTH_REGEXP_RE_BUF(regexp);
+	nmatch = re->re_nsub + 1;
 	eflags = FIX_TO_INT32(fth_variable_ref("*re-exec-options*"));
-	ret = regexec(re_buf, str, nmatch, pmatch, eflags);
+	ret = regexec(re, str, nmatch, match, eflags);
+
+	if (ret == REG_NOMATCH)
+		return (pos);
 
 	if (ret != 0) {
-		FTH_FREE(pmatch);
-
-		if (ret != REG_NOMATCH) {
-			regerror(ret, re_buf, errbuf, sizeof(errbuf));
-			FTH_REGEXP_THROW(errbuf);
-		}
+		regerror(ret, re, errbuf, sizeof(errbuf));
+		FTH_REGEXP_THROW(errbuf);
+		/* NOTREACHED */
 		return (pos);
 	}
-	beg = pmatch[0].rm_so;
-	end = pmatch[0].rm_eo;
+	beg = match[0].rm_so;
+	end = match[0].rm_eo;
 
 	switch (kind) {
 	case FREG_SEARCH:
@@ -299,8 +298,8 @@ regexp_search(FTH regexp, char *str, int kind)
 	 * Fill global regexp_results and results with subexpressions if any.
 	 */
 	for (i = 0; i < (int)nmatch; i++) {
-		beg = pmatch[i].rm_so;
-		end = pmatch[i].rm_eo;
+		beg = match[i].rm_so;
+		end = match[i].rm_eo;
 		slen = (ficlInteger)(end - beg);
 
 		if (slen < 0)
@@ -312,8 +311,6 @@ regexp_search(FTH regexp, char *str, int kind)
 		if (i < REGEXP_REGS)
 			fth_array_set(regexp_results, i, fs);
 	}
-
-	FTH_FREE(pmatch);
 	return (pos);
 }
 
@@ -323,16 +320,16 @@ regexp_search(FTH regexp, char *str, int kind)
 int
 fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 {
+	int		eflags;
 	int		ret;
-	int		found;
-	char		errbuf[128];
-	regmatch_t	match[REGEXP_REGS];
+	int		pos;
 	regex_t		re;
+	regmatch_t	match[REGEXP_REGS] = {};
 
-	found = -1;
+	pos = -1;
 
 	if (str == NULL || reg == NULL)
-		return (found);
+		return (pos);
 
 	ret = regcomp(&re, reg, cflags);
 
@@ -341,21 +338,25 @@ fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 		regfree(&re);
 		FTH_REGEXP_THROW(errbuf);
 		/* NOTREACHED */
-		return (found);
+		return (pos);
 	}
-	ret = regexec(&re, str, 1L, match, 0);
+	eflags = FIX_TO_INT32(fth_variable_ref("*re-exec-options*"));
+	ret = regexec(&re, str, 1L, match, eflags);
 
-	if (ret == 0)
-		found = (int)match[0].rm_so;
-	else if (ret != REG_NOMATCH) {
+	if (ret == REG_NOMATCH) {
+		regfree(&re);
+		return (pos);
+	}
+	if (ret != 0) {
 		regerror(ret, &re, errbuf, sizeof(errbuf));
 		regfree(&re);
 		FTH_REGEXP_THROW(errbuf);
 		/* NOTREACHED */
-		return (found);
+		return (pos);
 	}
+	pos = (int)match[0].rm_so;
 	regfree(&re);
-	return (found);
+	return (pos);
 }
 
 /*

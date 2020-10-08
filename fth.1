@@ -22,9 +22,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" @(#)fth.1	1.159 9/30/20
+.\" @(#)fth.1	1.160 10/8/20
 .\"
-.Dd 2020/09/30
+.Dd 2020/10/08
 .Dt FTH 1
 .Os
 .\"
@@ -7459,25 +7459,45 @@ is an xt (execution token, address of a Ficl word), otherwise #f.
 .\" *re-syntax-options*
 .\"
 .It Ev *re-syntax-options*
-This regexp variable can be set with the following constants.
-If more than one constant is used, combine them with
+This is the cflag option to
+.Xr regcomp 3 .
+This variable can be set with the following constants.
+If more than one constants are used, combine them with
 .Cm or ,
 see
 .Xr regex 3 .
+The default is
+.Dv REG_EXTENDED .
 .Bl -tag -offset MMMMM -width MMMMMMMMMMMM -compact
+.It Dv REG_BASIC
 .It Dv REG_EXTENDED
-Compile modern regex, default.
 .It Dv REG_ICASE
-Compile for matching ignore case.
-.It Dv REG_NEWLINE
-Compile for newline-sensitive matching.
 .It Dv REG_NOSUB
-Compile without creating subexpression.
+.It Dv REG_NEWLINE
+.It Dv REG_NOSPEC
+.It Dv REG_PEND
 .El
 For example, set matching to ignore case before creating a new regexp
 .Bd -literal -offset indent -compact
 REG_EXTENDED REG_ICASE or \ to *re-syntax-options*
 .Ed
+.\"
+.\" *re-exec-options*
+.\"
+.It Ev *re-exec-options*
+This is the eflag option to
+.Xr regexec 3 .
+This variable can be set with the following constants.
+If more than one constants are used, combine them with
+.Cm or ,
+see
+.Xr regex 3 .
+.Bl -tag -offset MMMMM -width MMMMMMMMMMMM -compact
+.It Dv REG_NOTBOL
+.It Dv REG_NOTEOL
+.It Dv REG_STARTEND
+.El
+No default is set.
 .\"
 .\" /
 .\"
@@ -8900,7 +8920,9 @@ Wrong argument type provided.
 .Xr libfth 3 ,
 .Xr printf 3 ,
 .Xr realpath 3 ,
+.Xr regcomp 3 ,
 .Xr regex 3 ,
+.Xr regexec 3 ,
 .Xr sethostname 3 ,
 .Xr strftime 3 ,
 .Xr time 3 ,

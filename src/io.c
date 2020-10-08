@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)io.c	2.3 10/5/20
+ * @(#)io.c	2.4 10/8/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -327,7 +327,7 @@ io_to_string(FTH self)
 static FTH
 io_dump(FTH self)
 {
-	char *s;
+	char	       *s;
 	FTH		fs;
 
 	fs = FTH_IO_FILENAME(self);
@@ -336,7 +336,7 @@ io_dump(FTH self)
 		return (io_inspect(self));
 
 	s = fth_string_ref(FTH_IO_FILENAME(self));
-	
+
 	if (s == NULL || *s == '\0')
 		return (io_inspect(self));
 
@@ -590,16 +590,18 @@ file_read_char(void *ptr)
 	fp = (FILE *) ptr;
 	c = fgetc(fp);
 
-	if (c == EOF) {
-		if (feof(fp))
-			return (EOF);
+	if (c != EOF)
+		return (c);
 
-		if (ferror(fp)) {
-			clearerr(fp);
-			IO_FILE_ERROR(fgetc);
-		}
+	if (feof(fp))
+		return (EOF);
+
+	if (ferror(fp)) {
+		clearerr(fp);
+		IO_FILE_ERROR(fgetc);
 	}
-	return (c);
+	/* NOTREACHED */
+	return (EOF);
 }
 
 static void
@@ -609,14 +611,16 @@ file_write_char(void *ptr, int c)
 
 	fp = (FILE *) ptr;
 
-	if (fputc(c, fp) == EOF)
-		if (ferror(fp)) {
-			clearerr(fp);
-			IO_FILE_ERROR(fputc);
-		}
+	if (fputc(c, fp) != EOF)
+		return;
+
+	if (ferror(fp)) {
+		clearerr(fp);
+		IO_FILE_ERROR(fputc);
+	}
 }
 
-static char 	io_scratch[BUFSIZ];
+static char 	io_scratch[BUFSIZ * 32];
 
 static char    *
 file_read_line(void *ptr)
@@ -629,14 +633,13 @@ file_read_line(void *ptr)
 
 	if (p != NULL)
 		return (p);
-	else {
-		if (feof(fp))
-			return (NULL);
 
-		if (ferror(fp)) {
-			clearerr(fp);
-			IO_FILE_ERROR(fgets);
-		}
+	if (feof(fp))
+		return (NULL);
+
+	if (ferror(fp)) {
+		clearerr(fp);
+		IO_FILE_ERROR(fgets);
 	}
 	/* NOTREACHED */
 	return (NULL);
@@ -649,11 +652,13 @@ file_write_line(void *ptr, const char *line)
 
 	fp = (FILE *) ptr;
 
-	if (fputs(line, fp) == EOF)
-		if (ferror(fp)) {
-			clearerr(fp);
-			IO_FILE_ERROR(fputs);
-		}
+	if (fputs(line, fp) != EOF)
+		return;
+
+	if (ferror(fp)) {
+		clearerr(fp);
+		IO_FILE_ERROR(fputs);
+	}
 }
 
 static int
@@ -832,9 +837,11 @@ string_write_char(void *ptr, int c)
 static char    *
 string_read_line(void *ptr)
 {
-	ficlInteger 	idx, len;
-	size_t 		i, size;
-	char           *line;
+	ficlInteger	idx;
+	ficlInteger	len;
+	size_t		i;
+	size_t		size;
+	char	       *line;
 
 	idx = FTH_IO_STRING_INDEX_REF(ptr);
 	len = FTH_IO_STRING_LENGTH(ptr);
@@ -846,9 +853,9 @@ string_read_line(void *ptr)
 	size = sizeof(io_scratch);
 
 	for (i = 0; i < size && idx < len; i++, idx++) {
-		char 		c;
+		char		c;
 
-		c = fth_string_c_char_fast_ref((FTH) ptr, idx);
+		c = fth_string_c_char_fast_ref((FTH)ptr, idx);
 		line[i] = c;
 		if (c == '\n') {
 			idx++;
@@ -865,8 +872,10 @@ string_read_line(void *ptr)
 static void
 string_write_line(void *ptr, const char *line)
 {
-	ficlInteger 	idx, len;
-	size_t 		i, size;
+	ficlInteger 	idx;
+	ficlInteger 	len;
+	size_t 		i;
+	size_t 		size;
 
 	if (line == NULL)
 		return;
@@ -905,7 +914,8 @@ string_tell(void *ptr)
 static ficl2Integer
 string_seek(void *ptr, ficl2Integer dpos, int whence)
 {
-	ficlInteger 	pos, end;
+	ficlInteger 	pos;
+	ficlInteger 	end;
 
 	pos = (ficlInteger) dpos;
 
@@ -971,7 +981,8 @@ fth_io_sopen(FTH string, int fam)
 ficl2Integer
 fth_io_length(FTH io)
 {
-	ficl2Integer 	io_len, pos;
+	ficl2Integer 	io_len;
+	ficl2Integer 	pos;
 
 	IO_ASSERT_IO(io);
 
@@ -1150,11 +1161,18 @@ static FTH 	version_number_string;
 static int
 file_number(char *name)
 {
-	FTH 		dir, files;
-	char           *bname, *path, *s;
-	size_t 		flen, blen, plen;
-	ficlInteger 	i, len;
-	int 		numb, x;
+	FTH 		dir;
+	FTH 		files;
+	char           *bname;
+	char           *path;
+	char           *s;
+	size_t 		flen;
+	size_t 		blen;
+	size_t 		plen;
+	ficlInteger 	i;
+	ficlInteger 	len;
+	int 		numb;
+	int 		x;
 
 	if (name == NULL)
 		return (0);
@@ -1364,7 +1382,8 @@ Open file NAME and return new IO object.  \
 If keyword FAM was not specified, open file read-only, otherwise take FAM.\n\
 " h_fam_values "\n" h_if_exist_help "\n\
 See also io-open-read and io-open-write."
-	FTH 		exists, fs;
+	FTH 		fs;
+	FTH 		exists;
 	int 		fam;
 	char           *name;
 
@@ -1411,7 +1430,8 @@ ficl_io_open_write(ficlVm *vm)
 Open file NAME for writing and return new IO object.\n\
 " h_if_exist_help "\n\
 See also io-open and io-open-read."
-	FTH 		exists, fs;
+	FTH 		fs;
+	FTH 		exists;
 	char           *name;
 
 	exists = fth_get_optkey(FTH_KEYWORD_IF_EXISTS, FTH_KEYWORD_OVERWRITE);
@@ -1442,7 +1462,9 @@ If keyword FAM was not given, use mode from IO1, otherwise use FAM.  \
 All restrictions on reopen apply, \
 ie. a file opened for reading can't reopened for writing etc.\n\
 See freopen(3) for more information."
-	FTH 		io, fname, ffam;
+	FTH 		io;
+	FTH 		fname;
+	FTH 		ffam;
 	char           *name;
 	int 		fam;
 	FILE           *fp;
@@ -1491,7 +1513,8 @@ If keyword FAM was not given, open file read-only, otherwise use FAM.\n\
 See fdopen(3) for more information."
 	FTH 		io;
 	FILE           *fp;
-	int 		fd, fam;
+	int 		fd;
+	int 		fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
 	FTH_STACK_CHECK(vm, 1, 1);
@@ -1523,7 +1546,8 @@ CMD may be a string (with shell expansion) or an array of strings.  \
 If keyword FAM was not given, open pipe read-only, otherwise use FAM.\n\
 " h_fam_values "\n\
 See also io-popen-read, io-popen-write and exec."
-	FTH 		obj, io;
+	FTH 		obj;
+	FTH 		io;
 	int 		fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
@@ -1544,7 +1568,8 @@ io1 io-close\n\
 Open read-only pipe for command CMD and return new IO object.  \
 CMD may be a string (with shell expansion) or an array of strings.\n\
 See also io-popen, io-popen-write and exec."
-	FTH 		obj, io;
+	FTH 		obj;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1563,7 +1588,8 @@ io1 io-close\n\
 Open write-only pipe for command CMD and return new IO object.  \
 CMD may be a string (with shell expansion) or an array of strings.\n\
 See also io-popen, io-popen-read and exec."
-	FTH 		obj, io;
+	FTH 		obj;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	obj = fth_pop_ficl_cell(vm);
@@ -1588,7 +1614,8 @@ s1 .string => \"test-string with append content\"\n\
 Open string with content STRING and return new IO object.  \
 If keyword FAM was not given, opens string read-only, otherwise takes FAM.\n\
 " h_fam_values
-	FTH 		fs, io;
+	FTH 		fs;
+	FTH 		io;
 	int 		fam;
 
 	fam = fth_get_optkey_fix(FTH_KEYWORD_FAM, FICL_FAM_READ);
@@ -1609,7 +1636,8 @@ io1 io-read => \"test-string\"\n\
 io1 io-close\n\
 Open read-only string with content STRING and return new IO object.\n\
 See also io-sopen."
-	FTH 		fs, io;
+	FTH 		fs;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1628,7 +1656,8 @@ io1 io-close\n\
 s1 .string => \"test-string\"\n\
 Open STRING for writing and return new IO object.\n\
 See also io-sopen."
-	FTH 		fs, io;
+	FTH 		fs;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -1707,7 +1736,8 @@ static int
 socket_eof_p(void *ptr)
 {
 	int 		fd;
-	off_t 		cur, end;
+	off_t 		cur;
+	off_t 		end;
 
 	fd = FTH_IO_SOCKET_FD(ptr);
 	cur = lseek(fd, (off_t) 0, SEEK_CUR);
@@ -1836,7 +1866,7 @@ static int
 socket_bind(const char *host, int port, int domain, int fd)
 {
 	struct sockaddr *addr;
-	socklen_t 	len;
+	socklen_t	len;
 
 	if (host == NULL)
 		return (-1);
@@ -1852,13 +1882,13 @@ socket_accept(int domain, int fd)
 	struct sockaddr_un sun;
 	struct sockaddr_in sin;
 	struct sockaddr *addr;
-	socklen_t 	len;
+	socklen_t	len;
 
 	len = 0;
 	if (domain == AF_UNIX)
-		addr = (struct sockaddr *) & sun;
+		addr = (struct sockaddr *)&sun;
 	else
-		addr = (struct sockaddr *) & sin;
+		addr = (struct sockaddr *)&sin;
 
 	return (accept(fd, addr, &len));
 }
@@ -1867,7 +1897,7 @@ static int
 socket_connect(const char *host, int port, int domain, int fd)
 {
 	struct sockaddr *addr;
-	socklen_t 	len;
+	socklen_t	len;
 
 	if (host == NULL)
 		return (-1);
@@ -1982,8 +2012,10 @@ io io-close\n\
 Connect to an already established server and return new IO object.  \
 Raise an SOCKET-ERROR exception if an error occured.\n\
 " h_socket_open_info
-	int 		domain, port;
-	FTH 		fs, io;
+	int 		domain;
+	int 		port;
+	FTH 		fs;
+	FTH 		io;
 
 	domain = fth_get_optkey_fix(FTH_KEYWORD_DOMAIN, FTH_DEFAULT_ADDRFAM);
 	port = fth_get_optkey_fix(FTH_KEYWORD_PORT, FTH_DEFAULT_PORT);
@@ -2038,7 +2070,9 @@ TYPE can be SOCK_STREAM or SOCK_DGRAM.  \
 The third argument to socket is 0 and can't be set by the user.  \
 Raise SOCKET-ERROR exception if socket fails.\n\
 See socket(2) for more information."
-	int 		fd, domain, type;
+	int 		fd;
+	int 		domain;
+	int 		type;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	type = (int) ficlStackPopInteger(vm->dataStack);
@@ -2071,7 +2105,9 @@ Raise SOCKET-ERROR exception if bind fails.\n\
 See bind(2) for more information."
 	FTH 		fs;
 	char           *host;
-	int 		fd, domain, port;
+	int 		fd;
+	int 		domain;
+	int 		port;
 
 	FTH_STACK_CHECK(vm, 4, 0);
 	domain = (int) ficlStackPopInteger(vm->dataStack);
@@ -2120,7 +2156,8 @@ Close socket connection.  \
 FD is the socket descriptor and HOW is one of SHUT_RD, SHUT_WR or SHUT_RDWR.  \
 Raise SOCKET-ERROR exception if shutdown fails.\n\
 See shutdown(2) for more information."
-	int 		fd, how;
+	int 		fd;
+	int 		how;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	how = (int) ficlStackPopInteger(vm->dataStack);
@@ -2147,8 +2184,11 @@ DOMAIN is one of AF_INET or AF_UNIX.  \
 This is used on the server side of a socket connection.  \
 Raise SOCKET-ERROR exception if accept fails.\n\
 See accept(2) for more information."
-	FTH 		fs, io;
-	int 		fd, nd, domain;
+	FTH 		fs;
+	FTH 		io;
+	int 		fd;
+	int 		nd;
+	int 		domain;
 
 	FTH_STACK_CHECK(vm, 3, 1);
 	domain = (int) ficlStackPopInteger(vm->dataStack);
@@ -2181,9 +2221,12 @@ and DOMAIN is one of AF_INET or AF_UNIX.  \
 This is used on the client side of a socket connection.  \
 Raise SOCKET-ERROR exception if connect fails.\n\
 See connet(2) for more information."
-	FTH 		fs, io;
+	FTH 		fs;
+	FTH 		io;
 	char           *host;
-	int 		domain, fd, port;
+	int 		domain;
+	int 		fd;
+	int 		port;
 
 	FTH_STACK_CHECK(vm, 4, 1);
 	domain = (int) ficlStackPopInteger(vm->dataStack);
@@ -2213,10 +2256,11 @@ MSG is the data to send \
 and FLAGS can be 0, MSG_PEEK or MSG_OOB.  \
 Raise SOCKET-ERROR exception if send fails.\n\
 See send(2) for more information."
-	int 		fd, flags;
+	int 		fd;
+	int 		flags;
 	size_t 		size;
-	FTH 		msg;
 	char           *text;
+	FTH 		msg;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	flags = (int) ficlStackPopInteger(vm->dataStack);
@@ -2239,9 +2283,10 @@ FD is the socket descriptor \
 and FLAGS can be 0, MSG_PEEK, or MSG_OOB.  \
 Raise SOCKET-ERROR exception if recv fails.\n\
 See recv(2) for more information."
-	FTH 		fs;
-	int 		fd, flags;
+	int 		fd;
+	int 		flags;
 	ssize_t 	len;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	flags = (int) ficlStackPopInteger(vm->dataStack);
@@ -2271,14 +2316,19 @@ PORT is the port if DOMAIN is AF_INET, otherwise unused, \
 and DOMAIN is one of AF_INET or AF_UNIX.  \
 Raise SOCKET-ERROR exception if sendto fails.\n\
 See sendto(2) for more information."
-	FTH 		fhost, fmsg;
-	int 		fd, flags, domain;
-	char           *host, *msg;
+	FTH 		fhost;
+	FTH 		fmsg;
+	int 		fd;
+	int 		flags;
+	int 		domain;
+	char           *host;
+	char           *msg;
 	ficlUnsigned16 	port;
 	struct sockaddr *addr;
-	socklen_t 	len = 0;
+	socklen_t 	len;
 
 	FTH_STACK_CHECK(vm, 6, 0);
+	len = 0;
 	domain = (int) ficlStackPopInteger(vm->dataStack);
 	port = (ficlUnsigned16) ficlStackPopUnsigned(vm->dataStack);
 	fhost = fth_pop_ficl_cell(vm);
@@ -2306,14 +2356,18 @@ PORT is the port if DOMAIN is AF_INET, otherwise unused, \
 and DOMAIN is one of AF_INET or AF_UNIX.  \
 Raise SOCKET-ERROR exception if recvfrom fails.\n\
 See recvfrom(2) for more information."
-	FTH 		fhost, fs;
-	int 		fd, flags, domain;
-	ficlUnsigned16 	port;
+	FTH 		fhost;
+	FTH 		fs;
+	int 		fd;
+	int 		flags;
+	int 		domain;
 	char           *host;
+	ficlUnsigned16 	port;
 	struct sockaddr *addr;
-	socklen_t 	len = 0;
+	socklen_t 	len;
 
 	FTH_STACK_CHECK(vm, 5, 1);
+	len = 0;
 	domain = (int) ficlStackPopInteger(vm->dataStack);
 	port = (ficlUnsigned16) ficlStackPopUnsigned(vm->dataStack);
 	fhost = fth_pop_ficl_cell(vm);
@@ -2419,7 +2473,8 @@ io1 io2 io= => #t\n\
 io1 io3 io= => #f\n\
 Return #t if OBJ1 and OBJ2 are IO objects with equal filenames, \
 modes and file positions, otherwise #f."
-	FTH 		obj1, obj2;
+	FTH 		obj1;
+	FTH 		obj2;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	obj2 = fth_pop_ficl_cell(vm);
@@ -2472,7 +2527,8 @@ io <char> c io-putc\n\
 io io-close\n\
 Write character C to IO object.\n\
 See also io-write, io-write-format."
-	FTH 		ch, io;
+	FTH 		ch;
+	FTH 		io;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	ch = fth_pop_ficl_cell(vm);
@@ -2532,7 +2588,8 @@ io \"content of entire line\" io-write\n\
 io io-close\n\
 Write LINE to IO object.\n\
 See also io-putc, io-write-format."
-	FTH 		io, fs;
+	FTH 		io;
+	FTH 		fs;
 
 	FTH_STACK_CHECK(vm, 2, 0);
 	fs = fth_pop_ficl_cell(vm);
@@ -2556,7 +2613,9 @@ io  \"%d %d + .\\n\"  #( 10 20 )  string-format  io-write\n\
 io io-close\n\
 Write string built from FMT and array FMT-ARGS to IO object.\n\
 See also io-putc, io-write."
-	FTH 		io, fmt, args;
+	FTH 		io;
+	FTH 		fmt;
+	FTH 		args;
 
 	FTH_STACK_CHECK(vm, 3, 0);
 	args = fth_pop_ficl_cell(vm);
@@ -2600,7 +2659,8 @@ io io-close\n\
 Write ARRAY-OF-LINES to IO object.\n\
 See also io-putc, io-write, io-write-format."
 	FTH 		fs;
-	ficlInteger 	i, len;
+	ficlInteger 	i;
+	ficlInteger 	len;
 	ficl2Integer 	pos;
 
 	IO_ASSERT_IO_OUTPUT(io);
@@ -2710,7 +2770,8 @@ Keyword WHENCE can have the following values:\n\
 SEEK_SET  --  offset counts from begin of file (default)\n\
 SEEK_CUR  --  offset counts from current position\n\
 SEEK_END  --  offset counts from end of file."
-	FTH 		io, pos;
+	FTH 		io;
+	FTH 		pos;
 	int 		whence;
 	ficl2Integer 	where;
 
@@ -2804,7 +2865,8 @@ See also io-pos-ref, io-pos-set!, io-seek."
 FTH
 fth_readlines(const char *name)
 {
-	FTH 		io, array;
+	FTH 		io;
+	FTH 		array;
 
 	io = fth_io_open(name, FICL_FAM_READ);
 	array = fth_io_readlines(io);
@@ -2819,7 +2881,8 @@ ficl_readlines(ficlVm *vm)
 \"test\" readlines => #( \"1st line\\n\" \"2nd line\\n\" ...)\n\
 Open file FNAME, read its content in an array, \
 close file and return the array."
-	FTH 		fs, array;
+	FTH 		fs;
+	FTH 		array;
 
 	FTH_STACK_CHECK(vm, 1, 1);
 	fs = fth_pop_ficl_cell(vm);
@@ -2844,7 +2907,8 @@ ficl_writelines(ficlVm *vm)
 #define h_writelines "( fname array-of-lines -- )  write array\n\
 \"test\" #( \"1st line\\n\" \"2nd line\\n\" ) writelines\n\
 Open file FNAME, write the content of ARRAY-OF-LINES to it and close file."
-	FTH 		array, fs;
+	FTH 		fs;
+	FTH 		array;
 
 	FTH_STACK_CHECK(vm, 2, 1);
 	array = fth_pop_ficl_cell(vm);
