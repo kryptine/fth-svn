@@ -2882,15 +2882,27 @@ DDEESSCCRRIIPPTTIIOONN
 
    RReeggeexxpp oobbjjeecctt ttyyppee
      *re-syntax-options*
-          This regexp variable can be set with the following constants.  If
-          more than one constant is used, combine them with oorr, see regex(3).
-               REG_EXTENDED  Compile modern regex, default.
-               REG_ICASE     Compile for matching ignore case.
-               REG_NEWLINE   Compile for newline-sensitive matching.
-               REG_NOSUB     Compile without creating subexpression.
+          This is the cflag option to regcomp(3).  This variable can be set
+          with the following constants.  If more than one constants are used,
+          combine them with oorr, see regex(3).  The default is REG_EXTENDED.
+               REG_BASIC
+               REG_EXTENDED
+               REG_ICASE
+               REG_NOSUB
+               REG_NEWLINE
+               REG_NOSPEC
+               REG_PEND
           For example, set matching to ignore case before creating a new
           regexp
                 REG_EXTENDED REG_ICASE or  to *re-syntax-options*
+     *re-exec-options*
+          This is the eflag option to regexec(3).  This variable can be set
+          with the following constants.  If more than one constants are used,
+          combine them with oorr, see regex(3).
+               REG_NOTBOL
+               REG_NOTEOL
+               REG_STARTEND
+          No default is set.
      // ( <ccc>/ -- reg )
           Prefix character ‘/’ start a regular expression object delimited by
           a second ‘/’.
@@ -3452,8 +3464,8 @@ SSEEEE AALLSSOO
      listen(2), recv(2), recvfrom(2), send(2), sendto(2), shutdown(2),
      socket(2), fegetround(3), fenv(3), fesetround(3), fopen(3), getopt(3),
      getservbyname(3), getservbyport(3), gl_prompt_style(3), libfth(3),
-     printf(3), realpath(3), regex(3), sethostname(3), strftime(3), time(3),
-     times(3), tecla(7).
+     printf(3), realpath(3), regcomp(3), regex(3), regexec(3), sethostname(3),
+     strftime(3), time(3), times(3), tecla(7).
 
 HHIISSTTOORRYY
      This manual page describes version 1.4.2.  fftthh is based on _F_i_c_l,
@@ -3466,4 +3478,4 @@ AAUUTTHHOORRSS
 BBUUGGSS
      Please report bugs to the author.
 
-NetBSD 9.99.73                    2020/09/30                    NetBSD 9.99.73
+NetBSD 9.99.73                    2020/10/08                    NetBSD 9.99.73
