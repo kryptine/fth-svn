@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)regexp.c	2.6 10/8/20
+ * @(#)regexp.c	2.8 10/8/20
  */
 
 #if defined(HAVE_CONFIG_H)
@@ -47,7 +47,7 @@ typedef struct {
 				 * and possible subexpressions */
 } FRegexp;
 
-#define REGEXP_REGS		10L
+#define REGEXP_REGS		30L
 
 #define FTH_REGEXP_OBJECT(Obj)	FTH_INSTANCE_REF_GEN(Obj, FRegexp)
 #define FTH_REGEXP_LENGTH(Obj)	FTH_REGEXP_OBJECT(Obj)->length
@@ -268,7 +268,9 @@ regexp_search(FTH regexp, char *str, int kind)
 
 	pos = -1;
 	re = &FTH_REGEXP_RE_BUF(regexp);
-	nmatch = re->re_nsub + 1;
+	nmatch = FICL_MIN(re->re_nsub, REGEXP_REGS) + 1;
+	match[0].rm_so = 0;
+	match[0].rm_eo = fth_strlen(str);
 	eflags = FIX_TO_INT32(fth_variable_ref("*re-exec-options*"));
 	ret = regexec(re, str, nmatch, match, eflags);
 
@@ -307,9 +309,7 @@ regexp_search(FTH regexp, char *str, int kind)
 
 		fs = fth_make_string_len(str + beg, slen);
 		fth_array_set(FTH_REGEXP_RESULTS(regexp), i, fs);
-
-		if (i < REGEXP_REGS)
-			fth_array_set(regexp_results, i, fs);
+		fth_array_set(regexp_results, i, fs);
 	}
 	return (pos);
 }
@@ -324,7 +324,7 @@ fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 	int		ret;
 	int		pos;
 	regex_t		re;
-	regmatch_t	match[REGEXP_REGS] = {};
+	regmatch_t	match;
 
 	pos = -1;
 
@@ -340,8 +340,10 @@ fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 		/* NOTREACHED */
 		return (pos);
 	}
+	match.rm_so = 0;
+	match.rm_eo = fth_strlen(str);
 	eflags = FIX_TO_INT32(fth_variable_ref("*re-exec-options*"));
-	ret = regexec(&re, str, 1L, match, eflags);
+	ret = regexec(&re, str, 1L, &match, eflags);
 
 	if (ret == REG_NOMATCH) {
 		regfree(&re);
@@ -354,7 +356,7 @@ fth_regexp_find_flags(const char *reg, const char *str, int cflags)
 		/* NOTREACHED */
 		return (pos);
 	}
-	pos = (int)match[0].rm_so;
+	pos = (int)match.rm_so;
 	regfree(&re);
 	return (pos);
 }
